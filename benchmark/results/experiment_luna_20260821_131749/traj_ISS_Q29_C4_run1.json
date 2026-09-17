@@ -1,0 +1,1130 @@
+{
+  "trajectory_id": "traj_ISS_Q29_C4_run1",
+  "task_id": "ISS_Q29",
+  "condition": "C4",
+  "model": "gpt-5.6-luna",
+  "run_index": 1,
+  "suite": "isolated",
+  "user_question": "Calculate total population and land area by census tract across Centre County.",
+  "input_artifact_paths": [
+    "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg",
+    "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_acs_centre_2024.csv"
+  ],
+  "status": "failed",
+  "total_wall_time": 30.184,
+  "rate_limit_wait_time": 0.0,
+  "provider_retry_wait_time": 0.0,
+  "orchestration_active_time": 30.181,
+  "worker_execution_time": 0.003,
+  "total_tokens": 8072,
+  "input_tokens": 5573,
+  "output_tokens": 2499,
+  "outputs": {
+    "summary": "Role 'attribute_table' requires data model 'table'.",
+    "artifacts": [],
+    "produced_artifacts": [
+      "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_1cb7d9ea_fx_tracts_centre.geojson"
+    ],
+    "workflow_plan": {
+      "workflow_id": "a5651468-5c9e-4ef4-a4b4-cb3d6b74e79b",
+      "plan_version": 1,
+      "goal": "Calculate total population and land area by census tract across Centre County.",
+      "workflow_steps": [
+        {
+          "step_id": "retrieve_land_area_table",
+          "title": "Retrieve census-tract land-area table",
+          "purpose": "Obtain a catalog dataset containing land-area values by census tract for Centre County.",
+          "agent_id": "data_retrieval_agent",
+          "operation": "dataset_retrieval",
+          "instructions": "Retrieve the best available candidate table containing census-tract land-area measurements covering Centre County. Treat the result as a candidate and validate its spatial coverage, tract granularity, required fields, and format at runtime.",
+          "parameters": {},
+          "depends_on": [],
+          "input_from_steps": [],
+          "status": "successful",
+          "output_artifact_ids": [
+            "74f42cb1-6c87-4da2-ad2f-5b042feb8937"
+          ]
+        },
+        {
+          "step_id": "join_population_land_area",
+          "title": "Join population and land area to census tracts",
+          "purpose": "Attach total population and land-area attributes to the supplied census-tract geometries, producing one tract-level analytical layer.",
+          "agent_id": null,
+          "operation": "attribute_join",
+          "instructions": "Join the retrieved attribute_table to input_1 and preserve the tract geometries and total_pop values from input_2. Leave vector_key, table_key, and land-area field selection unset; runtime QC must ground the actual compatible tract identifier fields and land-area field from observed schemas.",
+          "parameters": {
+            "operation": "attribute_join",
+            "vector_key": null,
+            "table_key": null
+          },
+          "depends_on": [
+            "retrieve_land_area_table"
+          ],
+          "input_from_steps": [
+            "retrieve_land_area_table"
+          ],
+          "status": "failed",
+          "output_artifact_ids": []
+        }
+      ],
+      "requirements": [
+        {
+          "requirement_id": "req_retrieval_coverage",
+          "requirement_type": "spatial_coverage",
+          "scope": "The retrieved attribute_table must cover Centre County census tracts at the tract level.",
+          "task_id": "retrieve_land_area_table",
+          "artifact_roles": [
+            "attribute_table"
+          ],
+          "parameters": {
+            "geography": "Centre County",
+            "spatial_unit": "census tract"
+          },
+          "blocking": true,
+          "provenance": "USER_EXPLICIT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_retrieval_fields",
+          "requirement_type": "required_fields",
+          "scope": "The retrieved attribute_table must contain a tract identifier and a land-area measure suitable for joining and reporting.",
+          "task_id": "retrieve_land_area_table",
+          "artifact_roles": [
+            "attribute_table"
+          ],
+          "parameters": {
+            "semantic_fields": [
+              "tract identifier",
+              "land area"
+            ]
+          },
+          "blocking": true,
+          "provenance": "USER_EXPLICIT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_retrieval_format",
+          "requirement_type": "format_compatible",
+          "scope": "The retrieved attribute_table must be available as a CSV table accepted by attribute_join.",
+          "task_id": "retrieve_land_area_table",
+          "artifact_roles": [
+            "attribute_table"
+          ],
+          "parameters": {
+            "formats": [
+              "CSV"
+            ]
+          },
+          "blocking": true,
+          "provenance": "WORKER_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_input_fields",
+          "requirement_type": "required_fields",
+          "scope": "The supplied inputs must contain the fields required to produce tract-level population and land-area results.",
+          "task_id": "join_population_land_area",
+          "artifact_roles": [
+            "input_1",
+            "input_2"
+          ],
+          "parameters": {
+            "input_1_fields": [
+              "GEOID"
+            ],
+            "input_2_fields": [
+              "GEOID",
+              "total_pop"
+            ]
+          },
+          "blocking": true,
+          "provenance": "PLANNER_INFERRED",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [
+            "7b2f1b28-2aa6-4bec-99d2-d72909ad9c26",
+            "a6dda921-192f-4705-84a5-12b8fc1d8a09"
+          ],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_join_format",
+          "requirement_type": "format_compatible",
+          "scope": "The attribute_join inputs must use supported formats: the tract vector as GPKG and the tabular sources as CSV.",
+          "task_id": "join_population_land_area",
+          "artifact_roles": [
+            "input_1",
+            "input_2",
+            "attribute_table"
+          ],
+          "parameters": {
+            "vector_formats": [
+              "GPKG"
+            ],
+            "table_formats": [
+              "CSV"
+            ]
+          },
+          "blocking": true,
+          "provenance": "WORKER_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [
+            "7b2f1b28-2aa6-4bec-99d2-d72909ad9c26",
+            "a6dda921-192f-4705-84a5-12b8fc1d8a09"
+          ],
+          "superseded_by": null
+        }
+      ],
+      "commitments": []
+    }
+  },
+  "workflow_state": {
+    "schema_version": "1.0.0",
+    "workflow_id": "a5651468-5c9e-4ef4-a4b4-cb3d6b74e79b",
+    "state_version": 13,
+    "user_goal": "Calculate total population and land area by census tract across Centre County.",
+    "feature_profile": "C4",
+    "feature_config": {
+      "profile_name": "C4",
+      "planner_mode": "gis_aware",
+      "qc_mode": "none",
+      "replanner_mode": "gis_aware",
+      "technical_invariants": true,
+      "local_recovery": true,
+      "structural_patching": true,
+      "gis_finding_routing": false
+    },
+    "current_plan_version": 1,
+    "tasks": {
+      "retrieve_land_area_table": {
+        "task_id": "retrieve_land_area_table",
+        "title": "Retrieve census-tract land-area table",
+        "purpose": "Obtain a catalog dataset containing land-area values by census tract for Centre County.",
+        "operation": "dataset_retrieval",
+        "instructions": "Retrieve the best available candidate table containing census-tract land-area measurements covering Centre County. Treat the result as a candidate and validate its spatial coverage, tract granularity, required fields, and format at runtime.",
+        "parameters": {},
+        "required_capabilities": [
+          "dataset_retrieval"
+        ],
+        "depends_on": [],
+        "input_requirements": [],
+        "expected_outputs": [
+          {
+            "role": "attribute_table",
+            "data_model": "table",
+            "formats": [
+              "CSV"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_retrieval_coverage",
+          "req_retrieval_fields",
+          "req_retrieval_format"
+        ],
+        "status": "successful",
+        "attempts": 1,
+        "active_binding_id": "32741baa-c9d5-4740-96f1-b7f4898d4e3f",
+        "output_artifact_ids": [
+          "74f42cb1-6c87-4da2-ad2f-5b042feb8937"
+        ],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      },
+      "join_population_land_area": {
+        "task_id": "join_population_land_area",
+        "title": "Join population and land area to census tracts",
+        "purpose": "Attach total population and land-area attributes to the supplied census-tract geometries, producing one tract-level analytical layer.",
+        "operation": "attribute_join",
+        "instructions": "Join the retrieved attribute_table to input_1 and preserve the tract geometries and total_pop values from input_2. Leave vector_key, table_key, and land-area field selection unset; runtime QC must ground the actual compatible tract identifier fields and land-area field from observed schemas.",
+        "parameters": {
+          "operation": "attribute_join",
+          "vector_key": null,
+          "table_key": null
+        },
+        "required_capabilities": [
+          "attribute_join",
+          "vector_aggregation_and_joins"
+        ],
+        "depends_on": [
+          "retrieve_land_area_table"
+        ],
+        "input_requirements": [
+          {
+            "role": "input_1",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          },
+          {
+            "role": "input_2",
+            "data_model": "table",
+            "formats": [
+              "CSV"
+            ],
+            "required": true
+          },
+          {
+            "role": "attribute_table",
+            "data_model": "table",
+            "formats": [
+              "CSV"
+            ],
+            "required": true
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "joined_tracts",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_input_fields",
+          "req_join_format"
+        ],
+        "status": "failed",
+        "attempts": 0,
+        "active_binding_id": null,
+        "output_artifact_ids": [],
+        "last_error": {
+          "code": "E_BINDING",
+          "message": "Role 'attribute_table' requires data model 'table'.",
+          "retryable": false,
+          "details": {}
+        },
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      }
+    },
+    "edges": [
+      [
+        "retrieve_land_area_table",
+        "join_population_land_area"
+      ]
+    ],
+    "bindings": {
+      "32741baa-c9d5-4740-96f1-b7f4898d4e3f": {
+        "binding_id": "32741baa-c9d5-4740-96f1-b7f4898d4e3f",
+        "task_id": "retrieve_land_area_table",
+        "agent_id": "data_retrieval_agent",
+        "operation": "dataset_retrieval",
+        "instruction": "Retrieve the best available candidate table containing census-tract land-area measurements covering Centre County. Treat the result as a candidate and validate its spatial coverage, tract granularity, required fields, and format at runtime.",
+        "input_bindings": [],
+        "agent_profile_snapshot": {
+          "agent_id": "data_retrieval_agent",
+          "name": "Data Retrieval Agent",
+          "description": "Searches the available catalog and returns the highest-ranked available dataset candidate. Query criteria influence retrieval but are not guarantees of task-level suitability. Returned metadata describe the retrieved artifact. Clients should inspect returned metadata before downstream use.",
+          "operations": [
+            "dataset_retrieval"
+          ],
+          "skills": [
+            {
+              "skill_id": "dataset_retrieval",
+              "name": "Dataset Retrieval",
+              "description": "Retrieves registered benchmark datasets matching requested criteria from the catalog.",
+              "constraints": {
+                "spatial": "Returns datasets covering registered spatial boundaries.",
+                "temporal": "Returns datasets with metadata indicating time/year of acquisition.",
+                "other": [
+                  "The service does not determine downstream analytical fitness.",
+                  "Supports candidate exclusion via exclude_artifact_ids."
+                ]
+              }
+            }
+          ],
+          "inputs": {
+            "input_datasets": {
+              "required": false,
+              "description": "Not required for data retrieval."
+            }
+          },
+          "outputs": [
+            {
+              "type": "dataset",
+              "formats": [
+                "GPKG",
+                "GeoJSON",
+                "GeoTIFF",
+                "CSV"
+              ],
+              "required": true,
+              "description": "Retrieved dataset artifact."
+            }
+          ],
+          "parameters": {
+            "exclude_artifact_ids": {
+              "required": false,
+              "description": "Optional list of artifact IDs to exclude from candidate ranking."
+            }
+          }
+        },
+        "endpoint": "https://www.geospatial-agentic-services.online/agents/data_retrieval_agent/tasks",
+        "attempt": 1,
+        "invocation_id": null,
+        "status": "successful",
+        "started_at": "2026-08-21T20:40:46.104375Z",
+        "completed_at": "2026-08-21T20:40:46.106931Z",
+        "duration_seconds": 0.0025624900008551776,
+        "output_artifact_ids": [
+          "74f42cb1-6c87-4da2-ad2f-5b042feb8937"
+        ],
+        "messages": [
+          "Successfully retrieved dataset: fx_tracts_centre.geojson"
+        ],
+        "structured_error": null,
+        "created_at": "2026-08-21T20:40:46.100570Z"
+      }
+    },
+    "artifacts": {
+      "6e997fce-586f-449e-a220-95d0d249832d": {
+        "artifact_id": "6e997fce-586f-449e-a220-95d0d249832d",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg",
+        "content_hash": "9818cdd69d3b26cbd238d60780f5a566bee625b857232a79ed5ca02595c100a8",
+        "format": "gpkg",
+        "media_type": null,
+        "data_model": "vector",
+        "producer_task_id": null,
+        "producer_binding_id": null,
+        "role": "input_1",
+        "evidence_ids": [
+          "7b2f1b28-2aa6-4bec-99d2-d72909ad9c26"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T20:40:15.977574Z",
+        "metadata": {
+          "source": "user_input"
+        }
+      },
+      "e66c642b-e25a-4613-a3e6-f547636a695d": {
+        "artifact_id": "e66c642b-e25a-4613-a3e6-f547636a695d",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_acs_centre_2024.csv",
+        "content_hash": "07aeaae70fda652250b9ef8042c26d2529bf448c8636a11b7c102a3eebde07b6",
+        "format": "csv",
+        "media_type": null,
+        "data_model": "table",
+        "producer_task_id": null,
+        "producer_binding_id": null,
+        "role": "input_2",
+        "evidence_ids": [
+          "a6dda921-192f-4705-84a5-12b8fc1d8a09"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T20:40:15.977794Z",
+        "metadata": {
+          "source": "user_input"
+        }
+      },
+      "74f42cb1-6c87-4da2-ad2f-5b042feb8937": {
+        "artifact_id": "74f42cb1-6c87-4da2-ad2f-5b042feb8937",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_1cb7d9ea_fx_tracts_centre.geojson",
+        "content_hash": "b8a88718d2672c77d63b742c526636e5834641d3b2a2f10bf84ba708110eb1a9",
+        "format": "geojson",
+        "media_type": null,
+        "data_model": "vector",
+        "producer_task_id": "retrieve_land_area_table",
+        "producer_binding_id": "32741baa-c9d5-4740-96f1-b7f4898d4e3f",
+        "role": "attribute_table",
+        "evidence_ids": [
+          "46825d65-9fc5-4214-8b36-542a42fa0119"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T20:40:46.109866Z",
+        "metadata": {}
+      }
+    },
+    "derivations": {
+      "48b088c6-5201-4229-8fcb-ccf37a69b72c": {
+        "derivation_id": "48b088c6-5201-4229-8fcb-ccf37a69b72c",
+        "output_artifact_id": "74f42cb1-6c87-4da2-ad2f-5b042feb8937",
+        "source_artifact_ids": [],
+        "producer_task_id": "retrieve_land_area_table",
+        "operation": "dataset_retrieval",
+        "parameters": {},
+        "semantic_effect": "Produced role 'attribute_table' using operation 'dataset_retrieval'.",
+        "evidence_snapshot_ids": [],
+        "created_at": "2026-08-21T20:40:46.109903Z"
+      }
+    },
+    "requirements": {
+      "req_retrieval_coverage": {
+        "requirement_id": "req_retrieval_coverage",
+        "requirement_type": "spatial_coverage",
+        "scope": "The retrieved attribute_table must cover Centre County census tracts at the tract level.",
+        "task_id": "retrieve_land_area_table",
+        "artifact_roles": [
+          "attribute_table"
+        ],
+        "parameters": {
+          "geography": "Centre County",
+          "spatial_unit": "census tract"
+        },
+        "blocking": true,
+        "provenance": "USER_EXPLICIT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_retrieval_fields": {
+        "requirement_id": "req_retrieval_fields",
+        "requirement_type": "required_fields",
+        "scope": "The retrieved attribute_table must contain a tract identifier and a land-area measure suitable for joining and reporting.",
+        "task_id": "retrieve_land_area_table",
+        "artifact_roles": [
+          "attribute_table"
+        ],
+        "parameters": {
+          "semantic_fields": [
+            "tract identifier",
+            "land area"
+          ]
+        },
+        "blocking": true,
+        "provenance": "USER_EXPLICIT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_retrieval_format": {
+        "requirement_id": "req_retrieval_format",
+        "requirement_type": "format_compatible",
+        "scope": "The retrieved attribute_table must be available as a CSV table accepted by attribute_join.",
+        "task_id": "retrieve_land_area_table",
+        "artifact_roles": [
+          "attribute_table"
+        ],
+        "parameters": {
+          "formats": [
+            "CSV"
+          ]
+        },
+        "blocking": true,
+        "provenance": "WORKER_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_input_fields": {
+        "requirement_id": "req_input_fields",
+        "requirement_type": "required_fields",
+        "scope": "The supplied inputs must contain the fields required to produce tract-level population and land-area results.",
+        "task_id": "join_population_land_area",
+        "artifact_roles": [
+          "input_1",
+          "input_2"
+        ],
+        "parameters": {
+          "input_1_fields": [
+            "GEOID"
+          ],
+          "input_2_fields": [
+            "GEOID",
+            "total_pop"
+          ]
+        },
+        "blocking": true,
+        "provenance": "PLANNER_INFERRED",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [
+          "7b2f1b28-2aa6-4bec-99d2-d72909ad9c26",
+          "a6dda921-192f-4705-84a5-12b8fc1d8a09"
+        ],
+        "superseded_by": null
+      },
+      "req_join_format": {
+        "requirement_id": "req_join_format",
+        "requirement_type": "format_compatible",
+        "scope": "The attribute_join inputs must use supported formats: the tract vector as GPKG and the tabular sources as CSV.",
+        "task_id": "join_population_land_area",
+        "artifact_roles": [
+          "input_1",
+          "input_2",
+          "attribute_table"
+        ],
+        "parameters": {
+          "vector_formats": [
+            "GPKG"
+          ],
+          "table_formats": [
+            "CSV"
+          ]
+        },
+        "blocking": true,
+        "provenance": "WORKER_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [
+          "7b2f1b28-2aa6-4bec-99d2-d72909ad9c26",
+          "a6dda921-192f-4705-84a5-12b8fc1d8a09"
+        ],
+        "superseded_by": null
+      }
+    },
+    "commitments": {},
+    "schema_mappings": {},
+    "evidence": {
+      "7b2f1b28-2aa6-4bec-99d2-d72909ad9c26": {
+        "evidence_id": "7b2f1b28-2aa6-4bec-99d2-d72909ad9c26",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "6e997fce-586f-449e-a220-95d0d249832d"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg",
+          "format": "gpkg",
+          "size_bytes": 98304,
+          "complete": true,
+          "limitations": [],
+          "data_model": "vector",
+          "feature_count": 16,
+          "schema": {
+            "GEOID": "object",
+            "NAME": "object",
+            "COUNTYFP": "object",
+            "STATEFP": "object"
+          },
+          "schema_fields": [
+            "GEOID",
+            "NAME",
+            "COUNTYFP",
+            "STATEFP"
+          ],
+          "geometry_type": [
+            "Polygon"
+          ],
+          "geometry_valid": true,
+          "invalid_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "null_geometry_count": 0,
+          "bounds": [
+            238087.3824011362,
+            4508961.385028789,
+            272914.01066431846,
+            4543387.006183241
+          ],
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true,
+          "crs": "EPSG:26918",
+          "crs_authority": "EPSG:26918",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T20:40:15.983770Z",
+        "complete": true,
+        "limitations": []
+      },
+      "a6dda921-192f-4705-84a5-12b8fc1d8a09": {
+        "evidence_id": "a6dda921-192f-4705-84a5-12b8fc1d8a09",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "e66c642b-e25a-4613-a3e6-f547636a695d"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_acs_centre_2024.csv",
+          "format": "csv",
+          "size_bytes": 747,
+          "complete": true,
+          "limitations": [],
+          "data_model": "table",
+          "inspected_row_count": 16,
+          "row_sample_complete": true,
+          "schema": {
+            "GEOID": "int64",
+            "tract_name": "object",
+            "median_income": "int64",
+            "median_rent": "int64",
+            "total_pop": "int64"
+          },
+          "schema_fields": [
+            "GEOID",
+            "tract_name",
+            "median_income",
+            "median_rent",
+            "total_pop"
+          ],
+          "coordinate_candidates": [],
+          "spatializable_from_coordinates": false,
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T20:40:15.985203Z",
+        "complete": true,
+        "limitations": []
+      },
+      "46825d65-9fc5-4214-8b36-542a42fa0119": {
+        "evidence_id": "46825d65-9fc5-4214-8b36-542a42fa0119",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "74f42cb1-6c87-4da2-ad2f-5b042feb8937"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_1cb7d9ea_fx_tracts_centre.geojson",
+          "format": "geojson",
+          "size_bytes": 7336,
+          "complete": true,
+          "limitations": [],
+          "data_model": "vector",
+          "feature_count": 16,
+          "schema": {
+            "GEOID": "object",
+            "NAME": "object",
+            "COUNTYFP": "object",
+            "STATEFP": "object"
+          },
+          "schema_fields": [
+            "GEOID",
+            "NAME",
+            "COUNTYFP",
+            "STATEFP"
+          ],
+          "geometry_type": [
+            "Polygon"
+          ],
+          "geometry_valid": true,
+          "invalid_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "null_geometry_count": 0,
+          "bounds": [
+            238087.3824011362,
+            4508961.385028789,
+            272914.01066431846,
+            4543387.006183241
+          ],
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true,
+          "crs": "EPSG:26918",
+          "crs_authority": "EPSG:26918",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T20:40:46.116680Z",
+        "complete": true,
+        "limitations": []
+      }
+    },
+    "violations": {},
+    "execution_history": [
+      {
+        "event_id": "ea137d31-5461-4f24-8945-30bd432fe1cc",
+        "event_type": "initial_plan_committed",
+        "actor": "planner_component",
+        "state_version": 0,
+        "plan_version": 1,
+        "task_id": null,
+        "reason": "Retrieve a candidate census-tract land-area table and attribute-join it to the supplied Centre County tract geometries and population records. Runtime QC must ground the actual join fields and land-area field from observed schemas.",
+        "metadata": {
+          "task_ids": [
+            "join_population_land_area",
+            "retrieve_land_area_table"
+          ]
+        },
+        "created_at": "2026-08-21T20:40:46.094029Z"
+      },
+      {
+        "event_id": "d863b658-f3b4-429c-8354-043cd586d600",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 1,
+        "plan_version": 1,
+        "task_id": "retrieve_land_area_table",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "proposed",
+          "to": "ready"
+        },
+        "created_at": "2026-08-21T20:40:46.097064Z"
+      },
+      {
+        "event_id": "98593b39-29af-4ddb-a48d-525f8ea6c91e",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 2,
+        "plan_version": 1,
+        "task_id": "retrieve_land_area_table",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-21T20:40:46.098799Z"
+      },
+      {
+        "event_id": "ce9b4256-4cd6-4e89-9ae4-39263bd35b23",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 3,
+        "plan_version": 1,
+        "task_id": "retrieve_land_area_table",
+        "reason": "Worker bound.",
+        "metadata": {
+          "from": "binding",
+          "to": "bound"
+        },
+        "created_at": "2026-08-21T20:40:46.100629Z"
+      },
+      {
+        "event_id": "f2d6589d-4c2c-46f7-b052-a1be7709c000",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 4,
+        "plan_version": 1,
+        "task_id": "retrieve_land_area_table",
+        "reason": "Worker started.",
+        "metadata": {
+          "from": "bound",
+          "to": "running"
+        },
+        "created_at": "2026-08-21T20:40:46.102526Z"
+      },
+      {
+        "event_id": "6d2b4246-cd80-4c01-9793-bd730f81a8aa",
+        "event_type": "worker_execution_completed",
+        "actor": "worker_executor",
+        "state_version": 5,
+        "plan_version": 1,
+        "task_id": "retrieve_land_area_table",
+        "reason": "Worker returned successfully.",
+        "metadata": {
+          "binding_id": "32741baa-c9d5-4740-96f1-b7f4898d4e3f",
+          "agent_id": "data_retrieval_agent",
+          "operation": "dataset_retrieval",
+          "attempt": 1,
+          "status": "successful",
+          "duration_seconds": 0.0025624900008551776
+        },
+        "created_at": "2026-08-21T20:40:46.107008Z"
+      },
+      {
+        "event_id": "a59119f2-e8a7-49a7-841a-b1cd240cf70b",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 5,
+        "plan_version": 1,
+        "task_id": "retrieve_land_area_table",
+        "reason": "Worker returned a provisional result.",
+        "metadata": {
+          "from": "running",
+          "to": "provisional_success"
+        },
+        "created_at": "2026-08-21T20:40:46.107075Z"
+      },
+      {
+        "event_id": "6778a807-c53e-4608-a953-4757c009ca03",
+        "event_type": "artifact_registered",
+        "actor": "artifact_registry",
+        "state_version": 6,
+        "plan_version": 1,
+        "task_id": "retrieve_land_area_table",
+        "reason": null,
+        "metadata": {
+          "artifact_id": "74f42cb1-6c87-4da2-ad2f-5b042feb8937",
+          "role": "attribute_table",
+          "content_hash": "b8a88718d2672c77d63b742c526636e5834641d3b2a2f10bf84ba708110eb1a9"
+        },
+        "created_at": "2026-08-21T20:40:46.109930Z"
+      },
+      {
+        "event_id": "79f0d706-4dfc-422b-a84b-db473f4dc986",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 7,
+        "plan_version": 1,
+        "task_id": "retrieve_land_area_table",
+        "reason": "Reviewing runtime evidence.",
+        "metadata": {
+          "from": "provisional_success",
+          "to": "validating"
+        },
+        "created_at": "2026-08-21T20:40:46.119077Z"
+      },
+      {
+        "event_id": "81ac427c-c535-4e81-b1a5-7c86f38d16f1",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 8,
+        "plan_version": 1,
+        "task_id": "retrieve_land_area_table",
+        "reason": "Shared technical response and output-role checks passed.",
+        "metadata": {
+          "from": "validating",
+          "to": "successful"
+        },
+        "created_at": "2026-08-21T20:40:46.121223Z"
+      },
+      {
+        "event_id": "49ef1f42-1051-4b95-8766-dd1be0297fb8",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 9,
+        "plan_version": 1,
+        "task_id": "join_population_land_area",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "proposed",
+          "to": "ready"
+        },
+        "created_at": "2026-08-21T20:40:46.123357Z"
+      },
+      {
+        "event_id": "c2dc2b43-8896-4e55-a074-54a677849b51",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 10,
+        "plan_version": 1,
+        "task_id": "join_population_land_area",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-21T20:40:46.125449Z"
+      },
+      {
+        "event_id": "2a02267c-0942-42ea-87cc-9b8ab0b0a32e",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 11,
+        "plan_version": 1,
+        "task_id": "join_population_land_area",
+        "reason": "Worker binding failed.",
+        "metadata": {
+          "from": "binding",
+          "to": "failed"
+        },
+        "created_at": "2026-08-21T20:40:46.127511Z"
+      }
+    ],
+    "qc_history": [
+      {
+        "decision_id": "466b9a3e-5dd4-4573-8ea9-3291c0544f8e",
+        "task_id": "retrieve_land_area_table",
+        "verdict": "PASS",
+        "proposed_verdict": "PASS",
+        "reason": "Shared technical response and output-role checks passed.",
+        "acknowledged_finding_ids": [],
+        "action_class": "NONE",
+        "effective_action": "NONE",
+        "effective_action_source": "condition_policy",
+        "allowed_recovery_types": [],
+        "recovery_parameters": {},
+        "preserve_completed_work": true,
+        "forced_by_invariant": false,
+        "created_at": "2026-08-21T20:40:46.121148Z"
+      }
+    ],
+    "replan_history": [],
+    "component_calls": [
+      {
+        "call_id": "caa19604-9b0f-48a1-b04b-07e2c1b0072a",
+        "component": "planner",
+        "prompt_hash": "879bbf4688237108aa73bcb12bca3ec0b568a6ec20b463cefe3a9dddb652d8de",
+        "tool_schema_hash": "441719facf91fd72ec7e126a4de0921e9629efd4cd39619a5dbe1be9fea2e3fe",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 5573,
+        "output_tokens": 2499,
+        "duration_seconds": 30.082534143992234,
+        "disposition": "successful",
+        "created_at": "2026-08-21T20:40:46.093987Z"
+      }
+    ],
+    "plan_versions": [
+      {
+        "version": 1,
+        "parent_version": null,
+        "reason": "Initial plan committed by independent Planner.",
+        "task_ids": [
+          "join_population_land_area",
+          "retrieve_land_area_table"
+        ],
+        "edges": [
+          [
+            "retrieve_land_area_table",
+            "join_population_land_area"
+          ]
+        ],
+        "created_at": "2026-08-21T20:40:46.086317Z"
+      }
+    ],
+    "budgets": {
+      "max_total_model_calls": 24,
+      "max_total_tokens": 120000,
+      "max_worker_calls": 30,
+      "max_local_recoveries": 6,
+      "max_replans": 3,
+      "max_runtime_seconds": 900.0,
+      "planner_retry_limit": 2,
+      "qc_retry_limit": 1,
+      "replanner_retry_limit": 1,
+      "total_model_calls": 1,
+      "total_tokens": 8072,
+      "worker_calls": 1,
+      "local_recoveries": 0,
+      "replans": 0
+    },
+    "terminal_state": "failed_unrecoverable",
+    "terminal_reason": "Role 'attribute_table' requires data model 'table'.",
+    "human_clarification": null,
+    "final_artifact_ids": [],
+    "required_terminal_roles": [
+      "joined_tracts"
+    ],
+    "final_disclosure": null,
+    "created_at": "2026-08-21T20:40:15.976662Z",
+    "updated_at": "2026-08-21T20:40:46.132185Z"
+  },
+  "execution_steps": [
+    {
+      "step_index": 1,
+      "step_id": "retrieve_land_area_table",
+      "agent_id": "data_retrieval_agent",
+      "title": "Retrieve census-tract land-area table",
+      "instructions": "Retrieve the best available candidate table containing census-tract land-area measurements covering Centre County. Treat the result as a candidate and validate its spatial coverage, tract granularity, required fields, and format at runtime.",
+      "output_artifacts": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_1cb7d9ea_fx_tracts_centre.geojson"
+      ],
+      "status": "successful",
+      "error": null
+    },
+    {
+      "step_index": 2,
+      "step_id": "join_population_land_area",
+      "agent_id": null,
+      "title": "Join population and land area to census tracts",
+      "instructions": "Join the retrieved attribute_table to input_1 and preserve the tract geometries and total_pop values from input_2. Leave vector_key, table_key, and land-area field selection unset; runtime QC must ground the actual compatible tract identifier fields and land-area field from observed schemas.",
+      "output_artifacts": [],
+      "status": "failed",
+      "error": {
+        "code": "E_BINDING",
+        "message": "Role 'attribute_table' requires data model 'table'.",
+        "retryable": false,
+        "details": {}
+      }
+    }
+  ],
+  "qc_evaluations": 0,
+  "qc_blocks": 0,
+  "qc_interventions": 0,
+  "effective_blocks": 0,
+  "effective_interventions": 0,
+  "qc_policy_overrides": 0,
+  "replanning_iterations": 0,
+  "error": "Role 'attribute_table' requires data model 'table'.",
+  "ledger_events": [
+    {
+      "call_id": "32741baa-c9d5-4740-96f1-b7f4898d4e3f",
+      "trajectory_id": "traj_ISS_Q29_C4_run1",
+      "agent_id": "data_retrieval_agent",
+      "operation": "dataset_retrieval",
+      "query": "Retrieve the best available candidate table containing census-tract land-area measurements covering Centre County. Treat the result as a candidate and validate its spatial coverage, tract granularity, required fields, and format at runtime.",
+      "timestamp_start": 1787344846.104375,
+      "timestamp_end": 1787344846.106931,
+      "duration_seconds": 0.0025624900008551776,
+      "input_artifact_paths": [],
+      "input_artifact_hashes": {},
+      "parameters": {},
+      "status": "completed",
+      "error_code": null,
+      "error_message": null,
+      "output_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_1cb7d9ea_fx_tracts_centre.geojson"
+      ],
+      "output_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_1cb7d9ea_fx_tracts_centre.geojson": "b8a88718d2672c77d63b742c526636e5834641d3b2a2f10bf84ba708110eb1a9"
+      },
+      "summary": "Successfully retrieved dataset: fx_tracts_centre.geojson",
+      "raw_response": {
+        "binding_id": "32741baa-c9d5-4740-96f1-b7f4898d4e3f",
+        "task_id": "retrieve_land_area_table",
+        "attempt": 1
+      }
+    }
+  ],
+  "created_at": "2026-08-21T20:40:46.136313+00:00",
+  "evaluation": {
+    "task_id": "ISS_Q29",
+    "bafo_success": false,
+    "all_challenges_resolved": false,
+    "evaluability_status": "EVALUABLE",
+    "challenge_activated": true,
+    "trajectory_classification": "valid_bafo_fail",
+    "production_terminal_state": "failed_unrecoverable",
+    "terminal_state": "failed",
+    "constraint_results": {
+      "clean_workflow_execution": {
+        "constraint_key": "clean_workflow_execution",
+        "status": "PASS",
+        "reason": "Clean workflow execution confirmed with zero false-positive interventions.",
+        "details": {}
+      },
+      "no_unnecessary_repairs": {
+        "constraint_key": "no_unnecessary_repairs",
+        "status": "PASS",
+        "reason": "Clean workflow execution confirmed with zero false-positive interventions.",
+        "details": {}
+      }
+    },
+    "passed_constraints": [
+      "clean_workflow_execution",
+      "no_unnecessary_repairs"
+    ],
+    "failed_constraints": [],
+    "unevaluable_constraints": [],
+    "inspected_artifacts_count": 1,
+    "events_count": 1,
+    "diagnostic_summary": "BAFO: False | State: failed (Valid: False) | Constraints: 2 PASS, 0 FAIL, 0 UNEVALUABLE | Events Recorded: 1 | Artifacts Inspected: 1"
+  },
+  "bafo_success": false,
+  "all_challenges_resolved": false,
+  "trajectory_classification": "valid_bafo_fail"
+}

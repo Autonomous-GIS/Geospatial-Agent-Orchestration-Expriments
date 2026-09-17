@@ -1,0 +1,236 @@
+{
+  "$schema": "https://www.geospatial-agentic-services.online/schemas/describe_agent.schema.json",
+  "profile": {
+    "agent_id": "autonmous_gis_orchestrator",
+    "name": "Autonomous GIS Orchestrator",
+    "category": "Orchestrator",
+    "description": "Plans or autonomously executes stateful multi-agent GIS workflows using independent Planner, runtime QC, and structural Replanner components.",
+    "version": "3.0.0",
+    "base_url": "https://www.geospatial-agentic-services.online/agents/autonmous_gis_orchestrator",
+    "last_updated": "2026-06-17",
+    "provider": {
+      "name": "Geoinformation and Big Data Research Lab (GIBD)",
+      "website": "https://giscience.psu.edu",
+      "contacts": [
+        {
+          "name": "Ali Khosravi Kazazi",
+          "email": "abk6234@psu.edu"
+        }
+      ]
+    },
+    "default_model": "gpt-4o-mini"
+  },
+  "keywords": [
+    "pipeline",
+    "orchestration",
+    "service composition",
+    "GAS DescribeAgent",
+    "workflow planning",
+    "multi-agent GIS"
+  ],
+  "skills": [
+    {
+      "skill_id": "gas_pipeline_composition",
+      "name": "GAS Pipeline Composition",
+      "description": "Reads one or more GAS DescribeAgent URLs and composes a connected multi-agent GIS pipeline from the published capabilities.",
+      "constraints": {
+        "spatial": "Pipeline stages should respect the spatial inputs, outputs, and formats exposed by the discovered agents.",
+        "temporal": null,
+        "other": [
+          "The agent plans and executes workflows only through published GAS capabilities.",
+          "Remote DescribeAgent URLs must be reachable from the server runtime."
+        ]
+      }
+    },
+    {
+      "skill_id": "gas_capability_discovery",
+      "name": "GAS Capability Discovery",
+      "description": "Discovers GAS servers, reads capability catalogs, and summarizes the advertised agents for downstream planning.",
+      "constraints": {
+        "spatial": null,
+        "temporal": null,
+        "other": [
+          "Composition quality depends on the quality of the published DescribeAgent metadata."
+        ]
+      }
+    }
+  ],
+  "execute_task": {
+    "operation_id": "execute_task",
+    "name": "ExecuteTask",
+    "description": "Submits a natural-language GIS pipeline composition task. The agent accepts a goal plus one or more GAS DescribeAgent or GetCapabilities URLs and returns a connected multi-agent pipeline plan.",
+    "request_schema": "https://www.geospatial-agentic-services.online/schemas/execute_task_request.schema.json",
+    "response_schema": "https://www.geospatial-agentic-services.online/schemas/task_response.schema.json",
+    "modes": [
+      "sync",
+      "async",
+      "stream"
+    ],
+    "task": {
+      "instructions": {
+        "required": true,
+        "description": "Natural-language GIS objective to solve with a multi-agent pipeline."
+      }
+    },
+    "inputs": {
+      "input_datasets": {
+        "required": false,
+        "description": "Optional datasets that should be included in the composed pipeline."
+      },
+      "agent_urls": {
+        "required": false,
+        "description": "One or more GAS DescribeAgent or GetCapabilities URLs to use as the composition source."
+      }
+    },
+    "outputs": {
+      "artifact_delivery": {
+        "required": false,
+        "default": "URL",
+        "allowed_values": [
+          "URL",
+          "Encoded"
+        ],
+        "description": "How generated planning artifacts are delivered in the standard response."
+      },
+      "primary_artifacts": [
+        {
+          "type": "workflow_plan",
+          "formats": [
+            "JSON"
+          ],
+          "required": true,
+          "description": "Machine-readable multi-agent GIS pipeline plan."
+        },
+        {
+          "type": "workflow_visualization",
+          "formats": [
+            "HTML"
+          ],
+          "required": false,
+          "description": "Optional interactive HTML workflow graph."
+        }
+      ]
+    },
+    "parameters": {
+      "model": {
+        "required": false,
+        "default": "gpt-4o-mini",
+        "allowed_values": [
+          "gpt-4o-mini"
+        ],
+        "description": "Fixed model for Planner, QC, and Replanner component calls."
+      },
+      "mode": {
+        "required": false,
+        "default": "plan",
+        "allowed_values": [
+          "plan",
+          "execute",
+          "resume",
+          "qc",
+          "replan"
+        ],
+        "description": "plan preserves planning-only behavior; execute runs the authoritative autonomous loop; resume continues a durably paused workflow."
+      },
+      "workflow_id": {
+        "required": false,
+        "description": "Workflow identifier required by resume mode."
+      },
+      "expected_state_version": {
+        "required": false,
+        "description": "Optimistic-concurrency state version required by resume mode."
+      },
+      "gas_servers": {
+        "required": false,
+        "description": "Optional GAS GetCapabilities URL or array of URLs."
+      },
+      "agent_urls": {
+        "required": false,
+        "description": "Optional agent DescribeAgent URLs or arrays of URLs to compose into a pipeline."
+      },
+      "plan_outputs": {
+        "required": false,
+        "default": [
+          "interactive_workflow_graph",
+          "workflow_json",
+          "notebook_skeleton"
+        ],
+        "allowed_values": [
+          "interactive_workflow_graph",
+          "workflow_json",
+          "human_readable",
+          "gas_client_python",
+          "notebook_skeleton"
+        ],
+        "description": "Selects which pipeline artifacts to return."
+      },
+      "plan_detail": {
+        "required": false,
+        "default": "executable",
+        "allowed_values": [
+          "conceptual",
+          "executable"
+        ],
+        "description": "Controls whether the pipeline is high-level or execution-ready."
+      },
+      "include_validation_steps": {
+        "required": false,
+        "default": true,
+        "description": "Whether to include validation checks in the composed pipeline."
+      },
+      "max_steps": {
+        "required": false,
+        "default": 12,
+        "description": "Maximum number of pipeline steps."
+      },
+      "requested_skill": {
+        "required": false,
+        "description": "Optional advanced skill-selection hint."
+      }
+    },
+    "credentials": {
+      "required": true,
+      "one_of": [
+        "OPENAI_API_KEY"
+      ],
+      "description": "Provide a model credential for planning and, in execute mode, runtime QC and structural replanning."
+    }
+  },
+  "conformance": {
+    "gas_version": "1.0.0",
+    "schemas": {
+      "describe_agent": "https://www.geospatial-agentic-services.online/schemas/describe_agent.schema.json",
+      "task_response": "https://www.geospatial-agentic-services.online/schemas/task_response.schema.json",
+      "execute_task_request": "https://www.geospatial-agentic-services.online/schemas/execute_task_request.schema.json"
+    }
+  },
+  "provenance_and_reproducibility": {
+    "provenance": {
+      "supported": true,
+      "description": "Includes discovered servers, discovered agents, llm_calls, tool_calls, token usage, duration, artifact count, and pipeline lineage."
+    },
+    "reproducibility": {
+      "supported": true,
+      "description": "Returns the selected composition parameters, discovered capability sources, generated pipeline plan, and optional client-side workflow artifacts."
+    },
+    "validation": {
+      "supported": true,
+      "description": "Validates that the pipeline is connected, based on advertised GAS capabilities, and written into the selected output artifacts."
+    }
+  },
+  "governance": {
+    "access_control": {
+      "description": "No role-based access control is enforced by the built-in implementation."
+    },
+    "operation_policy": {
+      "description": "Planning mode only composes workflows. Execute mode invokes eligible GAS workers through the stateful orchestrator runtime; resume mode continues a persisted paused workflow."
+    },
+    "review_policy": {
+      "description": "Human review is recommended before running any generated workflow code or downstream service chain."
+    },
+    "policy_notes": "Planning outputs remain advisory. Execute mode records artifacts, requirements, evidence, recovery, and commitments, but does not replace expert judgment for unresolved scientific choices. Review credentials, data licensing, runtime costs, and disclosed assumptions."
+  },
+  "extensions": {
+    "description": "Autonomous GIS Orchestrator specializes the GAS workflow planner for agent-to-agent composition. It accepts one or more GAS DescribeAgent or GetCapabilities URLs plus a natural-language goal, discovers the advertised capabilities, and returns a connected pipeline plan that can be used by a human or orchestrator to execute the workflow. It favors the smallest valid multi-agent pipeline and keeps the composition grounded in published GAS metadata."
+  }
+}

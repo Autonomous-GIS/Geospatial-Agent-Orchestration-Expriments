@@ -1,0 +1,1550 @@
+{
+  "trajectory_id": "traj_ISS_Q14_C3_run3",
+  "task_id": "ISS_Q14",
+  "condition": "C3",
+  "model": "gpt-5.6-luna",
+  "run_index": 3,
+  "suite": "isolated",
+  "user_question": "Create a census-tract choropleth of median gross rent in Centre County.",
+  "input_artifact_paths": [
+    "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg",
+    "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_acs_centre_schema_drift.csv"
+  ],
+  "status": "failed",
+  "total_wall_time": 38.672,
+  "rate_limit_wait_time": 0.0,
+  "provider_retry_wait_time": 0.0,
+  "orchestration_active_time": 38.664,
+  "worker_execution_time": 0.007,
+  "total_tokens": 14779,
+  "input_tokens": 10104,
+  "output_tokens": 4675,
+  "outputs": {
+    "summary": "No authorized recovery succeeded: The retrieval worker succeeded, but the produced artifact is a GeoTIFF raster rather than the required CSV attribute table, triggering the active deterministic FORMAT_UNSUPPORTED violation. The required median gross rent field also remains unverified. Structural replanning is required to retrieve or produce a compatible CSV table while preserving the accepted tract vector.",
+    "artifacts": [],
+    "produced_artifacts": [
+      "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_5172ac95_fx_dem_centre_30m_utm.tif"
+    ],
+    "workflow_plan": {
+      "workflow_id": "89bb3cce-0de9-4e57-9139-5478cc0a1387",
+      "plan_version": 1,
+      "goal": "Create a census-tract choropleth of median gross rent in Centre County.",
+      "workflow_steps": [
+        {
+          "step_id": "retrieve_rent_table",
+          "title": "Retrieve Centre County median-rent attribute table",
+          "purpose": "Obtain a tabular candidate containing median gross rent values for Centre County census tracts.",
+          "agent_id": "data_retrieval_agent",
+          "operation": "dataset_retrieval",
+          "instructions": "Retrieve a CSV attribute-table candidate for Centre County census tracts containing median gross rent data. Treat the result as a candidate and validate its spatial coverage and required semantic field at runtime. The supplied table is provided as a known candidate context and is excluded from catalog ranking when supported.",
+          "parameters": {
+            "exclude_artifact_ids": [
+              "1755f514-bde8-4ddc-b804-9b51e684a68d"
+            ]
+          },
+          "depends_on": [],
+          "input_from_steps": [],
+          "status": "rejected",
+          "output_artifact_ids": [
+            "e04d4e9b-d028-4b85-8af9-5e3c0f01eb30"
+          ]
+        },
+        {
+          "step_id": "join_rent_to_tracts",
+          "title": "Join median rent attributes to census tracts",
+          "purpose": "Attach the retrieved median gross rent attribute to the supplied Centre County tract geometries.",
+          "agent_id": null,
+          "operation": "attribute_join",
+          "instructions": "Join the supplied tract vector and retrieved attribute table. Leave vector_key and table_key unset; runtime QC must ground compatible join fields from the observed schemas. Preserve the tract geometries and attach the field representing median gross rent. Leave the mapped field name unset for downstream runtime grounding.",
+          "parameters": {
+            "operation": "attribute_join",
+            "vector_key": null,
+            "table_key": null
+          },
+          "depends_on": [
+            "retrieve_rent_table"
+          ],
+          "input_from_steps": [
+            "retrieve_rent_table"
+          ],
+          "status": "proposed",
+          "output_artifact_ids": []
+        },
+        {
+          "step_id": "map_median_gross_rent",
+          "title": "Create median gross rent choropleth",
+          "purpose": "Generate the requested census-tract choropleth for median gross rent in Centre County.",
+          "agent_id": null,
+          "operation": "thematic_mapping",
+          "instructions": "Create an HTML choropleth from the joined tract layer. Leave field unset; runtime QC must ground the observed attribute field representing median gross rent. Use the tract polygons as the mapped spatial unit and embed source and CRS verification metadata.",
+          "parameters": {
+            "field": null
+          },
+          "depends_on": [
+            "join_rent_to_tracts"
+          ],
+          "input_from_steps": [
+            "join_rent_to_tracts"
+          ],
+          "status": "proposed",
+          "output_artifact_ids": []
+        }
+      ],
+      "requirements": [
+        {
+          "requirement_id": "req_retrieval_coverage",
+          "requirement_type": "spatial_coverage",
+          "scope": "Retrieved attribute table must cover Centre County census tracts.",
+          "task_id": "retrieve_rent_table",
+          "artifact_roles": [
+            "attribute_table"
+          ],
+          "parameters": {
+            "geography": "Centre County",
+            "geographic_unit": "census tract"
+          },
+          "blocking": true,
+          "provenance": "USER_EXPLICIT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [
+            "b27f8d0e-ca75-4249-9bf9-2efc626f4f4a"
+          ],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_retrieval_format",
+          "requirement_type": "format_compatible",
+          "scope": "Retrieved attribute table must be available as CSV for the attribute join.",
+          "task_id": "retrieve_rent_table",
+          "artifact_roles": [
+            "attribute_table"
+          ],
+          "parameters": {
+            "formats": [
+              "CSV"
+            ]
+          },
+          "blocking": true,
+          "provenance": "WORKER_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "violated",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_retrieval_rent_field",
+          "requirement_type": "required_fields",
+          "scope": "Retrieved attribute table must contain a field representing median gross rent for the tract records.",
+          "task_id": "retrieve_rent_table",
+          "artifact_roles": [
+            "attribute_table"
+          ],
+          "parameters": {
+            "semantic_field": "median gross rent"
+          },
+          "blocking": true,
+          "provenance": "USER_EXPLICIT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_join_format",
+          "requirement_type": "format_compatible",
+          "scope": "Both inputs to the attribute join must use formats supported by the join worker.",
+          "task_id": "join_rent_to_tracts",
+          "artifact_roles": [
+            "input_1",
+            "attribute_table"
+          ],
+          "parameters": {
+            "vector_formats": [
+              "GPKG"
+            ],
+            "table_formats": [
+              "CSV"
+            ]
+          },
+          "blocking": true,
+          "provenance": "WORKER_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [
+            "59c09c4a-9b88-47af-90cf-0d17d718657e",
+            "b27f8d0e-ca75-4249-9bf9-2efc626f4f4a"
+          ],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_join_geometry",
+          "requirement_type": "valid_geometry",
+          "scope": "The tract input must contain valid non-empty polygon geometries for the joined map.",
+          "task_id": "join_rent_to_tracts",
+          "artifact_roles": [
+            "input_1"
+          ],
+          "parameters": {
+            "geometry_type": "Polygon",
+            "allow_empty": false,
+            "allow_invalid": false
+          },
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [
+            "59c09c4a-9b88-47af-90cf-0d17d718657e"
+          ],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_join_rent_field",
+          "requirement_type": "required_fields",
+          "scope": "The table and tract vector must expose compatible runtime-grounded join fields, and the table must expose the median gross rent field.",
+          "task_id": "join_rent_to_tracts",
+          "artifact_roles": [
+            "input_1",
+            "attribute_table"
+          ],
+          "parameters": {
+            "join_fields": "runtime_grounded",
+            "semantic_field": "median gross rent"
+          },
+          "blocking": true,
+          "provenance": "DOWNSTREAM_CONSUMER",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_map_format",
+          "requirement_type": "format_compatible",
+          "scope": "The joined tract layer must be provided to the mapping worker as GeoPackage.",
+          "task_id": "map_median_gross_rent",
+          "artifact_roles": [
+            "joined_tracts"
+          ],
+          "parameters": {
+            "formats": [
+              "GPKG"
+            ]
+          },
+          "blocking": true,
+          "provenance": "WORKER_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_map_geometry",
+          "requirement_type": "valid_geometry",
+          "scope": "The joined tract layer must retain valid polygon geometries suitable for choropleth rendering.",
+          "task_id": "map_median_gross_rent",
+          "artifact_roles": [
+            "joined_tracts"
+          ],
+          "parameters": {
+            "geometry_type": "Polygon",
+            "allow_empty": false,
+            "allow_invalid": false
+          },
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_map_rent_field",
+          "requirement_type": "required_fields",
+          "scope": "The joined tract layer must contain a runtime-grounded field representing median gross rent.",
+          "task_id": "map_median_gross_rent",
+          "artifact_roles": [
+            "joined_tracts"
+          ],
+          "parameters": {
+            "semantic_field": "median gross rent",
+            "field_parameter": "runtime_grounded"
+          },
+          "blocking": true,
+          "provenance": "USER_EXPLICIT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        }
+      ],
+      "commitments": []
+    }
+  },
+  "workflow_state": {
+    "schema_version": "1.0.0",
+    "workflow_id": "89bb3cce-0de9-4e57-9139-5478cc0a1387",
+    "state_version": 11,
+    "user_goal": "Create a census-tract choropleth of median gross rent in Centre County.",
+    "feature_profile": "C5",
+    "feature_config": {
+      "profile_name": "C5",
+      "planner_mode": "gis_aware",
+      "qc_mode": "gis_aware",
+      "replanner_mode": "none",
+      "technical_invariants": true,
+      "local_recovery": true,
+      "structural_patching": false,
+      "gis_finding_routing": true
+    },
+    "current_plan_version": 1,
+    "tasks": {
+      "retrieve_rent_table": {
+        "task_id": "retrieve_rent_table",
+        "title": "Retrieve Centre County median-rent attribute table",
+        "purpose": "Obtain a tabular candidate containing median gross rent values for Centre County census tracts.",
+        "operation": "dataset_retrieval",
+        "instructions": "Retrieve a CSV attribute-table candidate for Centre County census tracts containing median gross rent data. Treat the result as a candidate and validate its spatial coverage and required semantic field at runtime. The supplied table is provided as a known candidate context and is excluded from catalog ranking when supported.",
+        "parameters": {
+          "exclude_artifact_ids": [
+            "1755f514-bde8-4ddc-b804-9b51e684a68d"
+          ]
+        },
+        "required_capabilities": [
+          "dataset_retrieval"
+        ],
+        "depends_on": [],
+        "input_requirements": [
+          {
+            "role": "input_2",
+            "data_model": "table",
+            "formats": [
+              "CSV"
+            ],
+            "required": true
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "attribute_table",
+            "data_model": "table",
+            "formats": [
+              "CSV"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_retrieval_coverage",
+          "req_retrieval_format",
+          "req_retrieval_rent_field"
+        ],
+        "status": "rejected",
+        "attempts": 1,
+        "active_binding_id": "70413710-efc5-4989-b7d2-eb8d1ecfe63b",
+        "output_artifact_ids": [
+          "e04d4e9b-d028-4b85-8af9-5e3c0f01eb30"
+        ],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      },
+      "join_rent_to_tracts": {
+        "task_id": "join_rent_to_tracts",
+        "title": "Join median rent attributes to census tracts",
+        "purpose": "Attach the retrieved median gross rent attribute to the supplied Centre County tract geometries.",
+        "operation": "attribute_join",
+        "instructions": "Join the supplied tract vector and retrieved attribute table. Leave vector_key and table_key unset; runtime QC must ground compatible join fields from the observed schemas. Preserve the tract geometries and attach the field representing median gross rent. Leave the mapped field name unset for downstream runtime grounding.",
+        "parameters": {
+          "operation": "attribute_join",
+          "vector_key": null,
+          "table_key": null
+        },
+        "required_capabilities": [
+          "vector_aggregation_and_joins",
+          "attribute_join"
+        ],
+        "depends_on": [
+          "retrieve_rent_table"
+        ],
+        "input_requirements": [
+          {
+            "role": "input_1",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          },
+          {
+            "role": "attribute_table",
+            "data_model": "table",
+            "formats": [
+              "CSV"
+            ],
+            "required": true
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "joined_tracts",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_join_format",
+          "req_join_geometry",
+          "req_join_rent_field"
+        ],
+        "status": "proposed",
+        "attempts": 0,
+        "active_binding_id": null,
+        "output_artifact_ids": [],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      },
+      "map_median_gross_rent": {
+        "task_id": "map_median_gross_rent",
+        "title": "Create median gross rent choropleth",
+        "purpose": "Generate the requested census-tract choropleth for median gross rent in Centre County.",
+        "operation": "thematic_mapping",
+        "instructions": "Create an HTML choropleth from the joined tract layer. Leave field unset; runtime QC must ground the observed attribute field representing median gross rent. Use the tract polygons as the mapped spatial unit and embed source and CRS verification metadata.",
+        "parameters": {
+          "field": null
+        },
+        "required_capabilities": [
+          "thematic_mapping"
+        ],
+        "depends_on": [
+          "join_rent_to_tracts"
+        ],
+        "input_requirements": [
+          {
+            "role": "joined_tracts",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "median_gross_rent_choropleth",
+            "data_model": "map",
+            "formats": [
+              "HTML"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_map_format",
+          "req_map_geometry",
+          "req_map_rent_field"
+        ],
+        "status": "proposed",
+        "attempts": 0,
+        "active_binding_id": null,
+        "output_artifact_ids": [],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      }
+    },
+    "edges": [
+      [
+        "join_rent_to_tracts",
+        "map_median_gross_rent"
+      ],
+      [
+        "retrieve_rent_table",
+        "join_rent_to_tracts"
+      ]
+    ],
+    "bindings": {
+      "70413710-efc5-4989-b7d2-eb8d1ecfe63b": {
+        "binding_id": "70413710-efc5-4989-b7d2-eb8d1ecfe63b",
+        "task_id": "retrieve_rent_table",
+        "agent_id": "data_retrieval_agent",
+        "operation": "dataset_retrieval",
+        "instruction": "Retrieve a CSV attribute-table candidate for Centre County census tracts containing median gross rent data. Treat the result as a candidate and validate its spatial coverage and required semantic field at runtime. The supplied table is provided as a known candidate context and is excluded from catalog ranking when supported.",
+        "input_bindings": [
+          {
+            "role": "input_2",
+            "artifact_id": "1755f514-bde8-4ddc-b804-9b51e684a68d",
+            "source_task_id": null,
+            "binding_order": 0
+          }
+        ],
+        "agent_profile_snapshot": {
+          "agent_id": "data_retrieval_agent",
+          "name": "Data Retrieval Agent",
+          "description": "Searches the available catalog and returns the highest-ranked available dataset candidate. Query criteria influence retrieval but are not guarantees of task-level suitability. Returned metadata describe the retrieved artifact. Clients should inspect returned metadata before downstream use.",
+          "operations": [
+            "dataset_retrieval"
+          ],
+          "skills": [
+            {
+              "skill_id": "dataset_retrieval",
+              "name": "Dataset Retrieval",
+              "description": "Retrieves registered benchmark datasets matching requested criteria from the catalog.",
+              "constraints": {
+                "spatial": "Returns datasets covering registered spatial boundaries.",
+                "temporal": "Returns datasets with metadata indicating time/year of acquisition.",
+                "other": [
+                  "The service does not determine downstream analytical fitness.",
+                  "Supports candidate exclusion via exclude_artifact_ids."
+                ]
+              }
+            }
+          ],
+          "inputs": {
+            "input_datasets": {
+              "required": false,
+              "description": "Not required for data retrieval."
+            }
+          },
+          "outputs": [
+            {
+              "type": "dataset",
+              "formats": [
+                "GPKG",
+                "GeoJSON",
+                "GeoTIFF",
+                "CSV"
+              ],
+              "required": true,
+              "description": "Retrieved dataset artifact."
+            }
+          ],
+          "parameters": {
+            "exclude_artifact_ids": {
+              "required": false,
+              "description": "Optional list of artifact IDs to exclude from candidate ranking."
+            }
+          }
+        },
+        "endpoint": "https://www.geospatial-agentic-services.online/agents/data_retrieval_agent/tasks",
+        "attempt": 1,
+        "invocation_id": null,
+        "status": "successful",
+        "started_at": "2026-08-21T17:40:49.191480Z",
+        "completed_at": "2026-08-21T17:40:49.198787Z",
+        "duration_seconds": 0.007318406002013944,
+        "output_artifact_ids": [
+          "e04d4e9b-d028-4b85-8af9-5e3c0f01eb30"
+        ],
+        "messages": [
+          "Successfully retrieved dataset: fx_dem_centre_30m_utm.tif"
+        ],
+        "structured_error": null,
+        "created_at": "2026-08-21T17:40:49.185080Z"
+      }
+    },
+    "artifacts": {
+      "1ad7004e-7db7-4379-b91d-a4f4579f34c9": {
+        "artifact_id": "1ad7004e-7db7-4379-b91d-a4f4579f34c9",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg",
+        "content_hash": "9818cdd69d3b26cbd238d60780f5a566bee625b857232a79ed5ca02595c100a8",
+        "format": "gpkg",
+        "media_type": null,
+        "data_model": "vector",
+        "producer_task_id": null,
+        "producer_binding_id": null,
+        "role": "input_1",
+        "evidence_ids": [
+          "59c09c4a-9b88-47af-90cf-0d17d718657e"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T17:40:15.864069Z",
+        "metadata": {
+          "source": "user_input"
+        }
+      },
+      "1755f514-bde8-4ddc-b804-9b51e684a68d": {
+        "artifact_id": "1755f514-bde8-4ddc-b804-9b51e684a68d",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_acs_centre_schema_drift.csv",
+        "content_hash": "9eb8b4be7a1b7410df4240653cc73fa4bb68eafd6b3e76afd6349d44aeabe6d0",
+        "format": "csv",
+        "media_type": null,
+        "data_model": "table",
+        "producer_task_id": null,
+        "producer_binding_id": null,
+        "role": "input_2",
+        "evidence_ids": [
+          "de279f1f-4ef1-454d-9c88-40663ac76711"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T17:40:15.864301Z",
+        "metadata": {
+          "source": "user_input"
+        }
+      },
+      "e04d4e9b-d028-4b85-8af9-5e3c0f01eb30": {
+        "artifact_id": "e04d4e9b-d028-4b85-8af9-5e3c0f01eb30",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_5172ac95_fx_dem_centre_30m_utm.tif",
+        "content_hash": "1426addcdb0dea68e59a3b63a33a5efbf17fd56a0b1fd066a4bbf52595accdcb",
+        "format": "tif",
+        "media_type": null,
+        "data_model": "raster",
+        "producer_task_id": "retrieve_rent_table",
+        "producer_binding_id": "70413710-efc5-4989-b7d2-eb8d1ecfe63b",
+        "role": "attribute_table",
+        "evidence_ids": [
+          "b27f8d0e-ca75-4249-9bf9-2efc626f4f4a"
+        ],
+        "validation_status": "fail",
+        "created_at": "2026-08-21T17:40:49.215506Z",
+        "metadata": {}
+      }
+    },
+    "derivations": {
+      "1b748502-7b01-436b-8ffb-51b9c7ec7fdc": {
+        "derivation_id": "1b748502-7b01-436b-8ffb-51b9c7ec7fdc",
+        "output_artifact_id": "e04d4e9b-d028-4b85-8af9-5e3c0f01eb30",
+        "source_artifact_ids": [
+          "1755f514-bde8-4ddc-b804-9b51e684a68d"
+        ],
+        "producer_task_id": "retrieve_rent_table",
+        "operation": "dataset_retrieval",
+        "parameters": {
+          "exclude_artifact_ids": [
+            "1755f514-bde8-4ddc-b804-9b51e684a68d"
+          ]
+        },
+        "semantic_effect": "Produced role 'attribute_table' using operation 'dataset_retrieval'.",
+        "evidence_snapshot_ids": [],
+        "created_at": "2026-08-21T17:40:49.215545Z"
+      }
+    },
+    "requirements": {
+      "req_retrieval_coverage": {
+        "requirement_id": "req_retrieval_coverage",
+        "requirement_type": "spatial_coverage",
+        "scope": "Retrieved attribute table must cover Centre County census tracts.",
+        "task_id": "retrieve_rent_table",
+        "artifact_roles": [
+          "attribute_table"
+        ],
+        "parameters": {
+          "geography": "Centre County",
+          "geographic_unit": "census tract"
+        },
+        "blocking": true,
+        "provenance": "USER_EXPLICIT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [
+          "b27f8d0e-ca75-4249-9bf9-2efc626f4f4a"
+        ],
+        "superseded_by": null
+      },
+      "req_retrieval_format": {
+        "requirement_id": "req_retrieval_format",
+        "requirement_type": "format_compatible",
+        "scope": "Retrieved attribute table must be available as CSV for the attribute join.",
+        "task_id": "retrieve_rent_table",
+        "artifact_roles": [
+          "attribute_table"
+        ],
+        "parameters": {
+          "formats": [
+            "CSV"
+          ]
+        },
+        "blocking": true,
+        "provenance": "WORKER_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "violated",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_retrieval_rent_field": {
+        "requirement_id": "req_retrieval_rent_field",
+        "requirement_type": "required_fields",
+        "scope": "Retrieved attribute table must contain a field representing median gross rent for the tract records.",
+        "task_id": "retrieve_rent_table",
+        "artifact_roles": [
+          "attribute_table"
+        ],
+        "parameters": {
+          "semantic_field": "median gross rent"
+        },
+        "blocking": true,
+        "provenance": "USER_EXPLICIT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_join_format": {
+        "requirement_id": "req_join_format",
+        "requirement_type": "format_compatible",
+        "scope": "Both inputs to the attribute join must use formats supported by the join worker.",
+        "task_id": "join_rent_to_tracts",
+        "artifact_roles": [
+          "input_1",
+          "attribute_table"
+        ],
+        "parameters": {
+          "vector_formats": [
+            "GPKG"
+          ],
+          "table_formats": [
+            "CSV"
+          ]
+        },
+        "blocking": true,
+        "provenance": "WORKER_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [
+          "59c09c4a-9b88-47af-90cf-0d17d718657e",
+          "b27f8d0e-ca75-4249-9bf9-2efc626f4f4a"
+        ],
+        "superseded_by": null
+      },
+      "req_join_geometry": {
+        "requirement_id": "req_join_geometry",
+        "requirement_type": "valid_geometry",
+        "scope": "The tract input must contain valid non-empty polygon geometries for the joined map.",
+        "task_id": "join_rent_to_tracts",
+        "artifact_roles": [
+          "input_1"
+        ],
+        "parameters": {
+          "geometry_type": "Polygon",
+          "allow_empty": false,
+          "allow_invalid": false
+        },
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [
+          "59c09c4a-9b88-47af-90cf-0d17d718657e"
+        ],
+        "superseded_by": null
+      },
+      "req_join_rent_field": {
+        "requirement_id": "req_join_rent_field",
+        "requirement_type": "required_fields",
+        "scope": "The table and tract vector must expose compatible runtime-grounded join fields, and the table must expose the median gross rent field.",
+        "task_id": "join_rent_to_tracts",
+        "artifact_roles": [
+          "input_1",
+          "attribute_table"
+        ],
+        "parameters": {
+          "join_fields": "runtime_grounded",
+          "semantic_field": "median gross rent"
+        },
+        "blocking": true,
+        "provenance": "DOWNSTREAM_CONSUMER",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_map_format": {
+        "requirement_id": "req_map_format",
+        "requirement_type": "format_compatible",
+        "scope": "The joined tract layer must be provided to the mapping worker as GeoPackage.",
+        "task_id": "map_median_gross_rent",
+        "artifact_roles": [
+          "joined_tracts"
+        ],
+        "parameters": {
+          "formats": [
+            "GPKG"
+          ]
+        },
+        "blocking": true,
+        "provenance": "WORKER_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_map_geometry": {
+        "requirement_id": "req_map_geometry",
+        "requirement_type": "valid_geometry",
+        "scope": "The joined tract layer must retain valid polygon geometries suitable for choropleth rendering.",
+        "task_id": "map_median_gross_rent",
+        "artifact_roles": [
+          "joined_tracts"
+        ],
+        "parameters": {
+          "geometry_type": "Polygon",
+          "allow_empty": false,
+          "allow_invalid": false
+        },
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_map_rent_field": {
+        "requirement_id": "req_map_rent_field",
+        "requirement_type": "required_fields",
+        "scope": "The joined tract layer must contain a runtime-grounded field representing median gross rent.",
+        "task_id": "map_median_gross_rent",
+        "artifact_roles": [
+          "joined_tracts"
+        ],
+        "parameters": {
+          "semantic_field": "median gross rent",
+          "field_parameter": "runtime_grounded"
+        },
+        "blocking": true,
+        "provenance": "USER_EXPLICIT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      }
+    },
+    "commitments": {},
+    "schema_mappings": {},
+    "evidence": {
+      "59c09c4a-9b88-47af-90cf-0d17d718657e": {
+        "evidence_id": "59c09c4a-9b88-47af-90cf-0d17d718657e",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "1ad7004e-7db7-4379-b91d-a4f4579f34c9"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg",
+          "format": "gpkg",
+          "size_bytes": 98304,
+          "complete": true,
+          "limitations": [],
+          "data_model": "vector",
+          "feature_count": 16,
+          "schema": {
+            "GEOID": "object",
+            "NAME": "object",
+            "COUNTYFP": "object",
+            "STATEFP": "object"
+          },
+          "schema_fields": [
+            "GEOID",
+            "NAME",
+            "COUNTYFP",
+            "STATEFP"
+          ],
+          "geometry_type": [
+            "Polygon"
+          ],
+          "geometry_valid": true,
+          "invalid_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "null_geometry_count": 0,
+          "bounds": [
+            238087.3824011362,
+            4508961.385028789,
+            272914.01066431846,
+            4543387.006183241
+          ],
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true,
+          "crs": "EPSG:26918",
+          "crs_authority": "EPSG:26918",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T17:40:15.870525Z",
+        "complete": true,
+        "limitations": []
+      },
+      "de279f1f-4ef1-454d-9c88-40663ac76711": {
+        "evidence_id": "de279f1f-4ef1-454d-9c88-40663ac76711",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "1755f514-bde8-4ddc-b804-9b51e684a68d"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_acs_centre_schema_drift.csv",
+          "format": "csv",
+          "size_bytes": 750,
+          "complete": true,
+          "limitations": [],
+          "data_model": "table",
+          "inspected_row_count": 16,
+          "row_sample_complete": true,
+          "schema": {
+            "tract_id": "int64",
+            "tract_name": "object",
+            "income_median": "int64",
+            "rent_median": "int64",
+            "total_pop": "int64"
+          },
+          "schema_fields": [
+            "tract_id",
+            "tract_name",
+            "income_median",
+            "rent_median",
+            "total_pop"
+          ],
+          "coordinate_candidates": [],
+          "spatializable_from_coordinates": false,
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T17:40:15.872709Z",
+        "complete": true,
+        "limitations": []
+      },
+      "b27f8d0e-ca75-4249-9bf9-2efc626f4f4a": {
+        "evidence_id": "b27f8d0e-ca75-4249-9bf9-2efc626f4f4a",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "e04d4e9b-d028-4b85-8af9-5e3c0f01eb30"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_5172ac95_fx_dem_centre_30m_utm.tif",
+          "format": "tif",
+          "size_bytes": 5338558,
+          "complete": true,
+          "limitations": [],
+          "data_model": "raster",
+          "width": 1161,
+          "height": 1148,
+          "band_count": 1,
+          "resolution": [
+            30.0,
+            30.0
+          ],
+          "transform": [
+            30.0,
+            0.0,
+            238087.3824011362,
+            0.0,
+            -30.0,
+            4543387.006183241,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "grid_origin": [
+            238087.3824011362,
+            4543387.006183241
+          ],
+          "bounds": [
+            238087.3824011362,
+            4508947.006183241,
+            272917.3824011362,
+            4543387.006183241
+          ],
+          "nodata": null,
+          "dtype": "float32",
+          "driver": "GTiff",
+          "crs": "EPSG:26918",
+          "crs_authority": "EPSG:26918",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T17:40:49.218393Z",
+        "complete": true,
+        "limitations": []
+      }
+    },
+    "violations": {
+      "78b25602-d05d-4a65-b089-43e8af46af8a": {
+        "violation_id": "78b25602-d05d-4a65-b089-43e8af46af8a",
+        "code": "FORMAT_UNSUPPORTED",
+        "layer": "deterministic_requirement",
+        "task_id": "retrieve_rent_table",
+        "artifact_ids": [
+          "e04d4e9b-d028-4b85-8af9-5e3c0f01eb30"
+        ],
+        "requirement_ids": [
+          "req_retrieval_format"
+        ],
+        "evidence_ids": [
+          "b27f8d0e-ca75-4249-9bf9-2efc626f4f4a"
+        ],
+        "blocking": true,
+        "deterministic": true,
+        "computationally_resolvable": true,
+        "status": "active",
+        "created_in_plan_version": 1,
+        "resolved_by_evidence_ids": [],
+        "resolved_in_plan_version": null,
+        "created_at": "2026-08-21T17:40:49.218691Z",
+        "resolved_at": null
+      },
+      "93b14d70-92ff-4293-9bd6-018a14d50440": {
+        "violation_id": "93b14d70-92ff-4293-9bd6-018a14d50440",
+        "code": "DATA_MODEL_INCOMPATIBLE",
+        "layer": "deterministic_task_contract",
+        "task_id": "join_rent_to_tracts",
+        "artifact_ids": [
+          "e04d4e9b-d028-4b85-8af9-5e3c0f01eb30"
+        ],
+        "requirement_ids": [],
+        "evidence_ids": [
+          "b27f8d0e-ca75-4249-9bf9-2efc626f4f4a"
+        ],
+        "blocking": true,
+        "deterministic": true,
+        "computationally_resolvable": true,
+        "status": "active",
+        "created_in_plan_version": 1,
+        "resolved_by_evidence_ids": [],
+        "resolved_in_plan_version": null,
+        "created_at": "2026-08-21T17:40:49.218894Z",
+        "resolved_at": null
+      },
+      "56331d4f-8f25-4bfc-92b6-75c214929948": {
+        "violation_id": "56331d4f-8f25-4bfc-92b6-75c214929948",
+        "code": "FORMAT_UNSUPPORTED",
+        "layer": "deterministic_task_contract",
+        "task_id": "join_rent_to_tracts",
+        "artifact_ids": [
+          "e04d4e9b-d028-4b85-8af9-5e3c0f01eb30"
+        ],
+        "requirement_ids": [],
+        "evidence_ids": [
+          "b27f8d0e-ca75-4249-9bf9-2efc626f4f4a"
+        ],
+        "blocking": true,
+        "deterministic": true,
+        "computationally_resolvable": true,
+        "status": "active",
+        "created_in_plan_version": 1,
+        "resolved_by_evidence_ids": [],
+        "resolved_in_plan_version": null,
+        "created_at": "2026-08-21T17:40:49.218960Z",
+        "resolved_at": null
+      }
+    },
+    "execution_history": [
+      {
+        "event_id": "171a71b8-d45f-471c-9f94-84639d5f2901",
+        "event_type": "initial_plan_committed",
+        "actor": "planner_component",
+        "state_version": 0,
+        "plan_version": 1,
+        "task_id": null,
+        "reason": "Retrieve a suitable Centre County census-tract rent table, join it to the supplied tract polygons using runtime-grounded schema fields, and generate an HTML choropleth of median gross rent.",
+        "metadata": {
+          "task_ids": [
+            "join_rent_to_tracts",
+            "map_median_gross_rent",
+            "retrieve_rent_table"
+          ]
+        },
+        "created_at": "2026-08-21T17:40:49.177290Z"
+      },
+      {
+        "event_id": "88ab19df-8b94-4900-ad91-24287e60bae0",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 1,
+        "plan_version": 1,
+        "task_id": "retrieve_rent_table",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "proposed",
+          "to": "ready"
+        },
+        "created_at": "2026-08-21T17:40:49.181183Z"
+      },
+      {
+        "event_id": "8bf01290-ef29-402e-86b2-2bdd2bf625b3",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 2,
+        "plan_version": 1,
+        "task_id": "retrieve_rent_table",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-21T17:40:49.183175Z"
+      },
+      {
+        "event_id": "6ab2d6ea-ca32-4ef3-afaa-f3a7abb930e0",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 3,
+        "plan_version": 1,
+        "task_id": "retrieve_rent_table",
+        "reason": "Worker bound.",
+        "metadata": {
+          "from": "binding",
+          "to": "bound"
+        },
+        "created_at": "2026-08-21T17:40:49.185135Z"
+      },
+      {
+        "event_id": "d2169f4b-4d8e-4d75-ab5e-8bb816f5b0e6",
+        "event_type": "pre_execution_requirements_evaluated",
+        "actor": "invariant_engine",
+        "state_version": 4,
+        "plan_version": 1,
+        "task_id": "retrieve_rent_table",
+        "reason": "All currently evaluable preconditions are satisfied.",
+        "metadata": {
+          "evaluated_requirement_ids": [],
+          "blocking_violation_ids": []
+        },
+        "created_at": "2026-08-21T17:40:49.187494Z"
+      },
+      {
+        "event_id": "87f48d7b-bea5-4b68-8830-60656bb7ed83",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 5,
+        "plan_version": 1,
+        "task_id": "retrieve_rent_table",
+        "reason": "Worker started.",
+        "metadata": {
+          "from": "bound",
+          "to": "running"
+        },
+        "created_at": "2026-08-21T17:40:49.189505Z"
+      },
+      {
+        "event_id": "b2a374dd-caca-4e34-b709-062bcb3bf4fe",
+        "event_type": "worker_execution_completed",
+        "actor": "worker_executor",
+        "state_version": 6,
+        "plan_version": 1,
+        "task_id": "retrieve_rent_table",
+        "reason": "Worker returned successfully.",
+        "metadata": {
+          "binding_id": "70413710-efc5-4989-b7d2-eb8d1ecfe63b",
+          "agent_id": "data_retrieval_agent",
+          "operation": "dataset_retrieval",
+          "attempt": 1,
+          "status": "successful",
+          "duration_seconds": 0.007318406002013944
+        },
+        "created_at": "2026-08-21T17:40:49.198867Z"
+      },
+      {
+        "event_id": "c81dc2b0-ad7f-4ae6-a3aa-5910ebbbe381",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 6,
+        "plan_version": 1,
+        "task_id": "retrieve_rent_table",
+        "reason": "Worker returned a provisional result.",
+        "metadata": {
+          "from": "running",
+          "to": "provisional_success"
+        },
+        "created_at": "2026-08-21T17:40:49.198930Z"
+      },
+      {
+        "event_id": "1463b99a-f2ac-4cab-bf2c-6c242d1951ce",
+        "event_type": "artifact_registered",
+        "actor": "artifact_registry",
+        "state_version": 7,
+        "plan_version": 1,
+        "task_id": "retrieve_rent_table",
+        "reason": null,
+        "metadata": {
+          "artifact_id": "e04d4e9b-d028-4b85-8af9-5e3c0f01eb30",
+          "role": "attribute_table",
+          "content_hash": "1426addcdb0dea68e59a3b63a33a5efbf17fd56a0b1fd066a4bbf52595accdcb"
+        },
+        "created_at": "2026-08-21T17:40:49.215571Z"
+      },
+      {
+        "event_id": "4353e239-441d-4006-85e8-397f14de285c",
+        "event_type": "deterministic_violation_detected",
+        "actor": "invariant_engine",
+        "state_version": 7,
+        "plan_version": 1,
+        "task_id": "retrieve_rent_table",
+        "reason": "Detected blocking requirement violation: FORMAT_UNSUPPORTED.",
+        "metadata": {
+          "violation_id": "78b25602-d05d-4a65-b089-43e8af46af8a",
+          "requirement_id": "req_retrieval_format",
+          "code": "FORMAT_UNSUPPORTED",
+          "artifact_ids": [
+            "e04d4e9b-d028-4b85-8af9-5e3c0f01eb30"
+          ],
+          "computationally_resolvable": true
+        },
+        "created_at": "2026-08-21T17:40:49.218721Z"
+      },
+      {
+        "event_id": "db59f4f2-ab4b-41df-899c-c3793dd076ac",
+        "event_type": "deterministic_contract_violation_detected",
+        "actor": "invariant_engine",
+        "state_version": 7,
+        "plan_version": 1,
+        "task_id": "join_rent_to_tracts",
+        "reason": "Detected task-contract violation: DATA_MODEL_INCOMPATIBLE.",
+        "metadata": {
+          "violation_id": "93b14d70-92ff-4293-9bd6-018a14d50440",
+          "code": "DATA_MODEL_INCOMPATIBLE",
+          "artifact_ids": [
+            "e04d4e9b-d028-4b85-8af9-5e3c0f01eb30"
+          ],
+          "computationally_resolvable": true,
+          "details": {
+            "role": "attribute_table",
+            "required_data_model": "table",
+            "actual_data_model": "raster"
+          }
+        },
+        "created_at": "2026-08-21T17:40:49.218918Z"
+      },
+      {
+        "event_id": "f6539973-a046-4d85-9b02-c94a50a21813",
+        "event_type": "deterministic_contract_violation_detected",
+        "actor": "invariant_engine",
+        "state_version": 7,
+        "plan_version": 1,
+        "task_id": "join_rent_to_tracts",
+        "reason": "Detected task-contract violation: FORMAT_UNSUPPORTED.",
+        "metadata": {
+          "violation_id": "56331d4f-8f25-4bfc-92b6-75c214929948",
+          "code": "FORMAT_UNSUPPORTED",
+          "artifact_ids": [
+            "e04d4e9b-d028-4b85-8af9-5e3c0f01eb30"
+          ],
+          "computationally_resolvable": true,
+          "details": {
+            "role": "attribute_table",
+            "actual_format": "tif",
+            "allowed_formats": [
+              "csv"
+            ]
+          }
+        },
+        "created_at": "2026-08-21T17:40:49.218980Z"
+      },
+      {
+        "event_id": "5f3c6c2c-63e1-493c-977d-84e27cebc092",
+        "event_type": "downstream_requirement_pre_evaluated",
+        "actor": "invariant_engine",
+        "state_version": 7,
+        "plan_version": 1,
+        "task_id": "join_rent_to_tracts",
+        "reason": "New producer evidence established a downstream task precondition violation.",
+        "metadata": {
+          "producer_task_id": "retrieve_rent_table",
+          "violation_ids": [
+            "93b14d70-92ff-4293-9bd6-018a14d50440",
+            "56331d4f-8f25-4bfc-92b6-75c214929948"
+          ]
+        },
+        "created_at": "2026-08-21T17:40:49.219059Z"
+      },
+      {
+        "event_id": "a3c2e4bf-4450-4672-b5c2-c2e420e9d237",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 8,
+        "plan_version": 1,
+        "task_id": "retrieve_rent_table",
+        "reason": "Reviewing runtime evidence.",
+        "metadata": {
+          "from": "provisional_success",
+          "to": "validating"
+        },
+        "created_at": "2026-08-21T17:40:49.221379Z"
+      },
+      {
+        "event_id": "d10560b0-7735-4032-b70a-3c564744db1c",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 9,
+        "plan_version": 1,
+        "task_id": "retrieve_rent_table",
+        "reason": "The retrieval worker succeeded, but the produced artifact is a GeoTIFF raster rather than the required CSV attribute table, triggering the active deterministic FORMAT_UNSUPPORTED violation. The required median gross rent field also remains unverified. Structural replanning is required to retrieve or produce a compatible CSV table while preserving the accepted tract vector.",
+        "metadata": {
+          "from": "validating",
+          "to": "rejected"
+        },
+        "created_at": "2026-08-21T17:40:54.500382Z"
+      }
+    ],
+    "qc_history": [
+      {
+        "decision_id": "qc-retrieve-rent-table-20260821T174100Z",
+        "task_id": "retrieve_rent_table",
+        "verdict": "BLOCK",
+        "proposed_verdict": "BLOCK",
+        "reason": "The retrieval worker succeeded, but the produced artifact is a GeoTIFF raster rather than the required CSV attribute table, triggering the active deterministic FORMAT_UNSUPPORTED violation. The required median gross rent field also remains unverified. Structural replanning is required to retrieve or produce a compatible CSV table while preserving the accepted tract vector.",
+        "acknowledged_finding_ids": [
+          "78b25602-d05d-4a65-b089-43e8af46af8a"
+        ],
+        "action_class": "STRUCTURAL_REPLAN",
+        "effective_action": "STRUCTURAL_REPLAN",
+        "effective_action_source": "deterministic_invariant_guardrail",
+        "allowed_recovery_types": [
+          "convert_artifact_format"
+        ],
+        "recovery_parameters": {
+          "blocking_codes": [
+            "FORMAT_UNSUPPORTED"
+          ],
+          "blocking_artifact_ids": [
+            "e04d4e9b-d028-4b85-8af9-5e3c0f01eb30"
+          ],
+          "recovery_goal": "Apply the smallest structural/task patch that resolves every current deterministic blocker while preserving accepted work."
+        },
+        "preserve_completed_work": true,
+        "forced_by_invariant": true,
+        "created_at": "2026-08-21T17:41:00Z"
+      }
+    ],
+    "replan_history": [],
+    "component_calls": [
+      {
+        "call_id": "feb48207-ccf8-4925-8c93-bb05c00f95b1",
+        "component": "planner",
+        "prompt_hash": "879bbf4688237108aa73bcb12bca3ec0b568a6ec20b463cefe3a9dddb652d8de",
+        "tool_schema_hash": "441719facf91fd72ec7e126a4de0921e9629efd4cd39619a5dbe1be9fea2e3fe",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 5578,
+        "output_tokens": 4155,
+        "duration_seconds": 33.277526146004675,
+        "disposition": "successful",
+        "created_at": "2026-08-21T17:40:49.177247Z"
+      },
+      {
+        "call_id": "079117ac-93bd-4127-a032-1a0908c7dca7",
+        "component": "qc",
+        "prompt_hash": "f32e58c2015bc65d1615821b0bf588e3118841b8fd13c0f66435ff64db6bc238",
+        "tool_schema_hash": "264376b66f6ac19b4d57965f2f5a135067cea57302b6779a763ae77f3e5ccb86",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 4526,
+        "output_tokens": 520,
+        "duration_seconds": 5.272913845998119,
+        "disposition": "successful",
+        "created_at": "2026-08-21T17:40:54.500269Z"
+      }
+    ],
+    "plan_versions": [
+      {
+        "version": 1,
+        "parent_version": null,
+        "reason": "Initial plan committed by independent Planner.",
+        "task_ids": [
+          "join_rent_to_tracts",
+          "map_median_gross_rent",
+          "retrieve_rent_table"
+        ],
+        "edges": [
+          [
+            "join_rent_to_tracts",
+            "map_median_gross_rent"
+          ],
+          [
+            "retrieve_rent_table",
+            "join_rent_to_tracts"
+          ]
+        ],
+        "created_at": "2026-08-21T17:40:49.169836Z"
+      }
+    ],
+    "budgets": {
+      "max_total_model_calls": 24,
+      "max_total_tokens": 120000,
+      "max_worker_calls": 30,
+      "max_local_recoveries": 6,
+      "max_replans": 3,
+      "max_runtime_seconds": 900.0,
+      "planner_retry_limit": 2,
+      "qc_retry_limit": 1,
+      "replanner_retry_limit": 1,
+      "total_model_calls": 2,
+      "total_tokens": 14779,
+      "worker_calls": 1,
+      "local_recoveries": 0,
+      "replans": 0
+    },
+    "terminal_state": "failed_unrecoverable",
+    "terminal_reason": "No authorized recovery succeeded: The retrieval worker succeeded, but the produced artifact is a GeoTIFF raster rather than the required CSV attribute table, triggering the active deterministic FORMAT_UNSUPPORTED violation. The required median gross rent field also remains unverified. Structural replanning is required to retrieve or produce a compatible CSV table while preserving the accepted tract vector.",
+    "human_clarification": null,
+    "final_artifact_ids": [],
+    "required_terminal_roles": [
+      "median_gross_rent_choropleth"
+    ],
+    "final_disclosure": null,
+    "created_at": "2026-08-21T17:40:15.863089Z",
+    "updated_at": "2026-08-21T17:40:54.506163Z"
+  },
+  "execution_steps": [
+    {
+      "step_index": 1,
+      "step_id": "retrieve_rent_table",
+      "agent_id": "data_retrieval_agent",
+      "title": "Retrieve Centre County median-rent attribute table",
+      "instructions": "Retrieve a CSV attribute-table candidate for Centre County census tracts containing median gross rent data. Treat the result as a candidate and validate its spatial coverage and required semantic field at runtime. The supplied table is provided as a known candidate context and is excluded from catalog ranking when supported.",
+      "output_artifacts": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_5172ac95_fx_dem_centre_30m_utm.tif"
+      ],
+      "status": "rejected",
+      "error": null
+    },
+    {
+      "step_index": 2,
+      "step_id": "join_rent_to_tracts",
+      "agent_id": null,
+      "title": "Join median rent attributes to census tracts",
+      "instructions": "Join the supplied tract vector and retrieved attribute table. Leave vector_key and table_key unset; runtime QC must ground compatible join fields from the observed schemas. Preserve the tract geometries and attach the field representing median gross rent. Leave the mapped field name unset for downstream runtime grounding.",
+      "output_artifacts": [],
+      "status": "proposed",
+      "error": null
+    },
+    {
+      "step_index": 3,
+      "step_id": "map_median_gross_rent",
+      "agent_id": null,
+      "title": "Create median gross rent choropleth",
+      "instructions": "Create an HTML choropleth from the joined tract layer. Leave field unset; runtime QC must ground the observed attribute field representing median gross rent. Use the tract polygons as the mapped spatial unit and embed source and CRS verification metadata.",
+      "output_artifacts": [],
+      "status": "proposed",
+      "error": null
+    }
+  ],
+  "qc_evaluations": 1,
+  "qc_blocks": 1,
+  "qc_interventions": 1,
+  "effective_blocks": 1,
+  "effective_interventions": 1,
+  "qc_policy_overrides": 0,
+  "replanning_iterations": 0,
+  "error": "No authorized recovery succeeded: The retrieval worker succeeded, but the produced artifact is a GeoTIFF raster rather than the required CSV attribute table, triggering the active deterministic FORMAT_UNSUPPORTED violation. The required median gross rent field also remains unverified. Structural replanning is required to retrieve or produce a compatible CSV table while preserving the accepted tract vector.",
+  "ledger_events": [
+    {
+      "call_id": "70413710-efc5-4989-b7d2-eb8d1ecfe63b",
+      "trajectory_id": "traj_ISS_Q14_C5_run3",
+      "agent_id": "data_retrieval_agent",
+      "operation": "dataset_retrieval",
+      "query": "Retrieve a CSV attribute-table candidate for Centre County census tracts containing median gross rent data. Treat the result as a candidate and validate its spatial coverage and required semantic field at runtime. The supplied table is provided as a known candidate context and is excluded from catalog ranking when supported.",
+      "timestamp_start": 1787334049.19148,
+      "timestamp_end": 1787334049.198787,
+      "duration_seconds": 0.007318406002013944,
+      "input_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_acs_centre_schema_drift.csv"
+      ],
+      "input_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_acs_centre_schema_drift.csv": "9eb8b4be7a1b7410df4240653cc73fa4bb68eafd6b3e76afd6349d44aeabe6d0"
+      },
+      "parameters": {
+        "exclude_artifact_ids": [
+          "1755f514-bde8-4ddc-b804-9b51e684a68d"
+        ]
+      },
+      "status": "completed",
+      "error_code": null,
+      "error_message": null,
+      "output_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_5172ac95_fx_dem_centre_30m_utm.tif"
+      ],
+      "output_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_5172ac95_fx_dem_centre_30m_utm.tif": "1426addcdb0dea68e59a3b63a33a5efbf17fd56a0b1fd066a4bbf52595accdcb"
+      },
+      "summary": "Successfully retrieved dataset: fx_dem_centre_30m_utm.tif",
+      "raw_response": {
+        "binding_id": "70413710-efc5-4989-b7d2-eb8d1ecfe63b",
+        "task_id": "retrieve_rent_table",
+        "attempt": 1
+      }
+    }
+  ],
+  "created_at": "2026-08-21T17:40:54.509658+00:00",
+  "evaluation": {
+    "task_id": "ISS_Q14",
+    "bafo_success": false,
+    "all_challenges_resolved": false,
+    "evaluability_status": "EVALUABLE",
+    "challenge_activated": true,
+    "trajectory_classification": "valid_bafo_fail",
+    "production_terminal_state": "failed_unrecoverable",
+    "terminal_state": "failed",
+    "constraint_results": {
+      "schema_grounded_join_keys": {
+        "constraint_key": "schema_grounded_join_keys",
+        "status": "UNEVALUABLE",
+        "reason": "No output artifact with tabular schema produced to verify attribute grounding.",
+        "details": {}
+      },
+      "mapped_field": {
+        "constraint_key": "mapped_field",
+        "status": "UNEVALUABLE",
+        "reason": "No output artifact with tabular schema produced to verify attribute grounding.",
+        "details": {}
+      },
+      "format": {
+        "constraint_key": "format",
+        "status": "PASS",
+        "reason": "Constraint 'format' satisfied by valid output artifact.",
+        "details": {}
+      }
+    },
+    "passed_constraints": [
+      "format"
+    ],
+    "failed_constraints": [],
+    "unevaluable_constraints": [
+      "schema_grounded_join_keys",
+      "mapped_field"
+    ],
+    "inspected_artifacts_count": 1,
+    "events_count": 1,
+    "diagnostic_summary": "BAFO: False | State: failed (Valid: False) | Constraints: 1 PASS, 0 FAIL, 2 UNEVALUABLE | Events Recorded: 1 | Artifacts Inspected: 1"
+  },
+  "bafo_success": false,
+  "all_challenges_resolved": false,
+  "trajectory_classification": "valid_bafo_fail"
+}

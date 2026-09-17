@@ -1,0 +1,1531 @@
+{
+  "trajectory_id": "traj_ISS_Q24_C4_run1",
+  "task_id": "ISS_Q24",
+  "condition": "C4",
+  "model": "gpt-5.6-luna",
+  "run_index": 1,
+  "suite": "isolated",
+  "user_question": "Calculate average elevation inside the State College and Bellefonte borough boundaries.",
+  "input_artifact_paths": [
+    "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_dem_centre_epsg3857.tif",
+    "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_places_centre_utm.gpkg"
+  ],
+  "status": "successful",
+  "total_wall_time": 27.655,
+  "rate_limit_wait_time": 0.0,
+  "provider_retry_wait_time": 0.0,
+  "orchestration_active_time": 27.628,
+  "worker_execution_time": 0.027,
+  "total_tokens": 9039,
+  "input_tokens": 5683,
+  "output_tokens": 3356,
+  "outputs": {
+    "summary": "Workflow completed with accepted terminal artifacts.",
+    "artifacts": [
+      "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/raster_analysis_agent/zonal_stats_df09db90.csv"
+    ],
+    "produced_artifacts": [
+      "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/projection_agent/reprojected_b7d6500c.gpkg",
+      "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/raster_analysis_agent/zonal_stats_df09db90.csv"
+    ],
+    "workflow_plan": {
+      "workflow_id": "02e5a192-3872-45d9-af6e-7b696bd95a8e",
+      "plan_version": 1,
+      "goal": "Calculate average elevation inside the State College and Bellefonte borough boundaries.",
+      "workflow_steps": [
+        {
+          "step_id": "reproject_borough_boundaries",
+          "title": "Reproject borough boundaries to DEM CRS",
+          "purpose": "Transform the State College and Bellefonte polygon boundaries into the DEM CRS so zonal statistics can use compatible coordinate reference systems.",
+          "agent_id": "projection_agent",
+          "operation": "reproject",
+          "instructions": "Reproject the input GeoPackage vector layer from its observed CRS to EPSG:3857. Preserve the borough features and attributes.",
+          "parameters": {
+            "operation": "reproject",
+            "target_crs": "EPSG:3857"
+          },
+          "depends_on": [],
+          "input_from_steps": [],
+          "status": "successful",
+          "output_artifact_ids": [
+            "12b0ec64-85ef-434c-a815-52c4efa5ea75"
+          ]
+        },
+        {
+          "step_id": "calculate_borough_mean_elevation",
+          "title": "Calculate mean elevation by borough",
+          "purpose": "Compute the average DEM elevation within the State College and Bellefonte borough polygons.",
+          "agent_id": "raster_analysis_agent",
+          "operation": "zonal_statistics",
+          "instructions": "Calculate zonal statistics for the raster in input_1 using the reprojected borough polygons. Produce a CSV summary with the mean elevation for each borough, retaining available identifying attributes such as NAME.",
+          "parameters": {
+            "operation": "zonal_statistics"
+          },
+          "depends_on": [
+            "reproject_borough_boundaries"
+          ],
+          "input_from_steps": [
+            "reproject_borough_boundaries"
+          ],
+          "status": "successful",
+          "output_artifact_ids": [
+            "dbeb4234-8825-409a-9533-b07a13bd6649"
+          ]
+        }
+      ],
+      "requirements": [
+        {
+          "requirement_id": "req_reproject_source_crs_present",
+          "requirement_type": "crs_present",
+          "scope": "The source CRS for input_2 must be present before reprojection.",
+          "task_id": "reproject_borough_boundaries",
+          "artifact_roles": [
+            "input_2"
+          ],
+          "parameters": {},
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [
+            "77d109b4-49b4-4e86-9cef-17d3ccf032c6"
+          ],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_zonal_crs_present",
+          "requirement_type": "crs_present",
+          "scope": "Both the DEM and the reprojected borough boundaries must have explicit CRS metadata before zonal statistics.",
+          "task_id": "calculate_borough_mean_elevation",
+          "artifact_roles": [
+            "input_1",
+            "reprojected_borough_boundaries"
+          ],
+          "parameters": {},
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_zonal_compatible_crs",
+          "requirement_type": "compatible_crs",
+          "scope": "The DEM and borough boundary geometries must use compatible CRSs for zonal statistics.",
+          "task_id": "calculate_borough_mean_elevation",
+          "artifact_roles": [
+            "input_1",
+            "reprojected_borough_boundaries"
+          ],
+          "parameters": {
+            "target_crs": "EPSG:3857"
+          },
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_zonal_valid_geometry",
+          "requirement_type": "valid_geometry",
+          "scope": "The borough polygons used as zonal boundaries must have valid, non-empty geometries.",
+          "task_id": "calculate_borough_mean_elevation",
+          "artifact_roles": [
+            "reprojected_borough_boundaries"
+          ],
+          "parameters": {},
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_zonal_spatial_coverage",
+          "requirement_type": "spatial_coverage",
+          "scope": "The DEM must spatially cover the State College and Bellefonte borough polygons sufficiently to calculate statistics for both zones.",
+          "task_id": "calculate_borough_mean_elevation",
+          "artifact_roles": [
+            "input_1",
+            "reprojected_borough_boundaries"
+          ],
+          "parameters": {
+            "required_zones": [
+              "State College",
+              "Bellefonte"
+            ]
+          },
+          "blocking": true,
+          "provenance": "DOWNSTREAM_CONSUMER",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_zonal_format_compatible",
+          "requirement_type": "format_compatible",
+          "scope": "The zonal statistics worker must receive the DEM as GeoTIFF and the polygon zones as GeoPackage.",
+          "task_id": "calculate_borough_mean_elevation",
+          "artifact_roles": [
+            "input_1",
+            "reprojected_borough_boundaries"
+          ],
+          "parameters": {
+            "raster_format": "GeoTIFF",
+            "zone_format": "GPKG"
+          },
+          "blocking": true,
+          "provenance": "WORKER_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "8df0e575-df83-41f3-8145-a517c3c26e78",
+          "requirement_type": "compatible_crs",
+          "scope": "task_transition",
+          "task_id": "calculate_borough_mean_elevation",
+          "artifact_roles": [
+            "input_1",
+            "reprojected_borough_boundaries"
+          ],
+          "parameters": {},
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "operation_contract_catalog",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        }
+      ],
+      "commitments": []
+    }
+  },
+  "workflow_state": {
+    "schema_version": "1.0.0",
+    "workflow_id": "02e5a192-3872-45d9-af6e-7b696bd95a8e",
+    "state_version": 18,
+    "user_goal": "Calculate average elevation inside the State College and Bellefonte borough boundaries.",
+    "feature_profile": "C4",
+    "feature_config": {
+      "profile_name": "C4",
+      "planner_mode": "gis_aware",
+      "qc_mode": "none",
+      "replanner_mode": "gis_aware",
+      "technical_invariants": true,
+      "local_recovery": true,
+      "structural_patching": true,
+      "gis_finding_routing": false
+    },
+    "current_plan_version": 1,
+    "tasks": {
+      "reproject_borough_boundaries": {
+        "task_id": "reproject_borough_boundaries",
+        "title": "Reproject borough boundaries to DEM CRS",
+        "purpose": "Transform the State College and Bellefonte polygon boundaries into the DEM CRS so zonal statistics can use compatible coordinate reference systems.",
+        "operation": "reproject",
+        "instructions": "Reproject the input GeoPackage vector layer from its observed CRS to EPSG:3857. Preserve the borough features and attributes.",
+        "parameters": {
+          "operation": "reproject",
+          "target_crs": "EPSG:3857"
+        },
+        "required_capabilities": [
+          "reproject"
+        ],
+        "depends_on": [],
+        "input_requirements": [
+          {
+            "role": "input_2",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "reprojected_borough_boundaries",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_reproject_source_crs_present"
+        ],
+        "status": "successful",
+        "attempts": 1,
+        "active_binding_id": "c20dc562-610e-4d3e-9668-4a5ccf3642cf",
+        "output_artifact_ids": [
+          "12b0ec64-85ef-434c-a815-52c4efa5ea75"
+        ],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      },
+      "calculate_borough_mean_elevation": {
+        "task_id": "calculate_borough_mean_elevation",
+        "title": "Calculate mean elevation by borough",
+        "purpose": "Compute the average DEM elevation within the State College and Bellefonte borough polygons.",
+        "operation": "zonal_statistics",
+        "instructions": "Calculate zonal statistics for the raster in input_1 using the reprojected borough polygons. Produce a CSV summary with the mean elevation for each borough, retaining available identifying attributes such as NAME.",
+        "parameters": {
+          "operation": "zonal_statistics"
+        },
+        "required_capabilities": [
+          "zonal_statistics"
+        ],
+        "depends_on": [
+          "reproject_borough_boundaries"
+        ],
+        "input_requirements": [
+          {
+            "role": "input_1",
+            "data_model": "raster",
+            "formats": [
+              "GeoTIFF"
+            ],
+            "required": true
+          },
+          {
+            "role": "reprojected_borough_boundaries",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "borough_mean_elevation_table",
+            "data_model": "table",
+            "formats": [
+              "CSV"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_zonal_crs_present",
+          "req_zonal_compatible_crs",
+          "req_zonal_valid_geometry",
+          "req_zonal_spatial_coverage",
+          "req_zonal_format_compatible",
+          "8df0e575-df83-41f3-8145-a517c3c26e78"
+        ],
+        "status": "successful",
+        "attempts": 1,
+        "active_binding_id": "e35c493a-4169-4240-a274-093e146c52ec",
+        "output_artifact_ids": [
+          "dbeb4234-8825-409a-9533-b07a13bd6649"
+        ],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      }
+    },
+    "edges": [
+      [
+        "reproject_borough_boundaries",
+        "calculate_borough_mean_elevation"
+      ]
+    ],
+    "bindings": {
+      "c20dc562-610e-4d3e-9668-4a5ccf3642cf": {
+        "binding_id": "c20dc562-610e-4d3e-9668-4a5ccf3642cf",
+        "task_id": "reproject_borough_boundaries",
+        "agent_id": "projection_agent",
+        "operation": "reproject",
+        "instruction": "Reproject the input GeoPackage vector layer from its observed CRS to EPSG:3857. Preserve the borough features and attributes.",
+        "input_bindings": [
+          {
+            "role": "input_2",
+            "artifact_id": "af5fdd6f-eea0-41a5-872e-f2933f0f3ee4",
+            "source_task_id": null,
+            "binding_order": 0
+          }
+        ],
+        "agent_profile_snapshot": {
+          "agent_id": "projection_agent",
+          "name": "Projection Agent",
+          "description": "Reprojects vector artifacts between explicitly identified coordinate reference systems and assigns a CRS when explicitly supplied. The service never guesses an unknown CRS.",
+          "operations": [
+            "assign_crs",
+            "coordinate_transformation",
+            "reproject"
+          ],
+          "skills": [
+            {
+              "skill_id": "coordinate_transformation",
+              "name": "Coordinate Transformation",
+              "description": "Transforms vector geometry coordinates to a target CRS or defines an explicit CRS on datasets with missing metadata.",
+              "constraints": {
+                "spatial": "Reprojection requires a known source CRS and an explicit target CRS. assign_crs requires an explicit CRS to assign.",
+                "temporal": null,
+                "other": [
+                  "The service does not infer or guess unknown coordinate reference systems."
+                ]
+              }
+            }
+          ],
+          "inputs": {
+            "input_datasets": {
+              "required": true,
+              "description": "Vector dataset in GeoPackage or GeoJSON format."
+            }
+          },
+          "outputs": [
+            {
+              "type": "vector",
+              "formats": [
+                "GPKG"
+              ],
+              "required": true,
+              "description": "Reprojected or CRS-assigned vector dataset."
+            }
+          ],
+          "parameters": {
+            "operation": {
+              "required": false,
+              "description": "Explicit operation name (reproject, assign_crs)."
+            },
+            "target_crs": {
+              "required": false,
+              "description": "Explicit target EPSG/CRS identifier."
+            }
+          }
+        },
+        "endpoint": "https://www.geospatial-agentic-services.online/agents/projection_agent/tasks",
+        "attempt": 1,
+        "invocation_id": null,
+        "status": "successful",
+        "started_at": "2026-08-21T18:28:15.787310Z",
+        "completed_at": "2026-08-21T18:28:15.804649Z",
+        "duration_seconds": 0.01734897799906321,
+        "output_artifact_ids": [
+          "12b0ec64-85ef-434c-a815-52c4efa5ea75"
+        ],
+        "messages": [
+          "Reprojected 2 features to EPSG:3857."
+        ],
+        "structured_error": null,
+        "created_at": "2026-08-21T18:28:15.783664Z"
+      },
+      "e35c493a-4169-4240-a274-093e146c52ec": {
+        "binding_id": "e35c493a-4169-4240-a274-093e146c52ec",
+        "task_id": "calculate_borough_mean_elevation",
+        "agent_id": "raster_analysis_agent",
+        "operation": "zonal_statistics",
+        "instruction": "Calculate zonal statistics for the raster in input_1 using the reprojected borough polygons. Produce a CSV summary with the mean elevation for each borough, retaining available identifying attributes such as NAME.",
+        "input_bindings": [
+          {
+            "role": "input_1",
+            "artifact_id": "6752ab5e-8948-4823-a0e3-afea703592d1",
+            "source_task_id": null,
+            "binding_order": 0
+          },
+          {
+            "role": "reprojected_borough_boundaries",
+            "artifact_id": "12b0ec64-85ef-434c-a815-52c4efa5ea75",
+            "source_task_id": "reproject_borough_boundaries",
+            "binding_order": 1
+          }
+        ],
+        "agent_profile_snapshot": {
+          "agent_id": "raster_analysis_agent",
+          "name": "Raster Analysis Agent",
+          "description": "Performs deterministic raster reprojection, resampling, clipping, raster calculation, and zonal statistics. Consumes GeoTIFF rasters and GeoPackage polygon zones.",
+          "operations": [
+            "clip",
+            "raster_calculator",
+            "raster_geoprocessing",
+            "reproject_raster",
+            "resample",
+            "zonal_statistics"
+          ],
+          "skills": [
+            {
+              "skill_id": "raster_geoprocessing",
+              "name": "Raster Geoprocessing",
+              "description": "Executes raster calculations, reprojections, grid resampling, spatial masking, and zonal aggregations.",
+              "constraints": {
+                "spatial": "Raster calculation requires compatible grid definitions and CRS. Zonal statistics require matching CRS between raster and GeoPackage zones.",
+                "temporal": null,
+                "other": [
+                  "Accepts GeoTIFF (.tif) rasters and GeoPackage (.gpkg) polygon zones.",
+                  "Does not accept GeoJSON zones for zonal statistics."
+                ]
+              }
+            }
+          ],
+          "inputs": {
+            "input_datasets": {
+              "required": true,
+              "description": "GeoTIFF raster file(s) and optional GeoPackage polygon zone layer."
+            }
+          },
+          "outputs": [
+            {
+              "type": "raster",
+              "formats": [
+                "GeoTIFF"
+              ],
+              "required": false,
+              "description": "Processed raster dataset."
+            },
+            {
+              "type": "table",
+              "formats": [
+                "CSV"
+              ],
+              "required": false,
+              "description": "Zonal statistics summary table."
+            }
+          ],
+          "parameters": {
+            "operation": {
+              "required": false,
+              "description": "Explicit operation (zonal_statistics, raster_calculator, resample, clip, reproject_raster)."
+            },
+            "resolution": {
+              "required": false,
+              "description": "Target pixel resolution in meters for resampling."
+            },
+            "target_crs": {
+              "required": false,
+              "description": "Target coordinate reference system for raster reprojection."
+            }
+          }
+        },
+        "endpoint": "https://www.geospatial-agentic-services.online/agents/raster_analysis_agent/tasks",
+        "attempt": 1,
+        "invocation_id": null,
+        "status": "successful",
+        "started_at": "2026-08-21T18:28:15.826753Z",
+        "completed_at": "2026-08-21T18:28:15.836443Z",
+        "duration_seconds": 0.00969606899889186,
+        "output_artifact_ids": [
+          "dbeb4234-8825-409a-9533-b07a13bd6649"
+        ],
+        "messages": [
+          "Calculated zonal statistics for 2 zones."
+        ],
+        "structured_error": null,
+        "created_at": "2026-08-21T18:28:15.822786Z"
+      }
+    },
+    "artifacts": {
+      "6752ab5e-8948-4823-a0e3-afea703592d1": {
+        "artifact_id": "6752ab5e-8948-4823-a0e3-afea703592d1",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_dem_centre_epsg3857.tif",
+        "content_hash": "82fb0234a7db7c93766e71c019c8609f7509bb26db5ada8af297fd2a755d93bc",
+        "format": "tif",
+        "media_type": null,
+        "data_model": "raster",
+        "producer_task_id": null,
+        "producer_binding_id": null,
+        "role": "input_1",
+        "evidence_ids": [
+          "7c3bde7e-a7d0-4383-a0ec-a560ea8416f0"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T18:27:48.225069Z",
+        "metadata": {
+          "source": "user_input"
+        }
+      },
+      "af5fdd6f-eea0-41a5-872e-f2933f0f3ee4": {
+        "artifact_id": "af5fdd6f-eea0-41a5-872e-f2933f0f3ee4",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_places_centre_utm.gpkg",
+        "content_hash": "ed290cb184600f917fd262932992edb4d74baf2888ef85f9e294275e409af3c3",
+        "format": "gpkg",
+        "media_type": null,
+        "data_model": "vector",
+        "producer_task_id": null,
+        "producer_binding_id": null,
+        "role": "input_2",
+        "evidence_ids": [
+          "77d109b4-49b4-4e86-9cef-17d3ccf032c6"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T18:27:48.226165Z",
+        "metadata": {
+          "source": "user_input"
+        }
+      },
+      "12b0ec64-85ef-434c-a815-52c4efa5ea75": {
+        "artifact_id": "12b0ec64-85ef-434c-a815-52c4efa5ea75",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/projection_agent/reprojected_b7d6500c.gpkg",
+        "content_hash": "8c2a8387762abe30248bb50d7816ac7955c814e8955510374ab181ecb1d95d19",
+        "format": "gpkg",
+        "media_type": null,
+        "data_model": "vector",
+        "producer_task_id": "reproject_borough_boundaries",
+        "producer_binding_id": "c20dc562-610e-4d3e-9668-4a5ccf3642cf",
+        "role": "reprojected_borough_boundaries",
+        "evidence_ids": [
+          "ccfce781-02fa-413f-8a2d-272e2b022c58"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T18:28:15.807335Z",
+        "metadata": {}
+      },
+      "dbeb4234-8825-409a-9533-b07a13bd6649": {
+        "artifact_id": "dbeb4234-8825-409a-9533-b07a13bd6649",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/raster_analysis_agent/zonal_stats_df09db90.csv",
+        "content_hash": "7c2b2cbf3920f08170e5f374fe524f623b38bfc1d469646a83921788458d1869",
+        "format": "csv",
+        "media_type": null,
+        "data_model": "table",
+        "producer_task_id": "calculate_borough_mean_elevation",
+        "producer_binding_id": "e35c493a-4169-4240-a274-093e146c52ec",
+        "role": "borough_mean_elevation_table",
+        "evidence_ids": [
+          "3cc20173-b055-431d-9889-f1469c6a758e"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T18:28:15.839715Z",
+        "metadata": {}
+      }
+    },
+    "derivations": {
+      "87c50dc3-b829-42ba-a002-ca8c24bb9ea0": {
+        "derivation_id": "87c50dc3-b829-42ba-a002-ca8c24bb9ea0",
+        "output_artifact_id": "12b0ec64-85ef-434c-a815-52c4efa5ea75",
+        "source_artifact_ids": [
+          "af5fdd6f-eea0-41a5-872e-f2933f0f3ee4"
+        ],
+        "producer_task_id": "reproject_borough_boundaries",
+        "operation": "reproject",
+        "parameters": {
+          "operation": "reproject",
+          "target_crs": "EPSG:3857"
+        },
+        "semantic_effect": "Produced role 'reprojected_borough_boundaries' using operation 'reproject'.",
+        "evidence_snapshot_ids": [],
+        "created_at": "2026-08-21T18:28:15.807365Z"
+      },
+      "c8f60f38-9b79-4422-befa-bd96dd1ca670": {
+        "derivation_id": "c8f60f38-9b79-4422-befa-bd96dd1ca670",
+        "output_artifact_id": "dbeb4234-8825-409a-9533-b07a13bd6649",
+        "source_artifact_ids": [
+          "6752ab5e-8948-4823-a0e3-afea703592d1",
+          "12b0ec64-85ef-434c-a815-52c4efa5ea75"
+        ],
+        "producer_task_id": "calculate_borough_mean_elevation",
+        "operation": "zonal_statistics",
+        "parameters": {
+          "operation": "zonal_statistics"
+        },
+        "semantic_effect": "Produced role 'borough_mean_elevation_table' using operation 'zonal_statistics'.",
+        "evidence_snapshot_ids": [],
+        "created_at": "2026-08-21T18:28:15.839744Z"
+      }
+    },
+    "requirements": {
+      "req_reproject_source_crs_present": {
+        "requirement_id": "req_reproject_source_crs_present",
+        "requirement_type": "crs_present",
+        "scope": "The source CRS for input_2 must be present before reprojection.",
+        "task_id": "reproject_borough_boundaries",
+        "artifact_roles": [
+          "input_2"
+        ],
+        "parameters": {},
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [
+          "77d109b4-49b4-4e86-9cef-17d3ccf032c6"
+        ],
+        "superseded_by": null
+      },
+      "req_zonal_crs_present": {
+        "requirement_id": "req_zonal_crs_present",
+        "requirement_type": "crs_present",
+        "scope": "Both the DEM and the reprojected borough boundaries must have explicit CRS metadata before zonal statistics.",
+        "task_id": "calculate_borough_mean_elevation",
+        "artifact_roles": [
+          "input_1",
+          "reprojected_borough_boundaries"
+        ],
+        "parameters": {},
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_zonal_compatible_crs": {
+        "requirement_id": "req_zonal_compatible_crs",
+        "requirement_type": "compatible_crs",
+        "scope": "The DEM and borough boundary geometries must use compatible CRSs for zonal statistics.",
+        "task_id": "calculate_borough_mean_elevation",
+        "artifact_roles": [
+          "input_1",
+          "reprojected_borough_boundaries"
+        ],
+        "parameters": {
+          "target_crs": "EPSG:3857"
+        },
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_zonal_valid_geometry": {
+        "requirement_id": "req_zonal_valid_geometry",
+        "requirement_type": "valid_geometry",
+        "scope": "The borough polygons used as zonal boundaries must have valid, non-empty geometries.",
+        "task_id": "calculate_borough_mean_elevation",
+        "artifact_roles": [
+          "reprojected_borough_boundaries"
+        ],
+        "parameters": {},
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_zonal_spatial_coverage": {
+        "requirement_id": "req_zonal_spatial_coverage",
+        "requirement_type": "spatial_coverage",
+        "scope": "The DEM must spatially cover the State College and Bellefonte borough polygons sufficiently to calculate statistics for both zones.",
+        "task_id": "calculate_borough_mean_elevation",
+        "artifact_roles": [
+          "input_1",
+          "reprojected_borough_boundaries"
+        ],
+        "parameters": {
+          "required_zones": [
+            "State College",
+            "Bellefonte"
+          ]
+        },
+        "blocking": true,
+        "provenance": "DOWNSTREAM_CONSUMER",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_zonal_format_compatible": {
+        "requirement_id": "req_zonal_format_compatible",
+        "requirement_type": "format_compatible",
+        "scope": "The zonal statistics worker must receive the DEM as GeoTIFF and the polygon zones as GeoPackage.",
+        "task_id": "calculate_borough_mean_elevation",
+        "artifact_roles": [
+          "input_1",
+          "reprojected_borough_boundaries"
+        ],
+        "parameters": {
+          "raster_format": "GeoTIFF",
+          "zone_format": "GPKG"
+        },
+        "blocking": true,
+        "provenance": "WORKER_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "8df0e575-df83-41f3-8145-a517c3c26e78": {
+        "requirement_id": "8df0e575-df83-41f3-8145-a517c3c26e78",
+        "requirement_type": "compatible_crs",
+        "scope": "task_transition",
+        "task_id": "calculate_borough_mean_elevation",
+        "artifact_roles": [
+          "input_1",
+          "reprojected_borough_boundaries"
+        ],
+        "parameters": {},
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "operation_contract_catalog",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      }
+    },
+    "commitments": {},
+    "schema_mappings": {},
+    "evidence": {
+      "7c3bde7e-a7d0-4383-a0ec-a560ea8416f0": {
+        "evidence_id": "7c3bde7e-a7d0-4383-a0ec-a560ea8416f0",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "6752ab5e-8948-4823-a0e3-afea703592d1"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_dem_centre_epsg3857.tif",
+          "format": "tif",
+          "size_bytes": 160483,
+          "complete": true,
+          "limitations": [],
+          "data_model": "raster",
+          "width": 200,
+          "height": 200,
+          "band_count": 1,
+          "resolution": [
+            222.6389815865457,
+            220.748668296556
+          ],
+          "transform": [
+            222.6389815865457,
+            0.0,
+            -8694052.230954666,
+            0.0,
+            -220.748668296556,
+            5012341.663847517,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "grid_origin": [
+            -8694052.230954666,
+            5012341.663847517
+          ],
+          "bounds": [
+            -8694052.230954666,
+            4968191.930188206,
+            -8649524.434637357,
+            5012341.663847517
+          ],
+          "nodata": null,
+          "dtype": "float32",
+          "driver": "GTiff",
+          "crs": "EPSG:3857",
+          "crs_authority": "EPSG:3857",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T18:27:48.228591Z",
+        "complete": true,
+        "limitations": []
+      },
+      "77d109b4-49b4-4e86-9cef-17d3ccf032c6": {
+        "evidence_id": "77d109b4-49b4-4e86-9cef-17d3ccf032c6",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "af5fdd6f-eea0-41a5-872e-f2933f0f3ee4"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_places_centre_utm.gpkg",
+          "format": "gpkg",
+          "size_bytes": 98304,
+          "complete": true,
+          "limitations": [],
+          "data_model": "vector",
+          "feature_count": 2,
+          "schema": {
+            "GEOID": "object",
+            "NAME": "object",
+            "TYPE": "object"
+          },
+          "schema_fields": [
+            "GEOID",
+            "NAME",
+            "TYPE"
+          ],
+          "geometry_type": [
+            "Polygon"
+          ],
+          "geometry_valid": true,
+          "invalid_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "null_geometry_count": 0,
+          "bounds": [
+            256968.8034961426,
+            4518189.311213346,
+            267586.4152044514,
+            4533624.698620538
+          ],
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true,
+          "crs": "EPSG:26918",
+          "crs_authority": "EPSG:26918",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T18:27:48.234216Z",
+        "complete": true,
+        "limitations": []
+      },
+      "ccfce781-02fa-413f-8a2d-272e2b022c58": {
+        "evidence_id": "ccfce781-02fa-413f-8a2d-272e2b022c58",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "12b0ec64-85ef-434c-a815-52c4efa5ea75"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/projection_agent/reprojected_b7d6500c.gpkg",
+          "format": "gpkg",
+          "size_bytes": 98304,
+          "complete": true,
+          "limitations": [],
+          "data_model": "vector",
+          "feature_count": 2,
+          "schema": {
+            "GEOID": "object",
+            "NAME": "object",
+            "TYPE": "object"
+          },
+          "schema_fields": [
+            "GEOID",
+            "NAME",
+            "TYPE"
+          ],
+          "geometry_type": [
+            "Polygon"
+          ],
+          "geometry_valid": true,
+          "invalid_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "null_geometry_count": 0,
+          "bounds": [
+            -8669561.942980146,
+            4979945.670525387,
+            -8656203.604084954,
+            5000548.833625928
+          ],
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true,
+          "crs": "EPSG:3857",
+          "crs_authority": "EPSG:3857",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T18:28:15.812964Z",
+        "complete": true,
+        "limitations": []
+      },
+      "3cc20173-b055-431d-9889-f1469c6a758e": {
+        "evidence_id": "3cc20173-b055-431d-9889-f1469c6a758e",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "dbeb4234-8825-409a-9533-b07a13bd6649"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/raster_analysis_agent/zonal_stats_df09db90.csv",
+          "format": "csv",
+          "size_bytes": 95,
+          "complete": true,
+          "limitations": [],
+          "data_model": "table",
+          "inspected_row_count": 2,
+          "row_sample_complete": true,
+          "schema": {
+            "zone_id": "int64",
+            "cell_count": "int64",
+            "mean_elevation": "float64"
+          },
+          "schema_fields": [
+            "zone_id",
+            "cell_count",
+            "mean_elevation"
+          ],
+          "coordinate_candidates": [],
+          "spatializable_from_coordinates": false,
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T18:28:15.841029Z",
+        "complete": true,
+        "limitations": []
+      }
+    },
+    "violations": {},
+    "execution_history": [
+      {
+        "event_id": "0aa219c2-3ff1-490a-9d45-88b0a4b7e5c8",
+        "event_type": "initial_plan_committed",
+        "actor": "planner_component",
+        "state_version": 0,
+        "plan_version": 1,
+        "task_id": null,
+        "reason": "Reproject the borough boundary polygons from EPSG:26918 to the DEM's EPSG:3857 CRS, then compute zonal mean elevation for each borough.",
+        "metadata": {
+          "task_ids": [
+            "calculate_borough_mean_elevation",
+            "reproject_borough_boundaries"
+          ]
+        },
+        "created_at": "2026-08-21T18:28:15.777122Z"
+      },
+      {
+        "event_id": "d435e0e7-efa5-4db4-9fac-b5a5160662ec",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 1,
+        "plan_version": 1,
+        "task_id": "reproject_borough_boundaries",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "proposed",
+          "to": "ready"
+        },
+        "created_at": "2026-08-21T18:28:15.780215Z"
+      },
+      {
+        "event_id": "e93f2f87-516c-4155-935f-6ee1f9703656",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 2,
+        "plan_version": 1,
+        "task_id": "reproject_borough_boundaries",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-21T18:28:15.781896Z"
+      },
+      {
+        "event_id": "79ee392b-db35-4413-833b-fa2860d0478f",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 3,
+        "plan_version": 1,
+        "task_id": "reproject_borough_boundaries",
+        "reason": "Worker bound.",
+        "metadata": {
+          "from": "binding",
+          "to": "bound"
+        },
+        "created_at": "2026-08-21T18:28:15.783719Z"
+      },
+      {
+        "event_id": "fef205ce-1eb0-4796-b8d1-90fdc00f498d",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 4,
+        "plan_version": 1,
+        "task_id": "reproject_borough_boundaries",
+        "reason": "Worker started.",
+        "metadata": {
+          "from": "bound",
+          "to": "running"
+        },
+        "created_at": "2026-08-21T18:28:15.785511Z"
+      },
+      {
+        "event_id": "1120ff6b-7015-4bb4-85b0-f80736704a14",
+        "event_type": "worker_execution_completed",
+        "actor": "worker_executor",
+        "state_version": 5,
+        "plan_version": 1,
+        "task_id": "reproject_borough_boundaries",
+        "reason": "Worker returned successfully.",
+        "metadata": {
+          "binding_id": "c20dc562-610e-4d3e-9668-4a5ccf3642cf",
+          "agent_id": "projection_agent",
+          "operation": "reproject",
+          "attempt": 1,
+          "status": "successful",
+          "duration_seconds": 0.01734897799906321
+        },
+        "created_at": "2026-08-21T18:28:15.804724Z"
+      },
+      {
+        "event_id": "b768530e-bd08-40f8-9dbc-7fc0166853cd",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 5,
+        "plan_version": 1,
+        "task_id": "reproject_borough_boundaries",
+        "reason": "Worker returned a provisional result.",
+        "metadata": {
+          "from": "running",
+          "to": "provisional_success"
+        },
+        "created_at": "2026-08-21T18:28:15.804786Z"
+      },
+      {
+        "event_id": "041f8704-5b62-4314-8845-ec977c166a28",
+        "event_type": "artifact_registered",
+        "actor": "artifact_registry",
+        "state_version": 6,
+        "plan_version": 1,
+        "task_id": "reproject_borough_boundaries",
+        "reason": null,
+        "metadata": {
+          "artifact_id": "12b0ec64-85ef-434c-a815-52c4efa5ea75",
+          "role": "reprojected_borough_boundaries",
+          "content_hash": "8c2a8387762abe30248bb50d7816ac7955c814e8955510374ab181ecb1d95d19"
+        },
+        "created_at": "2026-08-21T18:28:15.807386Z"
+      },
+      {
+        "event_id": "3d5c8a44-5d49-4542-8718-e962393d2af1",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 7,
+        "plan_version": 1,
+        "task_id": "reproject_borough_boundaries",
+        "reason": "Reviewing runtime evidence.",
+        "metadata": {
+          "from": "provisional_success",
+          "to": "validating"
+        },
+        "created_at": "2026-08-21T18:28:15.814880Z"
+      },
+      {
+        "event_id": "0102c52c-fd84-4bd4-9c8c-c33610f530e7",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 8,
+        "plan_version": 1,
+        "task_id": "reproject_borough_boundaries",
+        "reason": "Shared technical response and output-role checks passed.",
+        "metadata": {
+          "from": "validating",
+          "to": "successful"
+        },
+        "created_at": "2026-08-21T18:28:15.816814Z"
+      },
+      {
+        "event_id": "a65ead11-9111-4498-9622-33c193024367",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 9,
+        "plan_version": 1,
+        "task_id": "calculate_borough_mean_elevation",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "proposed",
+          "to": "ready"
+        },
+        "created_at": "2026-08-21T18:28:15.818956Z"
+      },
+      {
+        "event_id": "e3e45aa4-9d30-4cb1-b549-87b66441aeb2",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 10,
+        "plan_version": 1,
+        "task_id": "calculate_borough_mean_elevation",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-21T18:28:15.820895Z"
+      },
+      {
+        "event_id": "9d3a2ff4-d0f1-4748-9239-60dcd56fb663",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 11,
+        "plan_version": 1,
+        "task_id": "calculate_borough_mean_elevation",
+        "reason": "Worker bound.",
+        "metadata": {
+          "from": "binding",
+          "to": "bound"
+        },
+        "created_at": "2026-08-21T18:28:15.822835Z"
+      },
+      {
+        "event_id": "3e434c86-77dd-4c17-9073-f1fa3b4dd20c",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 12,
+        "plan_version": 1,
+        "task_id": "calculate_borough_mean_elevation",
+        "reason": "Worker started.",
+        "metadata": {
+          "from": "bound",
+          "to": "running"
+        },
+        "created_at": "2026-08-21T18:28:15.824790Z"
+      },
+      {
+        "event_id": "15f22192-1987-4c5a-bbce-23a8653a41f2",
+        "event_type": "worker_execution_completed",
+        "actor": "worker_executor",
+        "state_version": 13,
+        "plan_version": 1,
+        "task_id": "calculate_borough_mean_elevation",
+        "reason": "Worker returned successfully.",
+        "metadata": {
+          "binding_id": "e35c493a-4169-4240-a274-093e146c52ec",
+          "agent_id": "raster_analysis_agent",
+          "operation": "zonal_statistics",
+          "attempt": 1,
+          "status": "successful",
+          "duration_seconds": 0.00969606899889186
+        },
+        "created_at": "2026-08-21T18:28:15.836500Z"
+      },
+      {
+        "event_id": "c6211c43-19dc-4eda-ba52-55e85b13a766",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 13,
+        "plan_version": 1,
+        "task_id": "calculate_borough_mean_elevation",
+        "reason": "Worker returned a provisional result.",
+        "metadata": {
+          "from": "running",
+          "to": "provisional_success"
+        },
+        "created_at": "2026-08-21T18:28:15.836555Z"
+      },
+      {
+        "event_id": "a3f82042-8fde-4f11-ba61-225d1598c373",
+        "event_type": "artifact_registered",
+        "actor": "artifact_registry",
+        "state_version": 14,
+        "plan_version": 1,
+        "task_id": "calculate_borough_mean_elevation",
+        "reason": null,
+        "metadata": {
+          "artifact_id": "dbeb4234-8825-409a-9533-b07a13bd6649",
+          "role": "borough_mean_elevation_table",
+          "content_hash": "7c2b2cbf3920f08170e5f374fe524f623b38bfc1d469646a83921788458d1869"
+        },
+        "created_at": "2026-08-21T18:28:15.839765Z"
+      },
+      {
+        "event_id": "7eec90bd-bc9e-44e7-9068-cef13c1cca7f",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 15,
+        "plan_version": 1,
+        "task_id": "calculate_borough_mean_elevation",
+        "reason": "Reviewing runtime evidence.",
+        "metadata": {
+          "from": "provisional_success",
+          "to": "validating"
+        },
+        "created_at": "2026-08-21T18:28:15.843735Z"
+      },
+      {
+        "event_id": "17691fd9-5b71-4b62-b3eb-81ab4bc80165",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 16,
+        "plan_version": 1,
+        "task_id": "calculate_borough_mean_elevation",
+        "reason": "Shared technical response and output-role checks passed.",
+        "metadata": {
+          "from": "validating",
+          "to": "successful"
+        },
+        "created_at": "2026-08-21T18:28:15.848859Z"
+      },
+      {
+        "event_id": "d44b5226-6006-427d-8056-b3feeb1501e7",
+        "event_type": "workflow_completed",
+        "actor": "completion_policy",
+        "state_version": 17,
+        "plan_version": 1,
+        "task_id": null,
+        "reason": "All active tasks, blocking requirements, and terminal outputs are satisfied.",
+        "metadata": {
+          "final_artifact_ids": [
+            "dbeb4234-8825-409a-9533-b07a13bd6649"
+          ]
+        },
+        "created_at": "2026-08-21T18:28:15.851109Z"
+      }
+    ],
+    "qc_history": [
+      {
+        "decision_id": "7fe53708-ecce-43da-b4a7-9ccb84d364dd",
+        "task_id": "reproject_borough_boundaries",
+        "verdict": "PASS",
+        "proposed_verdict": "PASS",
+        "reason": "Shared technical response and output-role checks passed.",
+        "acknowledged_finding_ids": [],
+        "action_class": "NONE",
+        "effective_action": "NONE",
+        "effective_action_source": "condition_policy",
+        "allowed_recovery_types": [],
+        "recovery_parameters": {},
+        "preserve_completed_work": true,
+        "forced_by_invariant": false,
+        "created_at": "2026-08-21T18:28:15.816740Z"
+      },
+      {
+        "decision_id": "249defd6-6d76-4ab5-996e-e6c1540a251f",
+        "task_id": "calculate_borough_mean_elevation",
+        "verdict": "PASS",
+        "proposed_verdict": "PASS",
+        "reason": "Shared technical response and output-role checks passed.",
+        "acknowledged_finding_ids": [],
+        "action_class": "NONE",
+        "effective_action": "NONE",
+        "effective_action_source": "condition_policy",
+        "allowed_recovery_types": [],
+        "recovery_parameters": {},
+        "preserve_completed_work": true,
+        "forced_by_invariant": false,
+        "created_at": "2026-08-21T18:28:15.848789Z"
+      }
+    ],
+    "replan_history": [],
+    "component_calls": [
+      {
+        "call_id": "97160794-3d00-43a8-87bb-52f4331d5bf0",
+        "component": "planner",
+        "prompt_hash": "879bbf4688237108aa73bcb12bca3ec0b568a6ec20b463cefe3a9dddb652d8de",
+        "tool_schema_hash": "441719facf91fd72ec7e126a4de0921e9629efd4cd39619a5dbe1be9fea2e3fe",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 5683,
+        "output_tokens": 3356,
+        "duration_seconds": 27.513137384012225,
+        "disposition": "successful",
+        "created_at": "2026-08-21T18:28:15.777084Z"
+      }
+    ],
+    "plan_versions": [
+      {
+        "version": 1,
+        "parent_version": null,
+        "reason": "Initial plan committed by independent Planner.",
+        "task_ids": [
+          "calculate_borough_mean_elevation",
+          "reproject_borough_boundaries"
+        ],
+        "edges": [
+          [
+            "reproject_borough_boundaries",
+            "calculate_borough_mean_elevation"
+          ]
+        ],
+        "created_at": "2026-08-21T18:28:15.769591Z"
+      }
+    ],
+    "budgets": {
+      "max_total_model_calls": 24,
+      "max_total_tokens": 120000,
+      "max_worker_calls": 30,
+      "max_local_recoveries": 6,
+      "max_replans": 3,
+      "max_runtime_seconds": 900.0,
+      "planner_retry_limit": 2,
+      "qc_retry_limit": 1,
+      "replanner_retry_limit": 1,
+      "total_model_calls": 1,
+      "total_tokens": 9039,
+      "worker_calls": 2,
+      "local_recoveries": 0,
+      "replans": 0
+    },
+    "terminal_state": "completed",
+    "terminal_reason": "All active tasks, blocking requirements, and terminal outputs are satisfied.",
+    "human_clarification": null,
+    "final_artifact_ids": [
+      "dbeb4234-8825-409a-9533-b07a13bd6649"
+    ],
+    "required_terminal_roles": [
+      "borough_mean_elevation_table"
+    ],
+    "final_disclosure": "Workflow completed with accepted terminal artifacts.",
+    "created_at": "2026-08-21T18:27:48.223619Z",
+    "updated_at": "2026-08-21T18:28:15.852168Z"
+  },
+  "execution_steps": [
+    {
+      "step_index": 1,
+      "step_id": "reproject_borough_boundaries",
+      "agent_id": "projection_agent",
+      "title": "Reproject borough boundaries to DEM CRS",
+      "instructions": "Reproject the input GeoPackage vector layer from its observed CRS to EPSG:3857. Preserve the borough features and attributes.",
+      "output_artifacts": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/projection_agent/reprojected_b7d6500c.gpkg"
+      ],
+      "status": "successful",
+      "error": null
+    },
+    {
+      "step_index": 2,
+      "step_id": "calculate_borough_mean_elevation",
+      "agent_id": "raster_analysis_agent",
+      "title": "Calculate mean elevation by borough",
+      "instructions": "Calculate zonal statistics for the raster in input_1 using the reprojected borough polygons. Produce a CSV summary with the mean elevation for each borough, retaining available identifying attributes such as NAME.",
+      "output_artifacts": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/raster_analysis_agent/zonal_stats_df09db90.csv"
+      ],
+      "status": "successful",
+      "error": null
+    }
+  ],
+  "qc_evaluations": 0,
+  "qc_blocks": 0,
+  "qc_interventions": 0,
+  "effective_blocks": 0,
+  "effective_interventions": 0,
+  "qc_policy_overrides": 0,
+  "replanning_iterations": 0,
+  "error": null,
+  "ledger_events": [
+    {
+      "call_id": "c20dc562-610e-4d3e-9668-4a5ccf3642cf",
+      "trajectory_id": "traj_ISS_Q24_C4_run1",
+      "agent_id": "projection_agent",
+      "operation": "reproject",
+      "query": "Reproject the input GeoPackage vector layer from its observed CRS to EPSG:3857. Preserve the borough features and attributes.",
+      "timestamp_start": 1787336895.78731,
+      "timestamp_end": 1787336895.804649,
+      "duration_seconds": 0.01734897799906321,
+      "input_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_places_centre_utm.gpkg"
+      ],
+      "input_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_places_centre_utm.gpkg": "ed290cb184600f917fd262932992edb4d74baf2888ef85f9e294275e409af3c3"
+      },
+      "parameters": {
+        "operation": "reproject",
+        "target_crs": "EPSG:3857"
+      },
+      "status": "completed",
+      "error_code": null,
+      "error_message": null,
+      "output_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/projection_agent/reprojected_b7d6500c.gpkg"
+      ],
+      "output_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/projection_agent/reprojected_b7d6500c.gpkg": "8c2a8387762abe30248bb50d7816ac7955c814e8955510374ab181ecb1d95d19"
+      },
+      "summary": "Reprojected 2 features to EPSG:3857.",
+      "raw_response": {
+        "binding_id": "c20dc562-610e-4d3e-9668-4a5ccf3642cf",
+        "task_id": "reproject_borough_boundaries",
+        "attempt": 1
+      }
+    },
+    {
+      "call_id": "e35c493a-4169-4240-a274-093e146c52ec",
+      "trajectory_id": "traj_ISS_Q24_C4_run1",
+      "agent_id": "raster_analysis_agent",
+      "operation": "zonal_statistics",
+      "query": "Calculate zonal statistics for the raster in input_1 using the reprojected borough polygons. Produce a CSV summary with the mean elevation for each borough, retaining available identifying attributes such as NAME.",
+      "timestamp_start": 1787336895.826753,
+      "timestamp_end": 1787336895.836443,
+      "duration_seconds": 0.00969606899889186,
+      "input_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_dem_centre_epsg3857.tif",
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/projection_agent/reprojected_b7d6500c.gpkg"
+      ],
+      "input_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_dem_centre_epsg3857.tif": "82fb0234a7db7c93766e71c019c8609f7509bb26db5ada8af297fd2a755d93bc",
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/projection_agent/reprojected_b7d6500c.gpkg": "8c2a8387762abe30248bb50d7816ac7955c814e8955510374ab181ecb1d95d19"
+      },
+      "parameters": {
+        "operation": "zonal_statistics"
+      },
+      "status": "completed",
+      "error_code": null,
+      "error_message": null,
+      "output_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/raster_analysis_agent/zonal_stats_df09db90.csv"
+      ],
+      "output_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/raster_analysis_agent/zonal_stats_df09db90.csv": "7c2b2cbf3920f08170e5f374fe524f623b38bfc1d469646a83921788458d1869"
+      },
+      "summary": "Calculated zonal statistics for 2 zones.",
+      "raw_response": {
+        "binding_id": "e35c493a-4169-4240-a274-093e146c52ec",
+        "task_id": "calculate_borough_mean_elevation",
+        "attempt": 1
+      }
+    }
+  ],
+  "created_at": "2026-08-21T18:28:15.854928+00:00",
+  "evaluation": {
+    "task_id": "ISS_Q24",
+    "bafo_success": true,
+    "all_challenges_resolved": true,
+    "evaluability_status": "EVALUABLE",
+    "challenge_activated": true,
+    "trajectory_classification": "valid_bafo_pass",
+    "production_terminal_state": "completed",
+    "terminal_state": "successful",
+    "constraint_results": {
+      "harmonized_crs_before_zonal_stats": {
+        "constraint_key": "harmonized_crs_before_zonal_stats",
+        "status": "PASS",
+        "reason": "Raster and vector spatial references harmonized for zonal statistics.",
+        "details": {
+          "output_features": 2
+        }
+      },
+      "zonal_statistics_output": {
+        "constraint_key": "zonal_statistics_output",
+        "status": "PASS",
+        "reason": "Raster and vector spatial references harmonized for zonal statistics.",
+        "details": {
+          "output_features": 2
+        }
+      }
+    },
+    "passed_constraints": [
+      "harmonized_crs_before_zonal_stats",
+      "zonal_statistics_output"
+    ],
+    "failed_constraints": [],
+    "unevaluable_constraints": [],
+    "inspected_artifacts_count": 2,
+    "events_count": 2,
+    "diagnostic_summary": "BAFO: True | State: successful (Valid: True) | Constraints: 2 PASS, 0 FAIL, 0 UNEVALUABLE | Events Recorded: 2 | Artifacts Inspected: 2"
+  },
+  "bafo_success": true,
+  "all_challenges_resolved": true,
+  "trajectory_classification": "valid_bafo_pass"
+}

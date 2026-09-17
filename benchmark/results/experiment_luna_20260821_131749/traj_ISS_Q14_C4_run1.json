@@ -1,0 +1,1777 @@
+{
+  "trajectory_id": "traj_ISS_Q14_C4_run1",
+  "task_id": "ISS_Q14",
+  "condition": "C4",
+  "model": "gpt-5.6-luna",
+  "run_index": 1,
+  "suite": "isolated",
+  "user_question": "Create a census-tract choropleth of median gross rent in Centre County.",
+  "input_artifact_paths": [
+    "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg",
+    "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_acs_centre_schema_drift.csv"
+  ],
+  "status": "successful",
+  "total_wall_time": 32.405,
+  "rate_limit_wait_time": 0.0,
+  "provider_retry_wait_time": 0.0,
+  "orchestration_active_time": 32.348,
+  "worker_execution_time": 0.057,
+  "total_tokens": 15766,
+  "input_tokens": 12660,
+  "output_tokens": 3106,
+  "outputs": {
+    "summary": "Workflow completed with accepted terminal artifacts.",
+    "artifacts": [
+      "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/mapping_agent/map_15101d0d.html"
+    ],
+    "produced_artifacts": [
+      "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/attr_joined_6da8e367.gpkg",
+      "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/mapping_agent/map_15101d0d.html"
+    ],
+    "workflow_plan": {
+      "workflow_id": "7d9a9684-ef43-42d2-ac36-21ad446ee0a9",
+      "plan_version": 2,
+      "goal": "Create a census-tract choropleth of median gross rent in Centre County.",
+      "workflow_steps": [
+        {
+          "step_id": "task_attribute_join",
+          "title": "Join rent attributes to census tracts",
+          "purpose": "Attach the median gross rent attributes to the census-tract polygon layer using runtime-grounded schema fields.",
+          "agent_id": "vector_analysis_b",
+          "operation": "attribute_join",
+          "instructions": "Join the CSV attributes to the census-tract polygons using the observed compatible fields: vector field NAME and table field tract_name. Preserve the rent_median attribute in the joined tract layer.",
+          "parameters": {
+            "operation": "attribute_join",
+            "vector_key": "NAME",
+            "table_key": "tract_name"
+          },
+          "depends_on": [],
+          "input_from_steps": [],
+          "status": "successful",
+          "output_artifact_ids": [
+            "82a0aa4a-ad4e-4e5f-b246-2225ae320a6c"
+          ]
+        },
+        {
+          "step_id": "task_thematic_mapping",
+          "title": "Create median gross rent choropleth",
+          "purpose": "Generate an interactive census-tract choropleth showing median gross rent.",
+          "agent_id": "mapping_agent",
+          "operation": "thematic_mapping",
+          "instructions": "Create a choropleth from the joined tract layer. Runtime QC must ground the mapped median gross rent field from the joined schema; do not assume a field name.",
+          "parameters": {},
+          "depends_on": [
+            "task_attribute_join"
+          ],
+          "input_from_steps": [
+            "task_attribute_join"
+          ],
+          "status": "successful",
+          "output_artifact_ids": [
+            "fc5e1aa9-9fb8-495c-8f58-da4f9f976fe9"
+          ]
+        }
+      ],
+      "requirements": [
+        {
+          "requirement_id": "req_join_fields",
+          "requirement_type": "required_fields",
+          "scope": "Ground compatible attribute-join fields from the observed schemas of the census-tract vector and CSV table at runtime.",
+          "task_id": "task_attribute_join",
+          "artifact_roles": [
+            "input_1",
+            "input_2"
+          ],
+          "parameters": {
+            "purpose": "attribute_join"
+          },
+          "blocking": true,
+          "provenance": "DOWNSTREAM_CONSUMER",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_centre_county_coverage",
+          "requirement_type": "spatial_coverage",
+          "scope": "The joined tract layer must cover the requested Centre County census-tract geography.",
+          "task_id": "task_attribute_join",
+          "artifact_roles": [
+            "input_1",
+            "input_2"
+          ],
+          "parameters": {
+            "requested_area": "Centre County"
+          },
+          "blocking": true,
+          "provenance": "USER_EXPLICIT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_median_gross_rent_field",
+          "requirement_type": "required_fields",
+          "scope": "The joined layer must contain a runtime-grounded numeric field representing median gross rent for thematic mapping.",
+          "task_id": "task_thematic_mapping",
+          "artifact_roles": [
+            "joined_tracts"
+          ],
+          "parameters": {
+            "semantic_field": "median gross rent",
+            "numeric": true
+          },
+          "blocking": true,
+          "provenance": "USER_EXPLICIT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_valid_tract_geometry",
+          "requirement_type": "valid_geometry",
+          "scope": "The tract geometries supplied to the mapping operation must be valid and non-empty.",
+          "task_id": "task_thematic_mapping",
+          "artifact_roles": [
+            "joined_tracts"
+          ],
+          "parameters": {
+            "geometry_type": "polygon"
+          },
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        }
+      ],
+      "commitments": []
+    }
+  },
+  "workflow_state": {
+    "schema_version": "1.0.0",
+    "workflow_id": "7d9a9684-ef43-42d2-ac36-21ad446ee0a9",
+    "state_version": 24,
+    "user_goal": "Create a census-tract choropleth of median gross rent in Centre County.",
+    "feature_profile": "C4",
+    "feature_config": {
+      "profile_name": "C4",
+      "planner_mode": "gis_aware",
+      "qc_mode": "none",
+      "replanner_mode": "gis_aware",
+      "technical_invariants": true,
+      "local_recovery": true,
+      "structural_patching": true,
+      "gis_finding_routing": false
+    },
+    "current_plan_version": 2,
+    "tasks": {
+      "task_attribute_join": {
+        "task_id": "task_attribute_join",
+        "title": "Join rent attributes to census tracts",
+        "purpose": "Attach the median gross rent attributes to the census-tract polygon layer using runtime-grounded schema fields.",
+        "operation": "attribute_join",
+        "instructions": "Join the CSV attributes to the census-tract polygons using the observed compatible fields: vector field NAME and table field tract_name. Preserve the rent_median attribute in the joined tract layer.",
+        "parameters": {
+          "operation": "attribute_join",
+          "vector_key": "NAME",
+          "table_key": "tract_name"
+        },
+        "required_capabilities": [
+          "attribute_join"
+        ],
+        "depends_on": [],
+        "input_requirements": [
+          {
+            "role": "input_1",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          },
+          {
+            "role": "input_2",
+            "data_model": "table",
+            "formats": [
+              "CSV"
+            ],
+            "required": true
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "joined_tracts",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_join_fields",
+          "req_centre_county_coverage"
+        ],
+        "status": "successful",
+        "attempts": 1,
+        "active_binding_id": "74f123b2-3572-4dd1-9d76-467c46be7ff5",
+        "output_artifact_ids": [
+          "82a0aa4a-ad4e-4e5f-b246-2225ae320a6c"
+        ],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      },
+      "task_thematic_mapping": {
+        "task_id": "task_thematic_mapping",
+        "title": "Create median gross rent choropleth",
+        "purpose": "Generate an interactive census-tract choropleth showing median gross rent.",
+        "operation": "thematic_mapping",
+        "instructions": "Create a choropleth from the joined tract layer. Runtime QC must ground the mapped median gross rent field from the joined schema; do not assume a field name.",
+        "parameters": {},
+        "required_capabilities": [
+          "thematic_mapping"
+        ],
+        "depends_on": [
+          "task_attribute_join"
+        ],
+        "input_requirements": [
+          {
+            "role": "joined_tracts",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "median_gross_rent_choropleth",
+            "data_model": "map",
+            "formats": [
+              "HTML"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_median_gross_rent_field",
+          "req_valid_tract_geometry"
+        ],
+        "status": "successful",
+        "attempts": 1,
+        "active_binding_id": "c6385291-781e-43df-8549-a215e111d6be",
+        "output_artifact_ids": [
+          "fc5e1aa9-9fb8-495c-8f58-da4f9f976fe9"
+        ],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      }
+    },
+    "edges": [
+      [
+        "task_attribute_join",
+        "task_thematic_mapping"
+      ]
+    ],
+    "bindings": {
+      "3f14384d-21a1-4740-ab6b-e2259f0acaa1": {
+        "binding_id": "3f14384d-21a1-4740-ab6b-e2259f0acaa1",
+        "task_id": "task_attribute_join",
+        "agent_id": "vector_analysis_b",
+        "operation": "attribute_join",
+        "instruction": "Join the CSV attributes to the census-tract polygons. Runtime QC must ground compatible join fields from the observed schemas and must not infer or coerce incompatible identifiers without clarification.",
+        "input_bindings": [
+          {
+            "role": "input_1",
+            "artifact_id": "20d59fd5-7acb-4463-8891-66b1b349f53f",
+            "source_task_id": null,
+            "binding_order": 0
+          },
+          {
+            "role": "input_2",
+            "artifact_id": "f8758411-dc3b-482d-b913-c3a57c6f8bc0",
+            "source_task_id": null,
+            "binding_order": 1
+          }
+        ],
+        "agent_profile_snapshot": {
+          "agent_id": "vector_analysis_b",
+          "name": "Vector Analysis B",
+          "description": "Performs deterministic vector joins, dissolves, grouped aggregations, attribute joins, and buffering. Vector operations consume GeoPackage inputs. The service does not convert formats, repair invalid geometries, or reproject inputs automatically.",
+          "operations": [
+            "aggregate",
+            "attribute_join",
+            "buffer",
+            "dissolve",
+            "point_count_by_polygon",
+            "point_sum_by_polygon",
+            "spatial_join",
+            "vector_aggregation_and_joins"
+          ],
+          "skills": [
+            {
+              "skill_id": "vector_aggregation_and_joins",
+              "name": "Vector Aggregation and Joins",
+              "description": "Performs polygon dissolves, feature aggregations, spatial joins, attribute table joins, and spatial buffering on GeoPackage layers.",
+              "constraints": {
+                "spatial": "Requires matching coordinate reference systems for spatial joins. Requires projected CRS for metric buffer.",
+                "temporal": null,
+                "other": [
+                  "Accepts GeoPackage (.gpkg) vector format only. Rejects GeoJSON or Shapefiles.",
+                  "Accepts CSV tables for attribute join operations."
+                ]
+              }
+            }
+          ],
+          "inputs": {
+            "input_datasets": {
+              "required": true,
+              "description": "GeoPackage vector dataset(s) and optional CSV attribute table."
+            }
+          },
+          "outputs": [
+            {
+              "type": "vector",
+              "formats": [
+                "GPKG"
+              ],
+              "required": true,
+              "description": "Processed GeoPackage vector dataset."
+            }
+          ],
+          "parameters": {
+            "operation": {
+              "required": false,
+              "description": "Explicit operation name (dissolve, spatial_join, attribute_join, buffer, aggregate, point_count_by_polygon, point_sum_by_polygon)."
+            },
+            "count_field": {
+              "required": false,
+              "description": "Output field name for point_count_by_polygon."
+            },
+            "sum_field": {
+              "required": false,
+              "description": "Point-layer numeric field to sum for point_sum_by_polygon."
+            },
+            "output_field": {
+              "required": false,
+              "description": "Output field name for point_sum_by_polygon."
+            },
+            "vector_key": {
+              "required": false,
+              "description": "Field name in vector dataset for attribute join."
+            },
+            "table_key": {
+              "required": false,
+              "description": "Field name in tabular dataset for attribute join."
+            }
+          }
+        },
+        "endpoint": "https://www.geospatial-agentic-services.online/agents/vector_analysis_b/tasks",
+        "attempt": 1,
+        "invocation_id": null,
+        "status": "failed",
+        "started_at": "2026-08-21T20:09:49.763734Z",
+        "completed_at": "2026-08-21T20:09:49.770620Z",
+        "duration_seconds": 0.006895862010424025,
+        "output_artifact_ids": [],
+        "messages": [],
+        "structured_error": {
+          "code": "E_SCHEMA_MISMATCH",
+          "message": "Could not resolve join keys between vector columns ['GEOID', 'NAME', 'COUNTYFP', 'STATEFP', 'geometry'] and table columns ['tract_id', 'tract_name', 'income_median', 'rent_median', 'total_pop'].",
+          "retryable": false,
+          "details": {}
+        },
+        "created_at": "2026-08-21T20:09:49.760300Z"
+      },
+      "74f123b2-3572-4dd1-9d76-467c46be7ff5": {
+        "binding_id": "74f123b2-3572-4dd1-9d76-467c46be7ff5",
+        "task_id": "task_attribute_join",
+        "agent_id": "vector_analysis_b",
+        "operation": "attribute_join",
+        "instruction": "Join the CSV attributes to the census-tract polygons using the observed compatible fields: vector field NAME and table field tract_name. Preserve the rent_median attribute in the joined tract layer.",
+        "input_bindings": [
+          {
+            "role": "input_1",
+            "artifact_id": "20d59fd5-7acb-4463-8891-66b1b349f53f",
+            "source_task_id": null,
+            "binding_order": 0
+          },
+          {
+            "role": "input_2",
+            "artifact_id": "f8758411-dc3b-482d-b913-c3a57c6f8bc0",
+            "source_task_id": null,
+            "binding_order": 1
+          }
+        ],
+        "agent_profile_snapshot": {
+          "agent_id": "vector_analysis_b",
+          "name": "Vector Analysis B",
+          "description": "Performs deterministic vector joins, dissolves, grouped aggregations, attribute joins, and buffering. Vector operations consume GeoPackage inputs. The service does not convert formats, repair invalid geometries, or reproject inputs automatically.",
+          "operations": [
+            "aggregate",
+            "attribute_join",
+            "buffer",
+            "dissolve",
+            "point_count_by_polygon",
+            "point_sum_by_polygon",
+            "spatial_join",
+            "vector_aggregation_and_joins"
+          ],
+          "skills": [
+            {
+              "skill_id": "vector_aggregation_and_joins",
+              "name": "Vector Aggregation and Joins",
+              "description": "Performs polygon dissolves, feature aggregations, spatial joins, attribute table joins, and spatial buffering on GeoPackage layers.",
+              "constraints": {
+                "spatial": "Requires matching coordinate reference systems for spatial joins. Requires projected CRS for metric buffer.",
+                "temporal": null,
+                "other": [
+                  "Accepts GeoPackage (.gpkg) vector format only. Rejects GeoJSON or Shapefiles.",
+                  "Accepts CSV tables for attribute join operations."
+                ]
+              }
+            }
+          ],
+          "inputs": {
+            "input_datasets": {
+              "required": true,
+              "description": "GeoPackage vector dataset(s) and optional CSV attribute table."
+            }
+          },
+          "outputs": [
+            {
+              "type": "vector",
+              "formats": [
+                "GPKG"
+              ],
+              "required": true,
+              "description": "Processed GeoPackage vector dataset."
+            }
+          ],
+          "parameters": {
+            "operation": {
+              "required": false,
+              "description": "Explicit operation name (dissolve, spatial_join, attribute_join, buffer, aggregate, point_count_by_polygon, point_sum_by_polygon)."
+            },
+            "count_field": {
+              "required": false,
+              "description": "Output field name for point_count_by_polygon."
+            },
+            "sum_field": {
+              "required": false,
+              "description": "Point-layer numeric field to sum for point_sum_by_polygon."
+            },
+            "output_field": {
+              "required": false,
+              "description": "Output field name for point_sum_by_polygon."
+            },
+            "vector_key": {
+              "required": false,
+              "description": "Field name in vector dataset for attribute join."
+            },
+            "table_key": {
+              "required": false,
+              "description": "Field name in tabular dataset for attribute join."
+            }
+          }
+        },
+        "endpoint": "https://www.geospatial-agentic-services.online/agents/vector_analysis_b/tasks",
+        "attempt": 2,
+        "invocation_id": null,
+        "status": "successful",
+        "started_at": "2026-08-21T20:09:59.805131Z",
+        "completed_at": "2026-08-21T20:09:59.845427Z",
+        "duration_seconds": 0.04030161999980919,
+        "output_artifact_ids": [
+          "82a0aa4a-ad4e-4e5f-b246-2225ae320a6c"
+        ],
+        "messages": [
+          "Joined attributes by NAME=tract_name, producing 16 features."
+        ],
+        "structured_error": null,
+        "created_at": "2026-08-21T20:09:59.765957Z"
+      },
+      "c6385291-781e-43df-8549-a215e111d6be": {
+        "binding_id": "c6385291-781e-43df-8549-a215e111d6be",
+        "task_id": "task_thematic_mapping",
+        "agent_id": "mapping_agent",
+        "operation": "thematic_mapping",
+        "instruction": "Create a choropleth from the joined tract layer. Runtime QC must ground the mapped median gross rent field from the joined schema; do not assume a field name.",
+        "input_bindings": [
+          {
+            "role": "joined_tracts",
+            "artifact_id": "82a0aa4a-ad4e-4e5f-b246-2225ae320a6c",
+            "source_task_id": "task_attribute_join",
+            "binding_order": 0
+          }
+        ],
+        "agent_profile_snapshot": {
+          "agent_id": "mapping_agent",
+          "name": "Mapping Agent",
+          "description": "Produces deterministic HTML maps from supplied vector, raster, or joined tabular-spatial artifacts. Visualizes the specified field and embeds verification metadata.",
+          "operations": [
+            "thematic_mapping"
+          ],
+          "skills": [
+            {
+              "skill_id": "thematic_mapping",
+              "name": "Thematic Mapping",
+              "description": "Generates interactive HTML choropleth and vector boundary maps from GeoPackage or GeoJSON layers.",
+              "constraints": {
+                "spatial": "Visualizes the specified spatial features and mapped attributes.",
+                "temporal": null,
+                "other": [
+                  "Embeds source artifact and CRS verification metadata in output HTML."
+                ]
+              }
+            }
+          ],
+          "inputs": {
+            "input_datasets": {
+              "required": true,
+              "description": "Input vector or raster layer in GeoPackage or GeoJSON format."
+            }
+          },
+          "outputs": [
+            {
+              "type": "map",
+              "formats": [
+                "HTML"
+              ],
+              "required": true,
+              "description": "Interactive HTML visualization map."
+            }
+          ],
+          "parameters": {
+            "field": {
+              "required": false,
+              "description": "Attribute column name to visualize/classify."
+            }
+          }
+        },
+        "endpoint": "https://www.geospatial-agentic-services.online/agents/mapping_agent/tasks",
+        "attempt": 1,
+        "invocation_id": null,
+        "status": "successful",
+        "started_at": "2026-08-21T20:09:59.873135Z",
+        "completed_at": "2026-08-21T20:09:59.882839Z",
+        "duration_seconds": 0.009708700003102422,
+        "output_artifact_ids": [
+          "fc5e1aa9-9fb8-495c-8f58-da4f9f976fe9"
+        ],
+        "messages": [
+          "Rendered map with 16 features (mapped field: rent_median)."
+        ],
+        "structured_error": null,
+        "created_at": "2026-08-21T20:09:59.868173Z"
+      }
+    },
+    "artifacts": {
+      "20d59fd5-7acb-4463-8891-66b1b349f53f": {
+        "artifact_id": "20d59fd5-7acb-4463-8891-66b1b349f53f",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg",
+        "content_hash": "9818cdd69d3b26cbd238d60780f5a566bee625b857232a79ed5ca02595c100a8",
+        "format": "gpkg",
+        "media_type": null,
+        "data_model": "vector",
+        "producer_task_id": null,
+        "producer_binding_id": null,
+        "role": "input_1",
+        "evidence_ids": [
+          "67a4951d-a944-4180-b2bb-0750ef79c1a0"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T20:09:27.526951Z",
+        "metadata": {
+          "source": "user_input"
+        }
+      },
+      "f8758411-dc3b-482d-b913-c3a57c6f8bc0": {
+        "artifact_id": "f8758411-dc3b-482d-b913-c3a57c6f8bc0",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_acs_centre_schema_drift.csv",
+        "content_hash": "9eb8b4be7a1b7410df4240653cc73fa4bb68eafd6b3e76afd6349d44aeabe6d0",
+        "format": "csv",
+        "media_type": null,
+        "data_model": "table",
+        "producer_task_id": null,
+        "producer_binding_id": null,
+        "role": "input_2",
+        "evidence_ids": [
+          "e678a045-5509-4881-b82c-722c8d33651f"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T20:09:27.527179Z",
+        "metadata": {
+          "source": "user_input"
+        }
+      },
+      "82a0aa4a-ad4e-4e5f-b246-2225ae320a6c": {
+        "artifact_id": "82a0aa4a-ad4e-4e5f-b246-2225ae320a6c",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/attr_joined_6da8e367.gpkg",
+        "content_hash": "bc64bfec2c82c001eb81a069f8388eddd9e279bb53e42ce7c3cf903cc6fff1ae",
+        "format": "gpkg",
+        "media_type": null,
+        "data_model": "vector",
+        "producer_task_id": "task_attribute_join",
+        "producer_binding_id": "74f123b2-3572-4dd1-9d76-467c46be7ff5",
+        "role": "joined_tracts",
+        "evidence_ids": [
+          "ba40a6a1-ecb9-44f1-be1a-5738e65de0f9"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T20:09:59.848706Z",
+        "metadata": {}
+      },
+      "fc5e1aa9-9fb8-495c-8f58-da4f9f976fe9": {
+        "artifact_id": "fc5e1aa9-9fb8-495c-8f58-da4f9f976fe9",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/mapping_agent/map_15101d0d.html",
+        "content_hash": "5517478fa3f6dfca2f56298be24dcbcfe46f07df3f0c2533f67e558397504fb2",
+        "format": "html",
+        "media_type": null,
+        "data_model": "map",
+        "producer_task_id": "task_thematic_mapping",
+        "producer_binding_id": "c6385291-781e-43df-8549-a215e111d6be",
+        "role": "median_gross_rent_choropleth",
+        "evidence_ids": [
+          "c5043686-f2f9-44aa-aa3f-d1f36cba9702"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T20:09:59.885734Z",
+        "metadata": {}
+      }
+    },
+    "derivations": {
+      "88cd883d-ee33-48f9-b9c4-74113bf2b639": {
+        "derivation_id": "88cd883d-ee33-48f9-b9c4-74113bf2b639",
+        "output_artifact_id": "82a0aa4a-ad4e-4e5f-b246-2225ae320a6c",
+        "source_artifact_ids": [
+          "20d59fd5-7acb-4463-8891-66b1b349f53f",
+          "f8758411-dc3b-482d-b913-c3a57c6f8bc0"
+        ],
+        "producer_task_id": "task_attribute_join",
+        "operation": "attribute_join",
+        "parameters": {
+          "operation": "attribute_join",
+          "vector_key": "NAME",
+          "table_key": "tract_name"
+        },
+        "semantic_effect": "Produced role 'joined_tracts' using operation 'attribute_join'.",
+        "evidence_snapshot_ids": [],
+        "created_at": "2026-08-21T20:09:59.848741Z"
+      },
+      "58523851-4dcb-48d5-be85-e506ff3acbd3": {
+        "derivation_id": "58523851-4dcb-48d5-be85-e506ff3acbd3",
+        "output_artifact_id": "fc5e1aa9-9fb8-495c-8f58-da4f9f976fe9",
+        "source_artifact_ids": [
+          "82a0aa4a-ad4e-4e5f-b246-2225ae320a6c"
+        ],
+        "producer_task_id": "task_thematic_mapping",
+        "operation": "thematic_mapping",
+        "parameters": {},
+        "semantic_effect": "Produced role 'median_gross_rent_choropleth' using operation 'thematic_mapping'.",
+        "evidence_snapshot_ids": [],
+        "created_at": "2026-08-21T20:09:59.885764Z"
+      }
+    },
+    "requirements": {
+      "req_join_fields": {
+        "requirement_id": "req_join_fields",
+        "requirement_type": "required_fields",
+        "scope": "Ground compatible attribute-join fields from the observed schemas of the census-tract vector and CSV table at runtime.",
+        "task_id": "task_attribute_join",
+        "artifact_roles": [
+          "input_1",
+          "input_2"
+        ],
+        "parameters": {
+          "purpose": "attribute_join"
+        },
+        "blocking": true,
+        "provenance": "DOWNSTREAM_CONSUMER",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_centre_county_coverage": {
+        "requirement_id": "req_centre_county_coverage",
+        "requirement_type": "spatial_coverage",
+        "scope": "The joined tract layer must cover the requested Centre County census-tract geography.",
+        "task_id": "task_attribute_join",
+        "artifact_roles": [
+          "input_1",
+          "input_2"
+        ],
+        "parameters": {
+          "requested_area": "Centre County"
+        },
+        "blocking": true,
+        "provenance": "USER_EXPLICIT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_median_gross_rent_field": {
+        "requirement_id": "req_median_gross_rent_field",
+        "requirement_type": "required_fields",
+        "scope": "The joined layer must contain a runtime-grounded numeric field representing median gross rent for thematic mapping.",
+        "task_id": "task_thematic_mapping",
+        "artifact_roles": [
+          "joined_tracts"
+        ],
+        "parameters": {
+          "semantic_field": "median gross rent",
+          "numeric": true
+        },
+        "blocking": true,
+        "provenance": "USER_EXPLICIT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_valid_tract_geometry": {
+        "requirement_id": "req_valid_tract_geometry",
+        "requirement_type": "valid_geometry",
+        "scope": "The tract geometries supplied to the mapping operation must be valid and non-empty.",
+        "task_id": "task_thematic_mapping",
+        "artifact_roles": [
+          "joined_tracts"
+        ],
+        "parameters": {
+          "geometry_type": "polygon"
+        },
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      }
+    },
+    "commitments": {},
+    "schema_mappings": {},
+    "evidence": {
+      "67a4951d-a944-4180-b2bb-0750ef79c1a0": {
+        "evidence_id": "67a4951d-a944-4180-b2bb-0750ef79c1a0",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "20d59fd5-7acb-4463-8891-66b1b349f53f"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg",
+          "format": "gpkg",
+          "size_bytes": 98304,
+          "complete": true,
+          "limitations": [],
+          "data_model": "vector",
+          "feature_count": 16,
+          "schema": {
+            "GEOID": "object",
+            "NAME": "object",
+            "COUNTYFP": "object",
+            "STATEFP": "object"
+          },
+          "schema_fields": [
+            "GEOID",
+            "NAME",
+            "COUNTYFP",
+            "STATEFP"
+          ],
+          "geometry_type": [
+            "Polygon"
+          ],
+          "geometry_valid": true,
+          "invalid_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "null_geometry_count": 0,
+          "bounds": [
+            238087.3824011362,
+            4508961.385028789,
+            272914.01066431846,
+            4543387.006183241
+          ],
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true,
+          "crs": "EPSG:26918",
+          "crs_authority": "EPSG:26918",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T20:09:27.533165Z",
+        "complete": true,
+        "limitations": []
+      },
+      "e678a045-5509-4881-b82c-722c8d33651f": {
+        "evidence_id": "e678a045-5509-4881-b82c-722c8d33651f",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "f8758411-dc3b-482d-b913-c3a57c6f8bc0"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_acs_centre_schema_drift.csv",
+          "format": "csv",
+          "size_bytes": 750,
+          "complete": true,
+          "limitations": [],
+          "data_model": "table",
+          "inspected_row_count": 16,
+          "row_sample_complete": true,
+          "schema": {
+            "tract_id": "int64",
+            "tract_name": "object",
+            "income_median": "int64",
+            "rent_median": "int64",
+            "total_pop": "int64"
+          },
+          "schema_fields": [
+            "tract_id",
+            "tract_name",
+            "income_median",
+            "rent_median",
+            "total_pop"
+          ],
+          "coordinate_candidates": [],
+          "spatializable_from_coordinates": false,
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T20:09:27.535247Z",
+        "complete": true,
+        "limitations": []
+      },
+      "ba40a6a1-ecb9-44f1-be1a-5738e65de0f9": {
+        "evidence_id": "ba40a6a1-ecb9-44f1-be1a-5738e65de0f9",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "82a0aa4a-ad4e-4e5f-b246-2225ae320a6c"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/attr_joined_6da8e367.gpkg",
+          "format": "gpkg",
+          "size_bytes": 98304,
+          "complete": true,
+          "limitations": [],
+          "data_model": "vector",
+          "feature_count": 16,
+          "schema": {
+            "GEOID": "object",
+            "NAME": "object",
+            "COUNTYFP": "object",
+            "STATEFP": "object",
+            "tract_id": "int64",
+            "tract_name": "object",
+            "income_median": "int64",
+            "rent_median": "int64",
+            "total_pop": "int64"
+          },
+          "schema_fields": [
+            "GEOID",
+            "NAME",
+            "COUNTYFP",
+            "STATEFP",
+            "tract_id",
+            "tract_name",
+            "income_median",
+            "rent_median",
+            "total_pop"
+          ],
+          "geometry_type": [
+            "Polygon"
+          ],
+          "geometry_valid": true,
+          "invalid_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "null_geometry_count": 0,
+          "bounds": [
+            238087.3824011362,
+            4508961.385028789,
+            272914.01066431846,
+            4543387.006183241
+          ],
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true,
+          "crs": "EPSG:26918",
+          "crs_authority": "EPSG:26918",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T20:09:59.855818Z",
+        "complete": true,
+        "limitations": []
+      },
+      "c5043686-f2f9-44aa-aa3f-d1f36cba9702": {
+        "evidence_id": "c5043686-f2f9-44aa-aa3f-d1f36cba9702",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "fc5e1aa9-9fb8-495c-8f58-da4f9f976fe9"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/mapping_agent/map_15101d0d.html",
+          "format": "html",
+          "size_bytes": 8592,
+          "complete": true,
+          "limitations": [],
+          "data_model": "map",
+          "embedded_metadata_present": true,
+          "embedded_metadata_keys": [
+            "bbox",
+            "crs",
+            "feature_count",
+            "mapped_field",
+            "source_artifact"
+          ],
+          "source_artifact": "attr_joined_6da8e367.gpkg",
+          "mapped_field": "rent_median",
+          "crs": "EPSG:26918",
+          "feature_count": 16,
+          "bounds": [
+            -78.10000000000001,
+            40.7,
+            -77.7,
+            41.0
+          ],
+          "analytical_unit": null,
+          "disclosure": null
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T20:09:59.886552Z",
+        "complete": true,
+        "limitations": []
+      }
+    },
+    "violations": {},
+    "execution_history": [
+      {
+        "event_id": "5f6f0cf7-1a5a-4def-8716-e1187edc0284",
+        "event_type": "initial_plan_committed",
+        "actor": "planner_component",
+        "state_version": 0,
+        "plan_version": 1,
+        "task_id": null,
+        "reason": "Join the supplied census-tract polygons with the supplied ACS attribute table, then generate an HTML choropleth of median gross rent for Centre County.",
+        "metadata": {
+          "task_ids": [
+            "task_attribute_join",
+            "task_thematic_mapping"
+          ]
+        },
+        "created_at": "2026-08-21T20:09:49.754027Z"
+      },
+      {
+        "event_id": "1f3635ab-68e1-49c0-bc42-13f2094ca14f",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 1,
+        "plan_version": 1,
+        "task_id": "task_attribute_join",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "proposed",
+          "to": "ready"
+        },
+        "created_at": "2026-08-21T20:09:49.756910Z"
+      },
+      {
+        "event_id": "1b14cfe2-6759-4877-88f6-ab89fda04064",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 2,
+        "plan_version": 1,
+        "task_id": "task_attribute_join",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-21T20:09:49.758673Z"
+      },
+      {
+        "event_id": "4b4348f4-f39f-4342-bf7c-1264817a82a5",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 3,
+        "plan_version": 1,
+        "task_id": "task_attribute_join",
+        "reason": "Worker bound.",
+        "metadata": {
+          "from": "binding",
+          "to": "bound"
+        },
+        "created_at": "2026-08-21T20:09:49.760370Z"
+      },
+      {
+        "event_id": "ef38da78-7f53-44ce-b43c-bc067ff5e754",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 4,
+        "plan_version": 1,
+        "task_id": "task_attribute_join",
+        "reason": "Worker started.",
+        "metadata": {
+          "from": "bound",
+          "to": "running"
+        },
+        "created_at": "2026-08-21T20:09:49.762054Z"
+      },
+      {
+        "event_id": "227966d2-0697-45b3-8cdd-4e3ab3312048",
+        "event_type": "worker_execution_completed",
+        "actor": "worker_executor",
+        "state_version": 5,
+        "plan_version": 1,
+        "task_id": "task_attribute_join",
+        "reason": "Could not resolve join keys between vector columns ['GEOID', 'NAME', 'COUNTYFP', 'STATEFP', 'geometry'] and table columns ['tract_id', 'tract_name', 'income_median', 'rent_median', 'total_pop'].",
+        "metadata": {
+          "binding_id": "3f14384d-21a1-4740-ab6b-e2259f0acaa1",
+          "agent_id": "vector_analysis_b",
+          "operation": "attribute_join",
+          "attempt": 1,
+          "status": "failed",
+          "duration_seconds": 0.006895862010424025
+        },
+        "created_at": "2026-08-21T20:09:49.770693Z"
+      },
+      {
+        "event_id": "ecef80d8-0f86-4847-903f-b0852451a5a8",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 5,
+        "plan_version": 1,
+        "task_id": "task_attribute_join",
+        "reason": "Worker execution failed.",
+        "metadata": {
+          "from": "running",
+          "to": "failed"
+        },
+        "created_at": "2026-08-21T20:09:49.770764Z"
+      },
+      {
+        "event_id": "2c5ae893-9858-4e35-9724-ba55343a8e24",
+        "event_type": "graph_patch_committed",
+        "actor": "graph_controller",
+        "state_version": 6,
+        "plan_version": 2,
+        "task_id": null,
+        "reason": "Configure the failed attribute join with the exact observed tract-name fields, avoiding identifier coercion or invented schema fields; reset only the affected join task while preserving the existing dependency and terminal output.",
+        "metadata": {
+          "inserted": [],
+          "removed": [],
+          "superseded": [],
+          "stale": [
+            "task_attribute_join",
+            "task_thematic_mapping"
+          ]
+        },
+        "created_at": "2026-08-21T20:09:59.748580Z"
+      },
+      {
+        "event_id": "a0ec5b4b-94ef-4535-91e9-a60db6316471",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 7,
+        "plan_version": 2,
+        "task_id": "task_attribute_join",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "proposed",
+          "to": "ready"
+        },
+        "created_at": "2026-08-21T20:09:59.761689Z"
+      },
+      {
+        "event_id": "cf54a2cf-7772-402c-966b-a88b9cdbd416",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 8,
+        "plan_version": 2,
+        "task_id": "task_attribute_join",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-21T20:09:59.763815Z"
+      },
+      {
+        "event_id": "290ce5e7-2aea-419b-9c85-18700705e876",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 9,
+        "plan_version": 2,
+        "task_id": "task_attribute_join",
+        "reason": "Worker bound.",
+        "metadata": {
+          "from": "binding",
+          "to": "bound"
+        },
+        "created_at": "2026-08-21T20:09:59.766021Z"
+      },
+      {
+        "event_id": "23e17174-2de2-4e28-ab3b-b557e687b064",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 10,
+        "plan_version": 2,
+        "task_id": "task_attribute_join",
+        "reason": "Worker started.",
+        "metadata": {
+          "from": "bound",
+          "to": "running"
+        },
+        "created_at": "2026-08-21T20:09:59.768347Z"
+      },
+      {
+        "event_id": "ba1f427b-0ed8-447d-b5cd-f92a94104253",
+        "event_type": "worker_execution_completed",
+        "actor": "worker_executor",
+        "state_version": 11,
+        "plan_version": 2,
+        "task_id": "task_attribute_join",
+        "reason": "Worker returned successfully.",
+        "metadata": {
+          "binding_id": "74f123b2-3572-4dd1-9d76-467c46be7ff5",
+          "agent_id": "vector_analysis_b",
+          "operation": "attribute_join",
+          "attempt": 1,
+          "status": "successful",
+          "duration_seconds": 0.04030161999980919
+        },
+        "created_at": "2026-08-21T20:09:59.845502Z"
+      },
+      {
+        "event_id": "2b65587b-d2b9-4a97-b694-cc4fe74a4f5c",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 11,
+        "plan_version": 2,
+        "task_id": "task_attribute_join",
+        "reason": "Worker returned a provisional result.",
+        "metadata": {
+          "from": "running",
+          "to": "provisional_success"
+        },
+        "created_at": "2026-08-21T20:09:59.845565Z"
+      },
+      {
+        "event_id": "92e9c1ff-1faf-4eed-ab06-0c2401cffaef",
+        "event_type": "artifact_registered",
+        "actor": "artifact_registry",
+        "state_version": 12,
+        "plan_version": 2,
+        "task_id": "task_attribute_join",
+        "reason": null,
+        "metadata": {
+          "artifact_id": "82a0aa4a-ad4e-4e5f-b246-2225ae320a6c",
+          "role": "joined_tracts",
+          "content_hash": "bc64bfec2c82c001eb81a069f8388eddd9e279bb53e42ce7c3cf903cc6fff1ae"
+        },
+        "created_at": "2026-08-21T20:09:59.848764Z"
+      },
+      {
+        "event_id": "df1bf50b-f237-4e35-9a82-38e301905607",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 13,
+        "plan_version": 2,
+        "task_id": "task_attribute_join",
+        "reason": "Reviewing runtime evidence.",
+        "metadata": {
+          "from": "provisional_success",
+          "to": "validating"
+        },
+        "created_at": "2026-08-21T20:09:59.858688Z"
+      },
+      {
+        "event_id": "1238dbb2-7f47-42ba-898a-03885f291416",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 14,
+        "plan_version": 2,
+        "task_id": "task_attribute_join",
+        "reason": "Shared technical response and output-role checks passed.",
+        "metadata": {
+          "from": "validating",
+          "to": "successful"
+        },
+        "created_at": "2026-08-21T20:09:59.860956Z"
+      },
+      {
+        "event_id": "288e4a4f-2f1f-497e-921c-16aaf082b36b",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 15,
+        "plan_version": 2,
+        "task_id": "task_thematic_mapping",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "proposed",
+          "to": "ready"
+        },
+        "created_at": "2026-08-21T20:09:59.863311Z"
+      },
+      {
+        "event_id": "ef7dbd13-f84d-4af1-ade9-638c47c0d55e",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 16,
+        "plan_version": 2,
+        "task_id": "task_thematic_mapping",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-21T20:09:59.865817Z"
+      },
+      {
+        "event_id": "68be77ee-ec08-45eb-8759-9d02b2909ba0",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 17,
+        "plan_version": 2,
+        "task_id": "task_thematic_mapping",
+        "reason": "Worker bound.",
+        "metadata": {
+          "from": "binding",
+          "to": "bound"
+        },
+        "created_at": "2026-08-21T20:09:59.868227Z"
+      },
+      {
+        "event_id": "2efba56a-a80f-4976-8c15-eb8090b54297",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 18,
+        "plan_version": 2,
+        "task_id": "task_thematic_mapping",
+        "reason": "Worker started.",
+        "metadata": {
+          "from": "bound",
+          "to": "running"
+        },
+        "created_at": "2026-08-21T20:09:59.870704Z"
+      },
+      {
+        "event_id": "9e2924b9-e705-4209-bd40-bf8cfe656225",
+        "event_type": "worker_execution_completed",
+        "actor": "worker_executor",
+        "state_version": 19,
+        "plan_version": 2,
+        "task_id": "task_thematic_mapping",
+        "reason": "Worker returned successfully.",
+        "metadata": {
+          "binding_id": "c6385291-781e-43df-8549-a215e111d6be",
+          "agent_id": "mapping_agent",
+          "operation": "thematic_mapping",
+          "attempt": 1,
+          "status": "successful",
+          "duration_seconds": 0.009708700003102422
+        },
+        "created_at": "2026-08-21T20:09:59.882900Z"
+      },
+      {
+        "event_id": "cbc40721-b510-44f1-b2e8-4ac5aaa21ebe",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 19,
+        "plan_version": 2,
+        "task_id": "task_thematic_mapping",
+        "reason": "Worker returned a provisional result.",
+        "metadata": {
+          "from": "running",
+          "to": "provisional_success"
+        },
+        "created_at": "2026-08-21T20:09:59.882959Z"
+      },
+      {
+        "event_id": "27cdfb11-3931-43c0-b24e-641ffb7b6238",
+        "event_type": "artifact_registered",
+        "actor": "artifact_registry",
+        "state_version": 20,
+        "plan_version": 2,
+        "task_id": "task_thematic_mapping",
+        "reason": null,
+        "metadata": {
+          "artifact_id": "fc5e1aa9-9fb8-495c-8f58-da4f9f976fe9",
+          "role": "median_gross_rent_choropleth",
+          "content_hash": "5517478fa3f6dfca2f56298be24dcbcfe46f07df3f0c2533f67e558397504fb2"
+        },
+        "created_at": "2026-08-21T20:09:59.885784Z"
+      },
+      {
+        "event_id": "26d9e715-1a74-4cc6-9d2a-876eb1af8b29",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 21,
+        "plan_version": 2,
+        "task_id": "task_thematic_mapping",
+        "reason": "Reviewing runtime evidence.",
+        "metadata": {
+          "from": "provisional_success",
+          "to": "validating"
+        },
+        "created_at": "2026-08-21T20:09:59.889204Z"
+      },
+      {
+        "event_id": "86f9e424-63f8-4b21-875e-02ab9f62e16e",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 22,
+        "plan_version": 2,
+        "task_id": "task_thematic_mapping",
+        "reason": "Shared technical response and output-role checks passed.",
+        "metadata": {
+          "from": "validating",
+          "to": "successful"
+        },
+        "created_at": "2026-08-21T20:09:59.895774Z"
+      },
+      {
+        "event_id": "7a3de31e-f429-4867-afa6-ef6ce8617c19",
+        "event_type": "workflow_completed",
+        "actor": "completion_policy",
+        "state_version": 23,
+        "plan_version": 2,
+        "task_id": null,
+        "reason": "All active tasks, blocking requirements, and terminal outputs are satisfied.",
+        "metadata": {
+          "final_artifact_ids": [
+            "fc5e1aa9-9fb8-495c-8f58-da4f9f976fe9"
+          ]
+        },
+        "created_at": "2026-08-21T20:09:59.898938Z"
+      }
+    ],
+    "qc_history": [
+      {
+        "decision_id": "5df0b3c3-843c-447e-af90-b6e5172ea4fd",
+        "task_id": "task_attribute_join",
+        "verdict": "BLOCK",
+        "proposed_verdict": "BLOCK",
+        "reason": "Explicit worker failure: Could not resolve join keys between vector columns ['GEOID', 'NAME', 'COUNTYFP', 'STATEFP', 'geometry'] and table columns ['tract_id', 'tract_name', 'income_median', 'rent_median', 'total_pop'].",
+        "acknowledged_finding_ids": [],
+        "action_class": "STRUCTURAL_REPLAN",
+        "effective_action": "STRUCTURAL_REPLAN",
+        "effective_action_source": "condition_policy",
+        "allowed_recovery_types": [],
+        "recovery_parameters": {},
+        "preserve_completed_work": true,
+        "forced_by_invariant": false,
+        "created_at": "2026-08-21T20:09:49.772629Z"
+      },
+      {
+        "decision_id": "8ec6d742-545c-4d51-a387-1c72daad6285",
+        "task_id": "task_attribute_join",
+        "verdict": "PASS",
+        "proposed_verdict": "PASS",
+        "reason": "Shared technical response and output-role checks passed.",
+        "acknowledged_finding_ids": [],
+        "action_class": "NONE",
+        "effective_action": "NONE",
+        "effective_action_source": "condition_policy",
+        "allowed_recovery_types": [],
+        "recovery_parameters": {},
+        "preserve_completed_work": true,
+        "forced_by_invariant": false,
+        "created_at": "2026-08-21T20:09:59.860888Z"
+      },
+      {
+        "decision_id": "ad27f4a1-cc21-4401-b160-81b34174075b",
+        "task_id": "task_thematic_mapping",
+        "verdict": "PASS",
+        "proposed_verdict": "PASS",
+        "reason": "Shared technical response and output-role checks passed.",
+        "acknowledged_finding_ids": [],
+        "action_class": "NONE",
+        "effective_action": "NONE",
+        "effective_action_source": "condition_policy",
+        "allowed_recovery_types": [],
+        "recovery_parameters": {},
+        "preserve_completed_work": true,
+        "forced_by_invariant": false,
+        "created_at": "2026-08-21T20:09:59.895702Z"
+      }
+    ],
+    "replan_history": [
+      {
+        "decision_id": "ca300ab8-66ef-41b8-90ef-96ca4b918f6f",
+        "base_plan_version": 1,
+        "rationale": "Configure the failed attribute join with the exact observed tract-name fields, avoiding identifier coercion or invented schema fields; reset only the affected join task while preserving the existing dependency and terminal output.",
+        "patch": {
+          "base_plan_version": 1,
+          "rationale": "Configure the failed attribute join with the exact observed tract-name fields, avoiding identifier coercion or invented schema fields; reset only the affected join task while preserving the existing dependency and terminal output.",
+          "insert_tasks": [],
+          "remove_task_ids": [],
+          "supersede_task_ids": [],
+          "update_tasks": {
+            "task_attribute_join": {
+              "task_id": null,
+              "title": null,
+              "purpose": null,
+              "operation": null,
+              "instructions": "Join the CSV attributes to the census-tract polygons using the observed compatible fields: vector field NAME and table field tract_name. Preserve the rent_median attribute in the joined tract layer.",
+              "parameters": {
+                "operation": "attribute_join",
+                "vector_key": "NAME",
+                "table_key": "tract_name"
+              },
+              "required_capabilities": null,
+              "depends_on": null,
+              "input_requirements": null,
+              "expected_outputs": null,
+              "requirement_ids": null,
+              "status": "proposed",
+              "attempts": 0,
+              "active_binding_id": null,
+              "output_artifact_ids": null,
+              "last_error": null,
+              "created_in_plan_version": null,
+              "superseded_in_plan_version": null,
+              "metadata": null
+            }
+          },
+          "add_dependencies": [],
+          "remove_dependencies": [],
+          "reuse_artifact_ids": [
+            "20d59fd5-7acb-4463-8891-66b1b349f53f",
+            "f8758411-dc3b-482d-b913-c3a57c6f8bc0"
+          ],
+          "reset_task_ids": [
+            "task_attribute_join"
+          ],
+          "commitment_revisions": []
+        },
+        "accepted": true,
+        "created_at": "2026-08-21T20:09:59.748722Z"
+      }
+    ],
+    "component_calls": [
+      {
+        "call_id": "cc31231e-d8a9-4162-a37b-189c89d89853",
+        "component": "planner",
+        "prompt_hash": "879bbf4688237108aa73bcb12bca3ec0b568a6ec20b463cefe3a9dddb652d8de",
+        "tool_schema_hash": "441719facf91fd72ec7e126a4de0921e9629efd4cd39619a5dbe1be9fea2e3fe",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 5574,
+        "output_tokens": 2357,
+        "duration_seconds": 22.193832712990115,
+        "disposition": "successful",
+        "created_at": "2026-08-21T20:09:49.753991Z"
+      },
+      {
+        "call_id": "d074dc0b-df64-441f-a3ac-e5623405ad95",
+        "component": "replanner",
+        "prompt_hash": "f44710a3ce878e6a4887fd0f8c607350a27b597530562dd74f9ecf59fc440071",
+        "tool_schema_hash": "7e4bffd48521db6cb33fd211812492847a9f5babb3e39c9ed1a4933eb33e3e0a",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 7086,
+        "output_tokens": 749,
+        "duration_seconds": 9.960575185003108,
+        "disposition": "successful",
+        "created_at": "2026-08-21T20:09:59.758437Z"
+      }
+    ],
+    "plan_versions": [
+      {
+        "version": 1,
+        "parent_version": null,
+        "reason": "Initial plan committed by independent Planner.",
+        "task_ids": [
+          "task_attribute_join",
+          "task_thematic_mapping"
+        ],
+        "edges": [
+          [
+            "task_attribute_join",
+            "task_thematic_mapping"
+          ]
+        ],
+        "created_at": "2026-08-21T20:09:49.746812Z"
+      },
+      {
+        "version": 2,
+        "parent_version": 1,
+        "reason": "Configure the failed attribute join with the exact observed tract-name fields, avoiding identifier coercion or invented schema fields; reset only the affected join task while preserving the existing dependency and terminal output.",
+        "task_ids": [
+          "task_attribute_join",
+          "task_thematic_mapping"
+        ],
+        "edges": [
+          [
+            "task_attribute_join",
+            "task_thematic_mapping"
+          ]
+        ],
+        "created_at": "2026-08-21T20:09:59.748522Z"
+      }
+    ],
+    "budgets": {
+      "max_total_model_calls": 24,
+      "max_total_tokens": 120000,
+      "max_worker_calls": 30,
+      "max_local_recoveries": 6,
+      "max_replans": 3,
+      "max_runtime_seconds": 900.0,
+      "planner_retry_limit": 2,
+      "qc_retry_limit": 1,
+      "replanner_retry_limit": 1,
+      "total_model_calls": 2,
+      "total_tokens": 15766,
+      "worker_calls": 3,
+      "local_recoveries": 0,
+      "replans": 1
+    },
+    "terminal_state": "completed",
+    "terminal_reason": "All active tasks, blocking requirements, and terminal outputs are satisfied.",
+    "human_clarification": null,
+    "final_artifact_ids": [
+      "fc5e1aa9-9fb8-495c-8f58-da4f9f976fe9"
+    ],
+    "required_terminal_roles": [
+      "median_gross_rent_choropleth"
+    ],
+    "final_disclosure": "Workflow completed with accepted terminal artifacts.",
+    "created_at": "2026-08-21T20:09:27.526020Z",
+    "updated_at": "2026-08-21T20:09:59.900284Z"
+  },
+  "execution_steps": [
+    {
+      "step_index": 1,
+      "step_id": "task_attribute_join",
+      "agent_id": "vector_analysis_b",
+      "title": "Join rent attributes to census tracts",
+      "instructions": "Join the CSV attributes to the census-tract polygons using the observed compatible fields: vector field NAME and table field tract_name. Preserve the rent_median attribute in the joined tract layer.",
+      "output_artifacts": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/attr_joined_6da8e367.gpkg"
+      ],
+      "status": "successful",
+      "error": null
+    },
+    {
+      "step_index": 2,
+      "step_id": "task_thematic_mapping",
+      "agent_id": "mapping_agent",
+      "title": "Create median gross rent choropleth",
+      "instructions": "Create a choropleth from the joined tract layer. Runtime QC must ground the mapped median gross rent field from the joined schema; do not assume a field name.",
+      "output_artifacts": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/mapping_agent/map_15101d0d.html"
+      ],
+      "status": "successful",
+      "error": null
+    }
+  ],
+  "qc_evaluations": 0,
+  "qc_blocks": 1,
+  "qc_interventions": 1,
+  "effective_blocks": 1,
+  "effective_interventions": 1,
+  "qc_policy_overrides": 0,
+  "replanning_iterations": 1,
+  "error": null,
+  "ledger_events": [
+    {
+      "call_id": "3f14384d-21a1-4740-ab6b-e2259f0acaa1",
+      "trajectory_id": "traj_ISS_Q14_C4_run1",
+      "agent_id": "vector_analysis_b",
+      "operation": "attribute_join",
+      "query": "Join the CSV attributes to the census-tract polygons. Runtime QC must ground compatible join fields from the observed schemas and must not infer or coerce incompatible identifiers without clarification.",
+      "timestamp_start": 1787342989.763734,
+      "timestamp_end": 1787342989.77062,
+      "duration_seconds": 0.006895862010424025,
+      "input_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg",
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_acs_centre_schema_drift.csv"
+      ],
+      "input_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg": "9818cdd69d3b26cbd238d60780f5a566bee625b857232a79ed5ca02595c100a8",
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_acs_centre_schema_drift.csv": "9eb8b4be7a1b7410df4240653cc73fa4bb68eafd6b3e76afd6349d44aeabe6d0"
+      },
+      "parameters": {
+        "operation": "attribute_join",
+        "vector_key": "NAME",
+        "table_key": "tract_name"
+      },
+      "status": "failed",
+      "error_code": "E_SCHEMA_MISMATCH",
+      "error_message": "Could not resolve join keys between vector columns ['GEOID', 'NAME', 'COUNTYFP', 'STATEFP', 'geometry'] and table columns ['tract_id', 'tract_name', 'income_median', 'rent_median', 'total_pop'].",
+      "output_artifact_paths": [],
+      "output_artifact_hashes": {},
+      "summary": "",
+      "raw_response": {
+        "binding_id": "3f14384d-21a1-4740-ab6b-e2259f0acaa1",
+        "task_id": "task_attribute_join",
+        "attempt": 1
+      }
+    },
+    {
+      "call_id": "74f123b2-3572-4dd1-9d76-467c46be7ff5",
+      "trajectory_id": "traj_ISS_Q14_C4_run1",
+      "agent_id": "vector_analysis_b",
+      "operation": "attribute_join",
+      "query": "Join the CSV attributes to the census-tract polygons using the observed compatible fields: vector field NAME and table field tract_name. Preserve the rent_median attribute in the joined tract layer.",
+      "timestamp_start": 1787342999.805131,
+      "timestamp_end": 1787342999.845427,
+      "duration_seconds": 0.04030161999980919,
+      "input_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg",
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_acs_centre_schema_drift.csv"
+      ],
+      "input_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg": "9818cdd69d3b26cbd238d60780f5a566bee625b857232a79ed5ca02595c100a8",
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_acs_centre_schema_drift.csv": "9eb8b4be7a1b7410df4240653cc73fa4bb68eafd6b3e76afd6349d44aeabe6d0"
+      },
+      "parameters": {
+        "operation": "attribute_join",
+        "vector_key": "NAME",
+        "table_key": "tract_name"
+      },
+      "status": "completed",
+      "error_code": null,
+      "error_message": null,
+      "output_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/attr_joined_6da8e367.gpkg"
+      ],
+      "output_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/attr_joined_6da8e367.gpkg": "bc64bfec2c82c001eb81a069f8388eddd9e279bb53e42ce7c3cf903cc6fff1ae"
+      },
+      "summary": "Joined attributes by NAME=tract_name, producing 16 features.",
+      "raw_response": {
+        "binding_id": "74f123b2-3572-4dd1-9d76-467c46be7ff5",
+        "task_id": "task_attribute_join",
+        "attempt": 2
+      }
+    },
+    {
+      "call_id": "c6385291-781e-43df-8549-a215e111d6be",
+      "trajectory_id": "traj_ISS_Q14_C4_run1",
+      "agent_id": "mapping_agent",
+      "operation": "thematic_mapping",
+      "query": "Create a choropleth from the joined tract layer. Runtime QC must ground the mapped median gross rent field from the joined schema; do not assume a field name.",
+      "timestamp_start": 1787342999.873135,
+      "timestamp_end": 1787342999.882839,
+      "duration_seconds": 0.009708700003102422,
+      "input_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/attr_joined_6da8e367.gpkg"
+      ],
+      "input_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/attr_joined_6da8e367.gpkg": "bc64bfec2c82c001eb81a069f8388eddd9e279bb53e42ce7c3cf903cc6fff1ae"
+      },
+      "parameters": {},
+      "status": "completed",
+      "error_code": null,
+      "error_message": null,
+      "output_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/mapping_agent/map_15101d0d.html"
+      ],
+      "output_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/mapping_agent/map_15101d0d.html": "5517478fa3f6dfca2f56298be24dcbcfe46f07df3f0c2533f67e558397504fb2"
+      },
+      "summary": "Rendered map with 16 features (mapped field: rent_median).",
+      "raw_response": {
+        "binding_id": "c6385291-781e-43df-8549-a215e111d6be",
+        "task_id": "task_thematic_mapping",
+        "attempt": 1
+      }
+    }
+  ],
+  "created_at": "2026-08-21T20:09:59.903148+00:00",
+  "evaluation": {
+    "task_id": "ISS_Q14",
+    "bafo_success": true,
+    "all_challenges_resolved": true,
+    "evaluability_status": "EVALUABLE",
+    "challenge_activated": true,
+    "trajectory_classification": "valid_bafo_pass",
+    "production_terminal_state": "completed",
+    "terminal_state": "successful",
+    "constraint_results": {
+      "schema_grounded_join_keys": {
+        "constraint_key": "schema_grounded_join_keys",
+        "status": "PASS",
+        "reason": "Schema attributes grounded across 10 column fields.",
+        "details": {
+          "columns": [
+            "GEOID",
+            "NAME",
+            "COUNTYFP",
+            "STATEFP",
+            "tract_id"
+          ]
+        }
+      },
+      "mapped_field": {
+        "constraint_key": "mapped_field",
+        "status": "PASS",
+        "reason": "Schema attributes grounded across 10 column fields.",
+        "details": {
+          "columns": [
+            "GEOID",
+            "NAME",
+            "COUNTYFP",
+            "STATEFP",
+            "tract_id"
+          ]
+        }
+      },
+      "format": {
+        "constraint_key": "format",
+        "status": "PASS",
+        "reason": "Constraint 'format' satisfied by valid output artifact.",
+        "details": {}
+      }
+    },
+    "passed_constraints": [
+      "schema_grounded_join_keys",
+      "mapped_field",
+      "format"
+    ],
+    "failed_constraints": [],
+    "unevaluable_constraints": [],
+    "inspected_artifacts_count": 2,
+    "events_count": 3,
+    "diagnostic_summary": "BAFO: True | State: successful (Valid: True) | Constraints: 3 PASS, 0 FAIL, 0 UNEVALUABLE | Events Recorded: 3 | Artifacts Inspected: 2"
+  },
+  "bafo_success": true,
+  "all_challenges_resolved": true,
+  "trajectory_classification": "valid_bafo_pass"
+}

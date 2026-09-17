@@ -1,0 +1,2027 @@
+{
+  "trajectory_id": "traj_ISS_Q22_C3_run1",
+  "task_id": "ISS_Q22",
+  "condition": "C3",
+  "model": "gpt-5.6-luna",
+  "run_index": 1,
+  "suite": "isolated",
+  "user_question": "Calculate the mean absolute elevation difference between the two elevation surfaces available for Bellefonte.",
+  "input_artifact_paths": [
+    "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_dem_centre_30m_utm.tif",
+    "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_dem_misaligned_grid_utm.tif"
+  ],
+  "status": "failed",
+  "total_wall_time": 36.376,
+  "rate_limit_wait_time": 0.0,
+  "provider_retry_wait_time": 0.0,
+  "orchestration_active_time": 36.293,
+  "worker_execution_time": 0.083,
+  "total_tokens": 20101,
+  "input_tokens": 15100,
+  "output_tokens": 5001,
+  "outputs": {
+    "summary": "No authorized recovery satisfied the known precondition: The bound rasters are not cellwise comparable: their dimensions, resolutions, origins, and transforms differ. Their reported bounds also do not provide the required Bellefonte coverage. These active deterministic blockers are computationally resolvable but require structural raster alignment and coverage correction before the raster calculator can run.",
+    "artifacts": [],
+    "produced_artifacts": [
+      "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/raster_analysis_agent/resampled_30m_560c950a.tif"
+    ],
+    "workflow_plan": {
+      "workflow_id": "4c1560a6-a936-43bd-b456-09397380a27c",
+      "plan_version": 1,
+      "goal": "Calculate the mean absolute elevation difference between the two elevation surfaces available for Bellefonte.",
+      "workflow_steps": [
+        {
+          "step_id": "task_retrieve_bellefonte_zone",
+          "title": "Retrieve Bellefonte analysis zone",
+          "purpose": "Obtain a GeoPackage polygon layer representing Bellefonte for zonal calculation of the raster difference.",
+          "agent_id": null,
+          "operation": "dataset_retrieval",
+          "instructions": "Retrieve the highest-ranked catalog candidate representing the Bellefonte polygon analysis zone. Treat the result as a candidate and retain spatial-coverage and polygon-geometry validation for runtime QC.",
+          "parameters": {},
+          "depends_on": [],
+          "input_from_steps": [],
+          "status": "proposed",
+          "output_artifact_ids": []
+        },
+        {
+          "step_id": "task_align_input_2",
+          "title": "Align second elevation raster",
+          "purpose": "Resample the second elevation surface to the first surface's raster resolution and grid for valid cellwise comparison.",
+          "agent_id": "raster_analysis_agent",
+          "operation": "resample",
+          "instructions": "Resample input_2 to the grid of input_1, using a 30 metre target resolution. Preserve the spatial coverage needed for the Bellefonte analysis and produce a GeoTIFF raster. Runtime QC must verify exact grid alignment rather than relying only on nominal resolution.",
+          "parameters": {
+            "operation": "resample",
+            "resolution": 30
+          },
+          "depends_on": [],
+          "input_from_steps": [],
+          "status": "successful",
+          "output_artifact_ids": [
+            "56259edf-9c80-4485-bb87-9fe6965e3fa1"
+          ]
+        },
+        {
+          "step_id": "task_calculate_absolute_difference",
+          "title": "Calculate absolute elevation difference",
+          "purpose": "Calculate the cellwise absolute difference between the two aligned elevation surfaces.",
+          "agent_id": "raster_analysis_agent",
+          "operation": "raster_calculator",
+          "instructions": "Calculate abs(input_1 - aligned_input_2) cell by cell. Use only overlapping valid raster cells and preserve a GeoTIFF raster output suitable for zonal statistics.",
+          "parameters": {
+            "operation": "raster_calculator"
+          },
+          "depends_on": [
+            "task_align_input_2"
+          ],
+          "input_from_steps": [
+            "task_align_input_2"
+          ],
+          "status": "rejected",
+          "output_artifact_ids": []
+        },
+        {
+          "step_id": "task_mean_absolute_difference",
+          "title": "Compute mean absolute elevation difference",
+          "purpose": "Summarize the absolute elevation-difference raster over the Bellefonte polygon zone.",
+          "agent_id": null,
+          "operation": "zonal_statistics",
+          "instructions": "Compute the mean of absolute_difference_raster within bellefonte_zone. Return a CSV summary containing the mean absolute elevation difference for the Bellefonte analysis zone. Runtime QC must verify that the retrieved zone is a valid polygon GeoPackage layer and that its CRS is compatible with the raster.",
+          "parameters": {
+            "operation": "zonal_statistics"
+          },
+          "depends_on": [
+            "task_calculate_absolute_difference",
+            "task_retrieve_bellefonte_zone"
+          ],
+          "input_from_steps": [
+            "task_calculate_absolute_difference",
+            "task_retrieve_bellefonte_zone"
+          ],
+          "status": "proposed",
+          "output_artifact_ids": []
+        }
+      ],
+      "requirements": [
+        {
+          "requirement_id": "req_zone_coverage",
+          "requirement_type": "spatial_coverage",
+          "scope": "The retrieved bellefonte_zone candidate must spatially represent Bellefonte.",
+          "task_id": "task_retrieve_bellefonte_zone",
+          "artifact_roles": [
+            "bellefonte_zone"
+          ],
+          "parameters": {
+            "place": "Bellefonte"
+          },
+          "blocking": true,
+          "provenance": "USER_EXPLICIT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_zone_format",
+          "requirement_type": "format_compatible",
+          "scope": "The retrieved Bellefonte zone must be available as a GeoPackage polygon input for zonal statistics.",
+          "task_id": "task_retrieve_bellefonte_zone",
+          "artifact_roles": [
+            "bellefonte_zone"
+          ],
+          "parameters": {
+            "format": "GPKG",
+            "geometry_type": "polygon"
+          },
+          "blocking": true,
+          "provenance": "WORKER_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_align_grid",
+          "requirement_type": "aligned_raster_grid",
+          "scope": "aligned_input_2 must have the same grid definition as input_1, including resolution, origin, extent alignment, and cell dimensions.",
+          "task_id": "task_align_input_2",
+          "artifact_roles": [
+            "input_1",
+            "aligned_input_2"
+          ],
+          "parameters": {
+            "reference_role": "input_1"
+          },
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_align_coverage",
+          "requirement_type": "spatial_coverage",
+          "scope": "The aligned second elevation raster must retain the Bellefonte coverage required for comparison.",
+          "task_id": "task_align_input_2",
+          "artifact_roles": [
+            "aligned_input_2"
+          ],
+          "parameters": {
+            "place": "Bellefonte"
+          },
+          "blocking": true,
+          "provenance": "USER_EXPLICIT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [
+            "f3eac409-b697-408e-b085-9a50d073edda"
+          ],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_difference_crs",
+          "requirement_type": "compatible_crs",
+          "scope": "input_1 and aligned_input_2 must use compatible coordinate reference systems for raster calculation.",
+          "task_id": "task_calculate_absolute_difference",
+          "artifact_roles": [
+            "input_1",
+            "aligned_input_2"
+          ],
+          "parameters": {},
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [
+            "4054f6b3-e14f-4c0f-a672-1d9b2a7cab4d",
+            "f3eac409-b697-408e-b085-9a50d073edda"
+          ],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_difference_grid",
+          "requirement_type": "aligned_raster_grid",
+          "scope": "input_1 and aligned_input_2 must be cellwise comparable on an identical raster grid.",
+          "task_id": "task_calculate_absolute_difference",
+          "artifact_roles": [
+            "input_1",
+            "aligned_input_2"
+          ],
+          "parameters": {},
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "violated",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_difference_coverage",
+          "requirement_type": "spatial_coverage",
+          "scope": "Both elevation surfaces must cover the Bellefonte analysis area used for the difference calculation.",
+          "task_id": "task_calculate_absolute_difference",
+          "artifact_roles": [
+            "input_1",
+            "aligned_input_2"
+          ],
+          "parameters": {
+            "place": "Bellefonte"
+          },
+          "blocking": true,
+          "provenance": "USER_EXPLICIT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "violated",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_zonal_crs",
+          "requirement_type": "compatible_crs",
+          "scope": "absolute_difference_raster and bellefonte_zone must have compatible CRSs for zonal statistics.",
+          "task_id": "task_mean_absolute_difference",
+          "artifact_roles": [
+            "absolute_difference_raster",
+            "bellefonte_zone"
+          ],
+          "parameters": {},
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_zonal_geometry",
+          "requirement_type": "valid_geometry",
+          "scope": "bellefonte_zone must contain valid polygon geometry suitable for zonal statistics.",
+          "task_id": "task_mean_absolute_difference",
+          "artifact_roles": [
+            "bellefonte_zone"
+          ],
+          "parameters": {
+            "geometry_type": "polygon"
+          },
+          "blocking": true,
+          "provenance": "WORKER_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_zonal_format",
+          "requirement_type": "format_compatible",
+          "scope": "The zonal-statistics zone input must be a GeoPackage polygon layer and the raster input must be GeoTIFF.",
+          "task_id": "task_mean_absolute_difference",
+          "artifact_roles": [
+            "absolute_difference_raster",
+            "bellefonte_zone"
+          ],
+          "parameters": {
+            "raster_format": "GeoTIFF",
+            "zone_format": "GPKG"
+          },
+          "blocking": true,
+          "provenance": "WORKER_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_zonal_coverage",
+          "requirement_type": "spatial_coverage",
+          "scope": "The zone and absolute-difference raster must overlap over the Bellefonte analysis area.",
+          "task_id": "task_mean_absolute_difference",
+          "artifact_roles": [
+            "absolute_difference_raster",
+            "bellefonte_zone"
+          ],
+          "parameters": {
+            "place": "Bellefonte"
+          },
+          "blocking": true,
+          "provenance": "USER_EXPLICIT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "4131b626-d6ae-4543-97a1-8b72791e5d7f",
+          "requirement_type": "aligned_raster_grid",
+          "scope": "task_transition",
+          "task_id": "task_calculate_absolute_difference",
+          "artifact_roles": [
+            "input_1",
+            "aligned_input_2"
+          ],
+          "parameters": {},
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "operation_contract_catalog",
+          "created_in_plan_version": 1,
+          "status": "violated",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "ad8a9910-fd4b-4333-9d4a-bfd916d93376",
+          "requirement_type": "compatible_crs",
+          "scope": "task_transition",
+          "task_id": "task_mean_absolute_difference",
+          "artifact_roles": [
+            "absolute_difference_raster",
+            "bellefonte_zone"
+          ],
+          "parameters": {},
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "operation_contract_catalog",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        }
+      ],
+      "commitments": []
+    }
+  },
+  "workflow_state": {
+    "schema_version": "1.0.0",
+    "workflow_id": "4c1560a6-a936-43bd-b456-09397380a27c",
+    "state_version": 17,
+    "user_goal": "Calculate the mean absolute elevation difference between the two elevation surfaces available for Bellefonte.",
+    "feature_profile": "C5",
+    "feature_config": {
+      "profile_name": "C5",
+      "planner_mode": "gis_aware",
+      "qc_mode": "gis_aware",
+      "replanner_mode": "none",
+      "technical_invariants": true,
+      "local_recovery": true,
+      "structural_patching": false,
+      "gis_finding_routing": true
+    },
+    "current_plan_version": 1,
+    "tasks": {
+      "task_retrieve_bellefonte_zone": {
+        "task_id": "task_retrieve_bellefonte_zone",
+        "title": "Retrieve Bellefonte analysis zone",
+        "purpose": "Obtain a GeoPackage polygon layer representing Bellefonte for zonal calculation of the raster difference.",
+        "operation": "dataset_retrieval",
+        "instructions": "Retrieve the highest-ranked catalog candidate representing the Bellefonte polygon analysis zone. Treat the result as a candidate and retain spatial-coverage and polygon-geometry validation for runtime QC.",
+        "parameters": {},
+        "required_capabilities": [
+          "dataset_retrieval"
+        ],
+        "depends_on": [],
+        "input_requirements": [],
+        "expected_outputs": [
+          {
+            "role": "bellefonte_zone",
+            "data_model": "dataset",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_zone_coverage",
+          "req_zone_format"
+        ],
+        "status": "proposed",
+        "attempts": 0,
+        "active_binding_id": null,
+        "output_artifact_ids": [],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      },
+      "task_align_input_2": {
+        "task_id": "task_align_input_2",
+        "title": "Align second elevation raster",
+        "purpose": "Resample the second elevation surface to the first surface's raster resolution and grid for valid cellwise comparison.",
+        "operation": "resample",
+        "instructions": "Resample input_2 to the grid of input_1, using a 30 metre target resolution. Preserve the spatial coverage needed for the Bellefonte analysis and produce a GeoTIFF raster. Runtime QC must verify exact grid alignment rather than relying only on nominal resolution.",
+        "parameters": {
+          "operation": "resample",
+          "resolution": 30
+        },
+        "required_capabilities": [
+          "resample"
+        ],
+        "depends_on": [],
+        "input_requirements": [
+          {
+            "role": "input_2",
+            "data_model": "raster",
+            "formats": [
+              "tif",
+              "GeoTIFF"
+            ],
+            "required": true
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "aligned_input_2",
+            "data_model": "raster",
+            "formats": [
+              "GeoTIFF"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_align_grid",
+          "req_align_coverage"
+        ],
+        "status": "successful",
+        "attempts": 1,
+        "active_binding_id": "a3ab07b5-7146-4ce3-ada3-faf687ed8e3c",
+        "output_artifact_ids": [
+          "56259edf-9c80-4485-bb87-9fe6965e3fa1"
+        ],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      },
+      "task_calculate_absolute_difference": {
+        "task_id": "task_calculate_absolute_difference",
+        "title": "Calculate absolute elevation difference",
+        "purpose": "Calculate the cellwise absolute difference between the two aligned elevation surfaces.",
+        "operation": "raster_calculator",
+        "instructions": "Calculate abs(input_1 - aligned_input_2) cell by cell. Use only overlapping valid raster cells and preserve a GeoTIFF raster output suitable for zonal statistics.",
+        "parameters": {
+          "operation": "raster_calculator"
+        },
+        "required_capabilities": [
+          "raster_calculator"
+        ],
+        "depends_on": [
+          "task_align_input_2"
+        ],
+        "input_requirements": [
+          {
+            "role": "input_1",
+            "data_model": "raster",
+            "formats": [
+              "tif",
+              "GeoTIFF"
+            ],
+            "required": true
+          },
+          {
+            "role": "aligned_input_2",
+            "data_model": "raster",
+            "formats": [
+              "GeoTIFF"
+            ],
+            "required": true
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "absolute_difference_raster",
+            "data_model": "raster",
+            "formats": [
+              "GeoTIFF"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_difference_crs",
+          "req_difference_grid",
+          "req_difference_coverage",
+          "4131b626-d6ae-4543-97a1-8b72791e5d7f"
+        ],
+        "status": "rejected",
+        "attempts": 0,
+        "active_binding_id": "0f153421-e4ac-472f-9a22-cfa48cf6cfef",
+        "output_artifact_ids": [],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      },
+      "task_mean_absolute_difference": {
+        "task_id": "task_mean_absolute_difference",
+        "title": "Compute mean absolute elevation difference",
+        "purpose": "Summarize the absolute elevation-difference raster over the Bellefonte polygon zone.",
+        "operation": "zonal_statistics",
+        "instructions": "Compute the mean of absolute_difference_raster within bellefonte_zone. Return a CSV summary containing the mean absolute elevation difference for the Bellefonte analysis zone. Runtime QC must verify that the retrieved zone is a valid polygon GeoPackage layer and that its CRS is compatible with the raster.",
+        "parameters": {
+          "operation": "zonal_statistics"
+        },
+        "required_capabilities": [
+          "zonal_statistics"
+        ],
+        "depends_on": [
+          "task_calculate_absolute_difference",
+          "task_retrieve_bellefonte_zone"
+        ],
+        "input_requirements": [
+          {
+            "role": "absolute_difference_raster",
+            "data_model": "raster",
+            "formats": [
+              "GeoTIFF"
+            ],
+            "required": true
+          },
+          {
+            "role": "bellefonte_zone",
+            "data_model": "dataset",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "mean_absolute_elevation_difference",
+            "data_model": "table",
+            "formats": [
+              "CSV"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_zonal_crs",
+          "req_zonal_geometry",
+          "req_zonal_format",
+          "req_zonal_coverage",
+          "ad8a9910-fd4b-4333-9d4a-bfd916d93376"
+        ],
+        "status": "proposed",
+        "attempts": 0,
+        "active_binding_id": null,
+        "output_artifact_ids": [],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      }
+    },
+    "edges": [
+      [
+        "task_align_input_2",
+        "task_calculate_absolute_difference"
+      ],
+      [
+        "task_calculate_absolute_difference",
+        "task_mean_absolute_difference"
+      ],
+      [
+        "task_retrieve_bellefonte_zone",
+        "task_mean_absolute_difference"
+      ]
+    ],
+    "bindings": {
+      "a3ab07b5-7146-4ce3-ada3-faf687ed8e3c": {
+        "binding_id": "a3ab07b5-7146-4ce3-ada3-faf687ed8e3c",
+        "task_id": "task_align_input_2",
+        "agent_id": "raster_analysis_agent",
+        "operation": "resample",
+        "instruction": "Resample input_2 to the grid of input_1, using a 30 metre target resolution. Preserve the spatial coverage needed for the Bellefonte analysis and produce a GeoTIFF raster. Runtime QC must verify exact grid alignment rather than relying only on nominal resolution.",
+        "input_bindings": [
+          {
+            "role": "input_2",
+            "artifact_id": "d543955e-7586-4776-9b64-8bdd337dedc0",
+            "source_task_id": null,
+            "binding_order": 0
+          }
+        ],
+        "agent_profile_snapshot": {
+          "agent_id": "raster_analysis_agent",
+          "name": "Raster Analysis Agent",
+          "description": "Performs deterministic raster reprojection, resampling, clipping, raster calculation, and zonal statistics. Consumes GeoTIFF rasters and GeoPackage polygon zones.",
+          "operations": [
+            "clip",
+            "raster_calculator",
+            "raster_geoprocessing",
+            "reproject_raster",
+            "resample",
+            "zonal_statistics"
+          ],
+          "skills": [
+            {
+              "skill_id": "raster_geoprocessing",
+              "name": "Raster Geoprocessing",
+              "description": "Executes raster calculations, reprojections, grid resampling, spatial masking, and zonal aggregations.",
+              "constraints": {
+                "spatial": "Raster calculation requires compatible grid definitions and CRS. Zonal statistics require matching CRS between raster and GeoPackage zones.",
+                "temporal": null,
+                "other": [
+                  "Accepts GeoTIFF (.tif) rasters and GeoPackage (.gpkg) polygon zones.",
+                  "Does not accept GeoJSON zones for zonal statistics."
+                ]
+              }
+            }
+          ],
+          "inputs": {
+            "input_datasets": {
+              "required": true,
+              "description": "GeoTIFF raster file(s) and optional GeoPackage polygon zone layer."
+            }
+          },
+          "outputs": [
+            {
+              "type": "raster",
+              "formats": [
+                "GeoTIFF"
+              ],
+              "required": false,
+              "description": "Processed raster dataset."
+            },
+            {
+              "type": "table",
+              "formats": [
+                "CSV"
+              ],
+              "required": false,
+              "description": "Zonal statistics summary table."
+            }
+          ],
+          "parameters": {
+            "operation": {
+              "required": false,
+              "description": "Explicit operation (zonal_statistics, raster_calculator, resample, clip, reproject_raster)."
+            },
+            "resolution": {
+              "required": false,
+              "description": "Target pixel resolution in meters for resampling."
+            },
+            "target_crs": {
+              "required": false,
+              "description": "Target coordinate reference system for raster reprojection."
+            }
+          }
+        },
+        "endpoint": "https://www.geospatial-agentic-services.online/agents/raster_analysis_agent/tasks",
+        "attempt": 1,
+        "invocation_id": null,
+        "status": "successful",
+        "started_at": "2026-08-21T21:43:35.776573Z",
+        "completed_at": "2026-08-21T21:43:35.859225Z",
+        "duration_seconds": 0.0826699880126398,
+        "output_artifact_ids": [
+          "56259edf-9c80-4485-bb87-9fe6965e3fa1"
+        ],
+        "messages": [
+          "Resampled raster to 30.0m resolution."
+        ],
+        "structured_error": null,
+        "created_at": "2026-08-21T21:43:35.768811Z"
+      },
+      "0f153421-e4ac-472f-9a22-cfa48cf6cfef": {
+        "binding_id": "0f153421-e4ac-472f-9a22-cfa48cf6cfef",
+        "task_id": "task_calculate_absolute_difference",
+        "agent_id": "raster_analysis_agent",
+        "operation": "raster_calculator",
+        "instruction": "Calculate abs(input_1 - aligned_input_2) cell by cell. Use only overlapping valid raster cells and preserve a GeoTIFF raster output suitable for zonal statistics.",
+        "input_bindings": [
+          {
+            "role": "input_1",
+            "artifact_id": "68fab741-a02f-47e1-b7a0-534767934c16",
+            "source_task_id": null,
+            "binding_order": 0
+          },
+          {
+            "role": "aligned_input_2",
+            "artifact_id": "56259edf-9c80-4485-bb87-9fe6965e3fa1",
+            "source_task_id": "task_align_input_2",
+            "binding_order": 1
+          }
+        ],
+        "agent_profile_snapshot": {
+          "agent_id": "raster_analysis_agent",
+          "name": "Raster Analysis Agent",
+          "description": "Performs deterministic raster reprojection, resampling, clipping, raster calculation, and zonal statistics. Consumes GeoTIFF rasters and GeoPackage polygon zones.",
+          "operations": [
+            "clip",
+            "raster_calculator",
+            "raster_geoprocessing",
+            "reproject_raster",
+            "resample",
+            "zonal_statistics"
+          ],
+          "skills": [
+            {
+              "skill_id": "raster_geoprocessing",
+              "name": "Raster Geoprocessing",
+              "description": "Executes raster calculations, reprojections, grid resampling, spatial masking, and zonal aggregations.",
+              "constraints": {
+                "spatial": "Raster calculation requires compatible grid definitions and CRS. Zonal statistics require matching CRS between raster and GeoPackage zones.",
+                "temporal": null,
+                "other": [
+                  "Accepts GeoTIFF (.tif) rasters and GeoPackage (.gpkg) polygon zones.",
+                  "Does not accept GeoJSON zones for zonal statistics."
+                ]
+              }
+            }
+          ],
+          "inputs": {
+            "input_datasets": {
+              "required": true,
+              "description": "GeoTIFF raster file(s) and optional GeoPackage polygon zone layer."
+            }
+          },
+          "outputs": [
+            {
+              "type": "raster",
+              "formats": [
+                "GeoTIFF"
+              ],
+              "required": false,
+              "description": "Processed raster dataset."
+            },
+            {
+              "type": "table",
+              "formats": [
+                "CSV"
+              ],
+              "required": false,
+              "description": "Zonal statistics summary table."
+            }
+          ],
+          "parameters": {
+            "operation": {
+              "required": false,
+              "description": "Explicit operation (zonal_statistics, raster_calculator, resample, clip, reproject_raster)."
+            },
+            "resolution": {
+              "required": false,
+              "description": "Target pixel resolution in meters for resampling."
+            },
+            "target_crs": {
+              "required": false,
+              "description": "Target coordinate reference system for raster reprojection."
+            }
+          }
+        },
+        "endpoint": "https://www.geospatial-agentic-services.online/agents/raster_analysis_agent/tasks",
+        "attempt": 1,
+        "invocation_id": null,
+        "status": "precondition_blocked",
+        "started_at": null,
+        "completed_at": null,
+        "duration_seconds": 0.0,
+        "output_artifact_ids": [],
+        "messages": [],
+        "structured_error": {
+          "code": "E_PRECONDITION_BLOCKED",
+          "message": "One or more deterministic task preconditions are not satisfied by the bound inputs.",
+          "retryable": false,
+          "details": {
+            "violation_ids": [
+              "5bf041c4-349a-4f3f-ab99-aca038de583c",
+              "bdd2131e-2969-478c-954f-b570c76b327f",
+              "2bcf4bdb-7a20-4880-b8ce-ce3b78b063aa"
+            ]
+          }
+        },
+        "created_at": "2026-08-21T21:43:40.410632Z"
+      }
+    },
+    "artifacts": {
+      "68fab741-a02f-47e1-b7a0-534767934c16": {
+        "artifact_id": "68fab741-a02f-47e1-b7a0-534767934c16",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_dem_centre_30m_utm.tif",
+        "content_hash": "1426addcdb0dea68e59a3b63a33a5efbf17fd56a0b1fd066a4bbf52595accdcb",
+        "format": "tif",
+        "media_type": null,
+        "data_model": "raster",
+        "producer_task_id": null,
+        "producer_binding_id": null,
+        "role": "input_1",
+        "evidence_ids": [
+          "4054f6b3-e14f-4c0f-a672-1d9b2a7cab4d"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T21:43:08.606716Z",
+        "metadata": {
+          "source": "user_input"
+        }
+      },
+      "d543955e-7586-4776-9b64-8bdd337dedc0": {
+        "artifact_id": "d543955e-7586-4776-9b64-8bdd337dedc0",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_dem_misaligned_grid_utm.tif",
+        "content_hash": "d52036217cde13719377b6dfbd069bee0b62395b9cc883b3e3cc80d0e7102d1d",
+        "format": "tif",
+        "media_type": null,
+        "data_model": "raster",
+        "producer_task_id": null,
+        "producer_binding_id": null,
+        "role": "input_2",
+        "evidence_ids": [
+          "03ccc2a9-d264-4474-ac7f-9e7d3c11e896"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T21:43:08.632756Z",
+        "metadata": {
+          "source": "user_input"
+        }
+      },
+      "56259edf-9c80-4485-bb87-9fe6965e3fa1": {
+        "artifact_id": "56259edf-9c80-4485-bb87-9fe6965e3fa1",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/raster_analysis_agent/resampled_30m_560c950a.tif",
+        "content_hash": "61e434a52d927d5ed8e9b965af31dd6423adc3ac128cc126ade37ae55b516774",
+        "format": "tif",
+        "media_type": null,
+        "data_model": "raster",
+        "producer_task_id": "task_align_input_2",
+        "producer_binding_id": "a3ab07b5-7146-4ce3-ada3-faf687ed8e3c",
+        "role": "aligned_input_2",
+        "evidence_ids": [
+          "f3eac409-b697-408e-b085-9a50d073edda"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T21:43:35.876297Z",
+        "metadata": {}
+      }
+    },
+    "derivations": {
+      "cc8567af-1fc7-4791-9652-9a68f7571021": {
+        "derivation_id": "cc8567af-1fc7-4791-9652-9a68f7571021",
+        "output_artifact_id": "56259edf-9c80-4485-bb87-9fe6965e3fa1",
+        "source_artifact_ids": [
+          "d543955e-7586-4776-9b64-8bdd337dedc0"
+        ],
+        "producer_task_id": "task_align_input_2",
+        "operation": "resample",
+        "parameters": {
+          "operation": "resample",
+          "resolution": 30
+        },
+        "semantic_effect": "Produced role 'aligned_input_2' using operation 'resample'.",
+        "evidence_snapshot_ids": [],
+        "created_at": "2026-08-21T21:43:35.876341Z"
+      }
+    },
+    "requirements": {
+      "req_zone_coverage": {
+        "requirement_id": "req_zone_coverage",
+        "requirement_type": "spatial_coverage",
+        "scope": "The retrieved bellefonte_zone candidate must spatially represent Bellefonte.",
+        "task_id": "task_retrieve_bellefonte_zone",
+        "artifact_roles": [
+          "bellefonte_zone"
+        ],
+        "parameters": {
+          "place": "Bellefonte"
+        },
+        "blocking": true,
+        "provenance": "USER_EXPLICIT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_zone_format": {
+        "requirement_id": "req_zone_format",
+        "requirement_type": "format_compatible",
+        "scope": "The retrieved Bellefonte zone must be available as a GeoPackage polygon input for zonal statistics.",
+        "task_id": "task_retrieve_bellefonte_zone",
+        "artifact_roles": [
+          "bellefonte_zone"
+        ],
+        "parameters": {
+          "format": "GPKG",
+          "geometry_type": "polygon"
+        },
+        "blocking": true,
+        "provenance": "WORKER_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_align_grid": {
+        "requirement_id": "req_align_grid",
+        "requirement_type": "aligned_raster_grid",
+        "scope": "aligned_input_2 must have the same grid definition as input_1, including resolution, origin, extent alignment, and cell dimensions.",
+        "task_id": "task_align_input_2",
+        "artifact_roles": [
+          "input_1",
+          "aligned_input_2"
+        ],
+        "parameters": {
+          "reference_role": "input_1"
+        },
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_align_coverage": {
+        "requirement_id": "req_align_coverage",
+        "requirement_type": "spatial_coverage",
+        "scope": "The aligned second elevation raster must retain the Bellefonte coverage required for comparison.",
+        "task_id": "task_align_input_2",
+        "artifact_roles": [
+          "aligned_input_2"
+        ],
+        "parameters": {
+          "place": "Bellefonte"
+        },
+        "blocking": true,
+        "provenance": "USER_EXPLICIT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [
+          "f3eac409-b697-408e-b085-9a50d073edda"
+        ],
+        "superseded_by": null
+      },
+      "req_difference_crs": {
+        "requirement_id": "req_difference_crs",
+        "requirement_type": "compatible_crs",
+        "scope": "input_1 and aligned_input_2 must use compatible coordinate reference systems for raster calculation.",
+        "task_id": "task_calculate_absolute_difference",
+        "artifact_roles": [
+          "input_1",
+          "aligned_input_2"
+        ],
+        "parameters": {},
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [
+          "4054f6b3-e14f-4c0f-a672-1d9b2a7cab4d",
+          "f3eac409-b697-408e-b085-9a50d073edda"
+        ],
+        "superseded_by": null
+      },
+      "req_difference_grid": {
+        "requirement_id": "req_difference_grid",
+        "requirement_type": "aligned_raster_grid",
+        "scope": "input_1 and aligned_input_2 must be cellwise comparable on an identical raster grid.",
+        "task_id": "task_calculate_absolute_difference",
+        "artifact_roles": [
+          "input_1",
+          "aligned_input_2"
+        ],
+        "parameters": {},
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "violated",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_difference_coverage": {
+        "requirement_id": "req_difference_coverage",
+        "requirement_type": "spatial_coverage",
+        "scope": "Both elevation surfaces must cover the Bellefonte analysis area used for the difference calculation.",
+        "task_id": "task_calculate_absolute_difference",
+        "artifact_roles": [
+          "input_1",
+          "aligned_input_2"
+        ],
+        "parameters": {
+          "place": "Bellefonte"
+        },
+        "blocking": true,
+        "provenance": "USER_EXPLICIT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "violated",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_zonal_crs": {
+        "requirement_id": "req_zonal_crs",
+        "requirement_type": "compatible_crs",
+        "scope": "absolute_difference_raster and bellefonte_zone must have compatible CRSs for zonal statistics.",
+        "task_id": "task_mean_absolute_difference",
+        "artifact_roles": [
+          "absolute_difference_raster",
+          "bellefonte_zone"
+        ],
+        "parameters": {},
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_zonal_geometry": {
+        "requirement_id": "req_zonal_geometry",
+        "requirement_type": "valid_geometry",
+        "scope": "bellefonte_zone must contain valid polygon geometry suitable for zonal statistics.",
+        "task_id": "task_mean_absolute_difference",
+        "artifact_roles": [
+          "bellefonte_zone"
+        ],
+        "parameters": {
+          "geometry_type": "polygon"
+        },
+        "blocking": true,
+        "provenance": "WORKER_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_zonal_format": {
+        "requirement_id": "req_zonal_format",
+        "requirement_type": "format_compatible",
+        "scope": "The zonal-statistics zone input must be a GeoPackage polygon layer and the raster input must be GeoTIFF.",
+        "task_id": "task_mean_absolute_difference",
+        "artifact_roles": [
+          "absolute_difference_raster",
+          "bellefonte_zone"
+        ],
+        "parameters": {
+          "raster_format": "GeoTIFF",
+          "zone_format": "GPKG"
+        },
+        "blocking": true,
+        "provenance": "WORKER_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_zonal_coverage": {
+        "requirement_id": "req_zonal_coverage",
+        "requirement_type": "spatial_coverage",
+        "scope": "The zone and absolute-difference raster must overlap over the Bellefonte analysis area.",
+        "task_id": "task_mean_absolute_difference",
+        "artifact_roles": [
+          "absolute_difference_raster",
+          "bellefonte_zone"
+        ],
+        "parameters": {
+          "place": "Bellefonte"
+        },
+        "blocking": true,
+        "provenance": "USER_EXPLICIT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "4131b626-d6ae-4543-97a1-8b72791e5d7f": {
+        "requirement_id": "4131b626-d6ae-4543-97a1-8b72791e5d7f",
+        "requirement_type": "aligned_raster_grid",
+        "scope": "task_transition",
+        "task_id": "task_calculate_absolute_difference",
+        "artifact_roles": [
+          "input_1",
+          "aligned_input_2"
+        ],
+        "parameters": {},
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "operation_contract_catalog",
+        "created_in_plan_version": 1,
+        "status": "violated",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "ad8a9910-fd4b-4333-9d4a-bfd916d93376": {
+        "requirement_id": "ad8a9910-fd4b-4333-9d4a-bfd916d93376",
+        "requirement_type": "compatible_crs",
+        "scope": "task_transition",
+        "task_id": "task_mean_absolute_difference",
+        "artifact_roles": [
+          "absolute_difference_raster",
+          "bellefonte_zone"
+        ],
+        "parameters": {},
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "operation_contract_catalog",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      }
+    },
+    "commitments": {},
+    "schema_mappings": {},
+    "evidence": {
+      "4054f6b3-e14f-4c0f-a672-1d9b2a7cab4d": {
+        "evidence_id": "4054f6b3-e14f-4c0f-a672-1d9b2a7cab4d",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "68fab741-a02f-47e1-b7a0-534767934c16"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_dem_centre_30m_utm.tif",
+          "format": "tif",
+          "size_bytes": 5338558,
+          "complete": true,
+          "limitations": [],
+          "data_model": "raster",
+          "width": 1161,
+          "height": 1148,
+          "band_count": 1,
+          "resolution": [
+            30.0,
+            30.0
+          ],
+          "transform": [
+            30.0,
+            0.0,
+            238087.3824011362,
+            0.0,
+            -30.0,
+            4543387.006183241,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "grid_origin": [
+            238087.3824011362,
+            4543387.006183241
+          ],
+          "bounds": [
+            238087.3824011362,
+            4508947.006183241,
+            272917.3824011362,
+            4543387.006183241
+          ],
+          "nodata": null,
+          "dtype": "float32",
+          "driver": "GTiff",
+          "crs": "EPSG:26918",
+          "crs_authority": "EPSG:26918",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T21:43:08.636996Z",
+        "complete": true,
+        "limitations": []
+      },
+      "03ccc2a9-d264-4474-ac7f-9e7d3c11e896": {
+        "evidence_id": "03ccc2a9-d264-4474-ac7f-9e7d3c11e896",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "d543955e-7586-4776-9b64-8bdd337dedc0"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_dem_misaligned_grid_utm.tif",
+          "format": "tif",
+          "size_bytes": 7681264,
+          "complete": true,
+          "limitations": [],
+          "data_model": "raster",
+          "width": 1393,
+          "height": 1377,
+          "band_count": 1,
+          "resolution": [
+            25.0,
+            25.0
+          ],
+          "transform": [
+            25.0,
+            0.0,
+            238102.3824011362,
+            0.0,
+            -25.0,
+            4543372.006183241,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "grid_origin": [
+            238102.3824011362,
+            4543372.006183241
+          ],
+          "bounds": [
+            238102.3824011362,
+            4508947.006183241,
+            272927.3824011362,
+            4543372.006183241
+          ],
+          "nodata": null,
+          "dtype": "float32",
+          "driver": "GTiff",
+          "crs": "EPSG:26918",
+          "crs_authority": "EPSG:26918",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T21:43:08.640179Z",
+        "complete": true,
+        "limitations": []
+      },
+      "f3eac409-b697-408e-b085-9a50d073edda": {
+        "evidence_id": "f3eac409-b697-408e-b085-9a50d073edda",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "56259edf-9c80-4485-bb87-9fe6965e3fa1"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/raster_analysis_agent/resampled_30m_560c950a.tif",
+          "format": "tif",
+          "size_bytes": 5329320,
+          "complete": true,
+          "limitations": [],
+          "data_model": "raster",
+          "width": 1160,
+          "height": 1147,
+          "band_count": 1,
+          "resolution": [
+            30.02155172413793,
+            30.013077593722752
+          ],
+          "transform": [
+            30.02155172413793,
+            0.0,
+            238102.3824011362,
+            0.0,
+            -30.013077593722752,
+            4543372.006183241,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "grid_origin": [
+            238102.3824011362,
+            4543372.006183241
+          ],
+          "bounds": [
+            238102.3824011362,
+            4508947.006183241,
+            272927.3824011362,
+            4543372.006183241
+          ],
+          "nodata": null,
+          "dtype": "float32",
+          "driver": "GTiff",
+          "crs": "EPSG:26918",
+          "crs_authority": "EPSG:26918",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T21:43:35.880422Z",
+        "complete": true,
+        "limitations": []
+      }
+    },
+    "violations": {
+      "5bf041c4-349a-4f3f-ab99-aca038de583c": {
+        "violation_id": "5bf041c4-349a-4f3f-ab99-aca038de583c",
+        "code": "RASTER_GRID_INCOMPATIBLE",
+        "layer": "deterministic_requirement",
+        "task_id": "task_calculate_absolute_difference",
+        "artifact_ids": [
+          "68fab741-a02f-47e1-b7a0-534767934c16",
+          "56259edf-9c80-4485-bb87-9fe6965e3fa1"
+        ],
+        "requirement_ids": [
+          "req_difference_grid"
+        ],
+        "evidence_ids": [
+          "4054f6b3-e14f-4c0f-a672-1d9b2a7cab4d",
+          "f3eac409-b697-408e-b085-9a50d073edda"
+        ],
+        "blocking": true,
+        "deterministic": true,
+        "computationally_resolvable": true,
+        "status": "active",
+        "created_in_plan_version": 1,
+        "resolved_by_evidence_ids": [],
+        "resolved_in_plan_version": null,
+        "created_at": "2026-08-21T21:43:35.880826Z",
+        "resolved_at": null
+      },
+      "bdd2131e-2969-478c-954f-b570c76b327f": {
+        "violation_id": "bdd2131e-2969-478c-954f-b570c76b327f",
+        "code": "SPATIAL_COVERAGE_INSUFFICIENT",
+        "layer": "deterministic_requirement",
+        "task_id": "task_calculate_absolute_difference",
+        "artifact_ids": [
+          "68fab741-a02f-47e1-b7a0-534767934c16",
+          "56259edf-9c80-4485-bb87-9fe6965e3fa1"
+        ],
+        "requirement_ids": [
+          "req_difference_coverage"
+        ],
+        "evidence_ids": [
+          "4054f6b3-e14f-4c0f-a672-1d9b2a7cab4d",
+          "f3eac409-b697-408e-b085-9a50d073edda"
+        ],
+        "blocking": true,
+        "deterministic": true,
+        "computationally_resolvable": true,
+        "status": "active",
+        "created_in_plan_version": 1,
+        "resolved_by_evidence_ids": [],
+        "resolved_in_plan_version": null,
+        "created_at": "2026-08-21T21:43:35.880966Z",
+        "resolved_at": null
+      },
+      "2bcf4bdb-7a20-4880-b8ce-ce3b78b063aa": {
+        "violation_id": "2bcf4bdb-7a20-4880-b8ce-ce3b78b063aa",
+        "code": "RASTER_GRID_INCOMPATIBLE",
+        "layer": "deterministic_requirement",
+        "task_id": "task_calculate_absolute_difference",
+        "artifact_ids": [
+          "68fab741-a02f-47e1-b7a0-534767934c16",
+          "56259edf-9c80-4485-bb87-9fe6965e3fa1"
+        ],
+        "requirement_ids": [
+          "4131b626-d6ae-4543-97a1-8b72791e5d7f"
+        ],
+        "evidence_ids": [
+          "4054f6b3-e14f-4c0f-a672-1d9b2a7cab4d",
+          "f3eac409-b697-408e-b085-9a50d073edda"
+        ],
+        "blocking": true,
+        "deterministic": true,
+        "computationally_resolvable": true,
+        "status": "active",
+        "created_in_plan_version": 1,
+        "resolved_by_evidence_ids": [],
+        "resolved_in_plan_version": null,
+        "created_at": "2026-08-21T21:43:35.881096Z",
+        "resolved_at": null
+      }
+    },
+    "execution_history": [
+      {
+        "event_id": "92b2fe53-a29f-4055-a9e0-72afda1b0ca3",
+        "event_type": "initial_plan_committed",
+        "actor": "planner_component",
+        "state_version": 0,
+        "plan_version": 1,
+        "task_id": null,
+        "reason": "Align the second elevation raster to the first raster's grid, calculate the cellwise absolute elevation difference, retrieve a Bellefonte polygon zone, and compute the mean absolute difference over that zone.",
+        "metadata": {
+          "task_ids": [
+            "task_align_input_2",
+            "task_calculate_absolute_difference",
+            "task_mean_absolute_difference",
+            "task_retrieve_bellefonte_zone"
+          ]
+        },
+        "created_at": "2026-08-21T21:43:35.761372Z"
+      },
+      {
+        "event_id": "3e3b7ac6-7e6a-4465-9d14-3d48ff48f4e6",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 1,
+        "plan_version": 1,
+        "task_id": "task_align_input_2",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "proposed",
+          "to": "ready"
+        },
+        "created_at": "2026-08-21T21:43:35.764526Z"
+      },
+      {
+        "event_id": "006d2bbb-ae37-4d8c-bf30-bd772242d170",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 2,
+        "plan_version": 1,
+        "task_id": "task_align_input_2",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-21T21:43:35.766737Z"
+      },
+      {
+        "event_id": "4e2b33ee-5aad-46be-b3f9-44fe4079cbbf",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 3,
+        "plan_version": 1,
+        "task_id": "task_align_input_2",
+        "reason": "Worker bound.",
+        "metadata": {
+          "from": "binding",
+          "to": "bound"
+        },
+        "created_at": "2026-08-21T21:43:35.768888Z"
+      },
+      {
+        "event_id": "7d4fdc37-7277-4850-94c9-080107e242e5",
+        "event_type": "pre_execution_requirements_evaluated",
+        "actor": "invariant_engine",
+        "state_version": 4,
+        "plan_version": 1,
+        "task_id": "task_align_input_2",
+        "reason": "All currently evaluable preconditions are satisfied.",
+        "metadata": {
+          "evaluated_requirement_ids": [],
+          "blocking_violation_ids": []
+        },
+        "created_at": "2026-08-21T21:43:35.771246Z"
+      },
+      {
+        "event_id": "59898714-82ea-4fe7-b379-15c37dc83506",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 5,
+        "plan_version": 1,
+        "task_id": "task_align_input_2",
+        "reason": "Worker started.",
+        "metadata": {
+          "from": "bound",
+          "to": "running"
+        },
+        "created_at": "2026-08-21T21:43:35.773727Z"
+      },
+      {
+        "event_id": "5f5bed42-950e-4f0b-a8ec-96b0219e7c26",
+        "event_type": "worker_execution_completed",
+        "actor": "worker_executor",
+        "state_version": 6,
+        "plan_version": 1,
+        "task_id": "task_align_input_2",
+        "reason": "Worker returned successfully.",
+        "metadata": {
+          "binding_id": "a3ab07b5-7146-4ce3-ada3-faf687ed8e3c",
+          "agent_id": "raster_analysis_agent",
+          "operation": "resample",
+          "attempt": 1,
+          "status": "successful",
+          "duration_seconds": 0.0826699880126398
+        },
+        "created_at": "2026-08-21T21:43:35.859332Z"
+      },
+      {
+        "event_id": "c2c7a04f-c238-4819-b9b2-47ee9c7b6432",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 6,
+        "plan_version": 1,
+        "task_id": "task_align_input_2",
+        "reason": "Worker returned a provisional result.",
+        "metadata": {
+          "from": "running",
+          "to": "provisional_success"
+        },
+        "created_at": "2026-08-21T21:43:35.859399Z"
+      },
+      {
+        "event_id": "74485eb6-82f0-4888-913a-3b426d1be7e0",
+        "event_type": "artifact_registered",
+        "actor": "artifact_registry",
+        "state_version": 7,
+        "plan_version": 1,
+        "task_id": "task_align_input_2",
+        "reason": null,
+        "metadata": {
+          "artifact_id": "56259edf-9c80-4485-bb87-9fe6965e3fa1",
+          "role": "aligned_input_2",
+          "content_hash": "61e434a52d927d5ed8e9b965af31dd6423adc3ac128cc126ade37ae55b516774"
+        },
+        "created_at": "2026-08-21T21:43:35.876365Z"
+      },
+      {
+        "event_id": "50cd28aa-cc92-490f-b595-00e37e64c00f",
+        "event_type": "deterministic_violation_detected",
+        "actor": "invariant_engine",
+        "state_version": 7,
+        "plan_version": 1,
+        "task_id": "task_calculate_absolute_difference",
+        "reason": "Detected blocking requirement violation: RASTER_GRID_INCOMPATIBLE.",
+        "metadata": {
+          "violation_id": "5bf041c4-349a-4f3f-ab99-aca038de583c",
+          "requirement_id": "req_difference_grid",
+          "code": "RASTER_GRID_INCOMPATIBLE",
+          "artifact_ids": [
+            "68fab741-a02f-47e1-b7a0-534767934c16",
+            "56259edf-9c80-4485-bb87-9fe6965e3fa1"
+          ],
+          "computationally_resolvable": true
+        },
+        "created_at": "2026-08-21T21:43:35.880855Z"
+      },
+      {
+        "event_id": "f5d2f27d-9b85-4034-8c2e-cf8eef1ea301",
+        "event_type": "deterministic_violation_detected",
+        "actor": "invariant_engine",
+        "state_version": 7,
+        "plan_version": 1,
+        "task_id": "task_calculate_absolute_difference",
+        "reason": "Detected blocking requirement violation: SPATIAL_COVERAGE_INSUFFICIENT.",
+        "metadata": {
+          "violation_id": "bdd2131e-2969-478c-954f-b570c76b327f",
+          "requirement_id": "req_difference_coverage",
+          "code": "SPATIAL_COVERAGE_INSUFFICIENT",
+          "artifact_ids": [
+            "68fab741-a02f-47e1-b7a0-534767934c16",
+            "56259edf-9c80-4485-bb87-9fe6965e3fa1"
+          ],
+          "computationally_resolvable": true
+        },
+        "created_at": "2026-08-21T21:43:35.880988Z"
+      },
+      {
+        "event_id": "b2407ed9-0a74-495b-a40c-20afb86e8b7c",
+        "event_type": "deterministic_violation_detected",
+        "actor": "invariant_engine",
+        "state_version": 7,
+        "plan_version": 1,
+        "task_id": "task_calculate_absolute_difference",
+        "reason": "Detected blocking requirement violation: RASTER_GRID_INCOMPATIBLE.",
+        "metadata": {
+          "violation_id": "2bcf4bdb-7a20-4880-b8ce-ce3b78b063aa",
+          "requirement_id": "4131b626-d6ae-4543-97a1-8b72791e5d7f",
+          "code": "RASTER_GRID_INCOMPATIBLE",
+          "artifact_ids": [
+            "68fab741-a02f-47e1-b7a0-534767934c16",
+            "56259edf-9c80-4485-bb87-9fe6965e3fa1"
+          ],
+          "computationally_resolvable": true
+        },
+        "created_at": "2026-08-21T21:43:35.881116Z"
+      },
+      {
+        "event_id": "045d8f29-fd34-48f6-b952-dc9c7e4f9e37",
+        "event_type": "downstream_requirement_pre_evaluated",
+        "actor": "invariant_engine",
+        "state_version": 7,
+        "plan_version": 1,
+        "task_id": "task_calculate_absolute_difference",
+        "reason": "New producer evidence established a downstream task precondition violation.",
+        "metadata": {
+          "producer_task_id": "task_align_input_2",
+          "violation_ids": [
+            "5bf041c4-349a-4f3f-ab99-aca038de583c",
+            "bdd2131e-2969-478c-954f-b570c76b327f",
+            "2bcf4bdb-7a20-4880-b8ce-ce3b78b063aa"
+          ]
+        },
+        "created_at": "2026-08-21T21:43:35.881152Z"
+      },
+      {
+        "event_id": "967757b4-5ee5-432d-a640-f0fab45ce0b8",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 8,
+        "plan_version": 1,
+        "task_id": "task_align_input_2",
+        "reason": "Reviewing runtime evidence.",
+        "metadata": {
+          "from": "provisional_success",
+          "to": "validating"
+        },
+        "created_at": "2026-08-21T21:43:35.883634Z"
+      },
+      {
+        "event_id": "96ed6cea-f800-40d6-8aaf-722b843d51bc",
+        "event_type": "qc_downstream_scope_routed",
+        "actor": "qc_component",
+        "state_version": 9,
+        "plan_version": 1,
+        "task_id": "task_align_input_2",
+        "reason": "The current producer transition satisfies its own contract; the objective defect remains active on the downstream task where recovery will be routed.",
+        "metadata": {
+          "qc_verdict": "BLOCK",
+          "qc_action": "STRUCTURAL_REPLAN",
+          "downstream_violation_ids": [
+            "5bf041c4-349a-4f3f-ab99-aca038de583c",
+            "bdd2131e-2969-478c-954f-b570c76b327f",
+            "2bcf4bdb-7a20-4880-b8ce-ce3b78b063aa"
+          ]
+        },
+        "created_at": "2026-08-21T21:43:40.396618Z"
+      },
+      {
+        "event_id": "bfaca2df-64ed-4ca6-a45d-8ce9624951cc",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 9,
+        "plan_version": 1,
+        "task_id": "task_align_input_2",
+        "reason": "The current producer transition satisfies its own contract; the objective defect remains active on the downstream task where recovery will be routed.",
+        "metadata": {
+          "from": "validating",
+          "to": "successful"
+        },
+        "created_at": "2026-08-21T21:43:40.398486Z"
+      },
+      {
+        "event_id": "9dcafe1f-793a-4336-939b-b294d69a4e3d",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 10,
+        "plan_version": 1,
+        "task_id": "task_calculate_absolute_difference",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "proposed",
+          "to": "ready"
+        },
+        "created_at": "2026-08-21T21:43:40.402639Z"
+      },
+      {
+        "event_id": "31debd4c-b8bb-4f61-a9c8-469050579694",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 11,
+        "plan_version": 1,
+        "task_id": "task_calculate_absolute_difference",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-21T21:43:40.406249Z"
+      },
+      {
+        "event_id": "6f85f68a-b2fb-44a7-bb57-20eedcc8fccd",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 12,
+        "plan_version": 1,
+        "task_id": "task_calculate_absolute_difference",
+        "reason": "Worker bound.",
+        "metadata": {
+          "from": "binding",
+          "to": "bound"
+        },
+        "created_at": "2026-08-21T21:43:40.410714Z"
+      },
+      {
+        "event_id": "90781400-d594-4b62-9c88-c259448ab9ac",
+        "event_type": "pre_execution_requirements_evaluated",
+        "actor": "invariant_engine",
+        "state_version": 13,
+        "plan_version": 1,
+        "task_id": "task_calculate_absolute_difference",
+        "reason": "Known blocking preconditions failed.",
+        "metadata": {
+          "evaluated_requirement_ids": [
+            "req_difference_crs",
+            "req_difference_grid",
+            "req_difference_coverage",
+            "4131b626-d6ae-4543-97a1-8b72791e5d7f"
+          ],
+          "blocking_violation_ids": [
+            "5bf041c4-349a-4f3f-ab99-aca038de583c",
+            "bdd2131e-2969-478c-954f-b570c76b327f",
+            "2bcf4bdb-7a20-4880-b8ce-ce3b78b063aa"
+          ]
+        },
+        "created_at": "2026-08-21T21:43:40.414549Z"
+      },
+      {
+        "event_id": "c84867b9-4530-404b-b20d-895f1abdb25a",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 14,
+        "plan_version": 1,
+        "task_id": "task_calculate_absolute_difference",
+        "reason": "Reviewing known blocking preconditions before execution.",
+        "metadata": {
+          "from": "bound",
+          "to": "validating"
+        },
+        "created_at": "2026-08-21T21:43:40.419353Z"
+      },
+      {
+        "event_id": "fc553822-b06e-402c-839e-68c4574ee990",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 15,
+        "plan_version": 1,
+        "task_id": "task_calculate_absolute_difference",
+        "reason": "The bound rasters are not cellwise comparable: their dimensions, resolutions, origins, and transforms differ. Their reported bounds also do not provide the required Bellefonte coverage. These active deterministic blockers are computationally resolvable but require structural raster alignment and coverage correction before the raster calculator can run.",
+        "metadata": {
+          "from": "validating",
+          "to": "rejected"
+        },
+        "created_at": "2026-08-21T21:43:44.922324Z"
+      }
+    ],
+    "qc_history": [
+      {
+        "decision_id": "77185e5d-abab-4c80-86b4-e498c6a308bc",
+        "task_id": "task_align_input_2",
+        "verdict": "PASS",
+        "proposed_verdict": "BLOCK",
+        "reason": "The current producer transition satisfies its own contract; the objective defect remains active on the downstream task where recovery will be routed.",
+        "acknowledged_finding_ids": [],
+        "action_class": "NONE",
+        "effective_action": "NONE",
+        "effective_action_source": "qc_component",
+        "allowed_recovery_types": [],
+        "recovery_parameters": {},
+        "preserve_completed_work": true,
+        "forced_by_invariant": true,
+        "created_at": "2026-08-21T21:43:40.396579Z"
+      },
+      {
+        "decision_id": "qc-task_calculate_absolute_difference-20260821T214400Z",
+        "task_id": "task_calculate_absolute_difference",
+        "verdict": "BLOCK",
+        "proposed_verdict": "BLOCK",
+        "reason": "The bound rasters are not cellwise comparable: their dimensions, resolutions, origins, and transforms differ. Their reported bounds also do not provide the required Bellefonte coverage. These active deterministic blockers are computationally resolvable but require structural raster alignment and coverage correction before the raster calculator can run.",
+        "acknowledged_finding_ids": [
+          "5bf041c4-349a-4f3f-ab99-aca038de583c",
+          "bdd2131e-2969-478c-954f-b570c76b327f",
+          "2bcf4bdb-7a20-4880-b8ce-ce3b78b063aa"
+        ],
+        "action_class": "STRUCTURAL_REPLAN",
+        "effective_action": "STRUCTURAL_REPLAN",
+        "effective_action_source": "deterministic_invariant_guardrail",
+        "allowed_recovery_types": [
+          "reproject_artifact",
+          "align_raster_grid"
+        ],
+        "recovery_parameters": {
+          "blocking_codes": [
+            "RASTER_GRID_INCOMPATIBLE",
+            "SPATIAL_COVERAGE_INSUFFICIENT"
+          ],
+          "blocking_artifact_ids": [
+            "56259edf-9c80-4485-bb87-9fe6965e3fa1",
+            "68fab741-a02f-47e1-b7a0-534767934c16"
+          ],
+          "recovery_goal": "Apply the smallest structural/task patch that resolves every current deterministic blocker while preserving accepted work."
+        },
+        "preserve_completed_work": true,
+        "forced_by_invariant": true,
+        "created_at": "2026-08-21T21:44:00Z"
+      }
+    ],
+    "replan_history": [],
+    "component_calls": [
+      {
+        "call_id": "4d91f34d-b0ee-47ed-85d1-02a2222d9cd4",
+        "component": "planner",
+        "prompt_hash": "879bbf4688237108aa73bcb12bca3ec0b568a6ec20b463cefe3a9dddb652d8de",
+        "tool_schema_hash": "441719facf91fd72ec7e126a4de0921e9629efd4cd39619a5dbe1be9fea2e3fe",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 5691,
+        "output_tokens": 3907,
+        "duration_seconds": 27.07253710499208,
+        "disposition": "successful",
+        "created_at": "2026-08-21T21:43:35.761323Z"
+      },
+      {
+        "call_id": "0dcbc091-dbc7-4c21-b66a-55d881aad3dd",
+        "component": "qc",
+        "prompt_hash": "f32e58c2015bc65d1615821b0bf588e3118841b8fd13c0f66435ff64db6bc238",
+        "tool_schema_hash": "264376b66f6ac19b4d57965f2f5a135067cea57302b6779a763ae77f3e5ccb86",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 4415,
+        "output_tokens": 557,
+        "duration_seconds": 4.508580872992752,
+        "disposition": "successful",
+        "created_at": "2026-08-21T21:43:40.398359Z"
+      },
+      {
+        "call_id": "fdd66023-78e2-41f5-9154-b81e013c4342",
+        "component": "qc",
+        "prompt_hash": "f32e58c2015bc65d1615821b0bf588e3118841b8fd13c0f66435ff64db6bc238",
+        "tool_schema_hash": "264376b66f6ac19b4d57965f2f5a135067cea57302b6779a763ae77f3e5ccb86",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 4994,
+        "output_tokens": 537,
+        "duration_seconds": 4.495884493007907,
+        "disposition": "successful",
+        "created_at": "2026-08-21T21:43:44.922188Z"
+      }
+    ],
+    "plan_versions": [
+      {
+        "version": 1,
+        "parent_version": null,
+        "reason": "Initial plan committed by independent Planner.",
+        "task_ids": [
+          "task_align_input_2",
+          "task_calculate_absolute_difference",
+          "task_mean_absolute_difference",
+          "task_retrieve_bellefonte_zone"
+        ],
+        "edges": [
+          [
+            "task_align_input_2",
+            "task_calculate_absolute_difference"
+          ],
+          [
+            "task_calculate_absolute_difference",
+            "task_mean_absolute_difference"
+          ],
+          [
+            "task_retrieve_bellefonte_zone",
+            "task_mean_absolute_difference"
+          ]
+        ],
+        "created_at": "2026-08-21T21:43:35.745909Z"
+      }
+    ],
+    "budgets": {
+      "max_total_model_calls": 24,
+      "max_total_tokens": 120000,
+      "max_worker_calls": 30,
+      "max_local_recoveries": 6,
+      "max_replans": 3,
+      "max_runtime_seconds": 900.0,
+      "planner_retry_limit": 2,
+      "qc_retry_limit": 1,
+      "replanner_retry_limit": 1,
+      "total_model_calls": 3,
+      "total_tokens": 20101,
+      "worker_calls": 1,
+      "local_recoveries": 0,
+      "replans": 0
+    },
+    "terminal_state": "failed_unrecoverable",
+    "terminal_reason": "No authorized recovery satisfied the known precondition: The bound rasters are not cellwise comparable: their dimensions, resolutions, origins, and transforms differ. Their reported bounds also do not provide the required Bellefonte coverage. These active deterministic blockers are computationally resolvable but require structural raster alignment and coverage correction before the raster calculator can run.",
+    "human_clarification": null,
+    "final_artifact_ids": [],
+    "required_terminal_roles": [
+      "mean_absolute_elevation_difference"
+    ],
+    "final_disclosure": null,
+    "created_at": "2026-08-21T21:43:08.589955Z",
+    "updated_at": "2026-08-21T21:43:44.930675Z"
+  },
+  "execution_steps": [
+    {
+      "step_index": 1,
+      "step_id": "task_retrieve_bellefonte_zone",
+      "agent_id": null,
+      "title": "Retrieve Bellefonte analysis zone",
+      "instructions": "Retrieve the highest-ranked catalog candidate representing the Bellefonte polygon analysis zone. Treat the result as a candidate and retain spatial-coverage and polygon-geometry validation for runtime QC.",
+      "output_artifacts": [],
+      "status": "proposed",
+      "error": null
+    },
+    {
+      "step_index": 2,
+      "step_id": "task_align_input_2",
+      "agent_id": "raster_analysis_agent",
+      "title": "Align second elevation raster",
+      "instructions": "Resample input_2 to the grid of input_1, using a 30 metre target resolution. Preserve the spatial coverage needed for the Bellefonte analysis and produce a GeoTIFF raster. Runtime QC must verify exact grid alignment rather than relying only on nominal resolution.",
+      "output_artifacts": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/raster_analysis_agent/resampled_30m_560c950a.tif"
+      ],
+      "status": "successful",
+      "error": null
+    },
+    {
+      "step_index": 3,
+      "step_id": "task_calculate_absolute_difference",
+      "agent_id": "raster_analysis_agent",
+      "title": "Calculate absolute elevation difference",
+      "instructions": "Calculate abs(input_1 - aligned_input_2) cell by cell. Use only overlapping valid raster cells and preserve a GeoTIFF raster output suitable for zonal statistics.",
+      "output_artifacts": [],
+      "status": "rejected",
+      "error": null
+    },
+    {
+      "step_index": 4,
+      "step_id": "task_mean_absolute_difference",
+      "agent_id": null,
+      "title": "Compute mean absolute elevation difference",
+      "instructions": "Compute the mean of absolute_difference_raster within bellefonte_zone. Return a CSV summary containing the mean absolute elevation difference for the Bellefonte analysis zone. Runtime QC must verify that the retrieved zone is a valid polygon GeoPackage layer and that its CRS is compatible with the raster.",
+      "output_artifacts": [],
+      "status": "proposed",
+      "error": null
+    }
+  ],
+  "qc_evaluations": 2,
+  "qc_blocks": 2,
+  "qc_interventions": 1,
+  "effective_blocks": 1,
+  "effective_interventions": 1,
+  "qc_policy_overrides": 0,
+  "replanning_iterations": 0,
+  "error": "No authorized recovery satisfied the known precondition: The bound rasters are not cellwise comparable: their dimensions, resolutions, origins, and transforms differ. Their reported bounds also do not provide the required Bellefonte coverage. These active deterministic blockers are computationally resolvable but require structural raster alignment and coverage correction before the raster calculator can run.",
+  "ledger_events": [
+    {
+      "call_id": "a3ab07b5-7146-4ce3-ada3-faf687ed8e3c",
+      "trajectory_id": "traj_ISS_Q22_C5_run1",
+      "agent_id": "raster_analysis_agent",
+      "operation": "resample",
+      "query": "Resample input_2 to the grid of input_1, using a 30 metre target resolution. Preserve the spatial coverage needed for the Bellefonte analysis and produce a GeoTIFF raster. Runtime QC must verify exact grid alignment rather than relying only on nominal resolution.",
+      "timestamp_start": 1787348615.776573,
+      "timestamp_end": 1787348615.859225,
+      "duration_seconds": 0.0826699880126398,
+      "input_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_dem_misaligned_grid_utm.tif"
+      ],
+      "input_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_dem_misaligned_grid_utm.tif": "d52036217cde13719377b6dfbd069bee0b62395b9cc883b3e3cc80d0e7102d1d"
+      },
+      "parameters": {
+        "operation": "resample",
+        "resolution": 30
+      },
+      "status": "completed",
+      "error_code": null,
+      "error_message": null,
+      "output_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/raster_analysis_agent/resampled_30m_560c950a.tif"
+      ],
+      "output_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/raster_analysis_agent/resampled_30m_560c950a.tif": "61e434a52d927d5ed8e9b965af31dd6423adc3ac128cc126ade37ae55b516774"
+      },
+      "summary": "Resampled raster to 30.0m resolution.",
+      "raw_response": {
+        "binding_id": "a3ab07b5-7146-4ce3-ada3-faf687ed8e3c",
+        "task_id": "task_align_input_2",
+        "attempt": 1
+      }
+    }
+  ],
+  "created_at": "2026-08-21T21:43:44.934363+00:00",
+  "evaluation": {
+    "task_id": "ISS_Q22",
+    "bafo_success": false,
+    "all_challenges_resolved": false,
+    "evaluability_status": "EVALUABLE",
+    "challenge_activated": true,
+    "trajectory_classification": "valid_bafo_fail",
+    "production_terminal_state": "failed_unrecoverable",
+    "terminal_state": "failed",
+    "constraint_results": {
+      "grid_resampled_before_subtraction": {
+        "constraint_key": "grid_resampled_before_subtraction",
+        "status": "UNEVALUABLE",
+        "reason": "No differenced raster produced to verify grid alignment.",
+        "details": {}
+      },
+      "absolute_difference": {
+        "constraint_key": "absolute_difference",
+        "status": "UNEVALUABLE",
+        "reason": "No differenced raster produced to verify grid alignment.",
+        "details": {}
+      }
+    },
+    "passed_constraints": [],
+    "failed_constraints": [],
+    "unevaluable_constraints": [
+      "grid_resampled_before_subtraction",
+      "absolute_difference"
+    ],
+    "inspected_artifacts_count": 1,
+    "events_count": 1,
+    "diagnostic_summary": "BAFO: False | State: failed (Valid: False) | Constraints: 0 PASS, 0 FAIL, 2 UNEVALUABLE | Events Recorded: 1 | Artifacts Inspected: 1"
+  },
+  "bafo_success": false,
+  "all_challenges_resolved": false,
+  "trajectory_classification": "valid_bafo_fail"
+}

@@ -1,0 +1,431 @@
+[
+  {
+    "task_id": "ISS_Q01",
+    "suite": "isolated",
+    "family_id": "F01",
+    "family_name": "Metric buffer on geographic CRS coordinates",
+    "user_question": "Create 1-km buffers around the hospital locations in Centre County.",
+    "input_artifacts": ["fx_hospitals_wgs84.gpkg"],
+    "required_constraints": {
+      "buffer_distance_meters": 1000.0,
+      "requires_projected_crs": true,
+      "geometry_type": "Polygon"
+    },
+    "forbidden_behaviors": ["angular_buffer_as_metric", "guessing_crs"],
+    "acceptable_terminal_states": ["successful"]
+  },
+  {
+    "task_id": "ISS_Q02",
+    "suite": "isolated",
+    "family_id": "F01",
+    "family_name": "Metric buffer on geographic CRS coordinates",
+    "user_question": "Create 2-km buffers around the hospital locations in Centre County and return the buffer layer.",
+    "input_artifacts": ["fx_hospitals_wgs84.gpkg"],
+    "required_constraints": {
+      "buffer_distance_meters": 2000.0,
+      "requires_projected_crs": true,
+      "geometry_type": "Polygon"
+    },
+    "forbidden_behaviors": ["angular_buffer_as_metric", "guessing_crs"],
+    "acceptable_terminal_states": ["successful"]
+  },
+  {
+    "task_id": "ISS_Q03",
+    "suite": "isolated",
+    "family_id": "F02",
+    "family_name": "Vector-vector CRS mismatch in binary spatial predicate",
+    "user_question": "Count the hospitals located within each census tract in Centre County.",
+    "input_artifacts": ["fx_hospitals_wgs84.gpkg", "fx_tracts_centre_utm.gpkg"],
+    "required_constraints": {
+      "harmonized_crs": true,
+      "spatial_predicate": "intersects",
+      "count_output": true
+    },
+    "forbidden_behaviors": ["unreprojected_binary_operation"],
+    "acceptable_terminal_states": ["successful"]
+  },
+  {
+    "task_id": "ISS_Q04",
+    "suite": "isolated",
+    "family_id": "F02",
+    "family_name": "Vector-vector CRS mismatch in binary spatial predicate",
+    "user_question": "Assign each Centre County hospital to the census tract that contains it and return the tract identifier with each hospital.",
+    "input_artifacts": ["fx_hospitals_wgs84.gpkg", "fx_tracts_centre_utm.gpkg"],
+    "required_constraints": {
+      "harmonized_crs": true,
+      "retained_attributes": ["GEOID", "ID"]
+    },
+    "forbidden_behaviors": ["unreprojected_binary_operation"],
+    "acceptable_terminal_states": ["successful"]
+  },
+  {
+    "task_id": "ISS_Q05",
+    "suite": "isolated",
+    "family_id": "F03",
+    "family_name": "Missing CRS definition requiring human clarification",
+    "user_question": "Clip the Centre County hospital layer to the State College borough boundary.",
+    "input_artifacts": ["fx_hospitals_utm.gpkg", "fx_boundary_missing_crs.gpkg"],
+    "required_constraints": {
+      "crs_clarification_required": true
+    },
+    "forbidden_behaviors": ["silent_default_crs_assumption", "unjustified_crs_guessing"],
+    "acceptable_terminal_states": ["human_intervention_required"]
+  },
+  {
+    "task_id": "ISS_Q06",
+    "suite": "isolated",
+    "family_id": "F03",
+    "family_name": "Missing CRS definition requiring human clarification",
+    "user_question": "Count the hospitals located inside the Bellefonte borough boundary.",
+    "input_artifacts": ["fx_hospitals_utm.gpkg", "fx_boundary_missing_crs.gpkg"],
+    "required_constraints": {
+      "crs_clarification_required": true
+    },
+    "forbidden_behaviors": ["silent_default_crs_assumption", "unjustified_crs_guessing"],
+    "acceptable_terminal_states": ["human_intervention_required"]
+  },
+  {
+    "task_id": "ISS_Q07",
+    "suite": "isolated",
+    "family_id": "F04",
+    "family_name": "Invalid polygon geometry in boundary input",
+    "user_question": "Intersect the State College borough boundary with the census tracts that overlap it.",
+    "input_artifacts": ["fx_boundary_invalid_geom.gpkg", "fx_tracts_centre_utm.gpkg"],
+    "required_constraints": {
+      "geometry_repair_performed": true,
+      "valid_output_geometries": true
+    },
+    "forbidden_behaviors": ["unrepaired_invalid_intersection"],
+    "acceptable_terminal_states": ["successful"]
+  },
+  {
+    "task_id": "ISS_Q08",
+    "suite": "isolated",
+    "family_id": "F04",
+    "family_name": "Invalid polygon geometry in boundary input",
+    "user_question": "Clip the Centre County census tracts to the Bellefonte borough boundary.",
+    "input_artifacts": ["fx_tracts_centre_utm.gpkg", "fx_boundary_invalid_geom.gpkg"],
+    "required_constraints": {
+      "geometry_repair_performed": true,
+      "valid_output_geometries": true
+    },
+    "forbidden_behaviors": ["unrepaired_invalid_intersection"],
+    "acceptable_terminal_states": ["successful"]
+  },
+  {
+    "task_id": "ISS_Q09",
+    "suite": "isolated",
+    "family_id": "F05",
+    "family_name": "Tabular coordinate spatialization with explicit column identification",
+    "user_question": "Create a map of hospital locations in Centre County.",
+    "input_artifacts": ["fx_hospitals_centre.csv"],
+    "required_constraints": {
+      "csv_to_points_spatialization": true,
+      "lat_col": "LATITUDE",
+      "lon_col": "LONGITUDE",
+      "format": "HTML"
+    },
+    "forbidden_behaviors": ["direct_tabular_mapping_without_points"],
+    "acceptable_terminal_states": ["successful"]
+  },
+  {
+    "task_id": "ISS_Q10",
+    "suite": "isolated",
+    "family_id": "F05",
+    "family_name": "Tabular coordinate spatialization with explicit column identification",
+    "user_question": "Count hospitals by census tract in Centre County.",
+    "input_artifacts": ["fx_hospitals_centre.csv", "fx_tracts_centre_wgs84.gpkg"],
+    "required_constraints": {
+      "csv_to_points_spatialization": true,
+      "spatial_join": true
+    },
+    "forbidden_behaviors": ["direct_tabular_join_without_geometry"],
+    "acceptable_terminal_states": ["successful"]
+  },
+  {
+    "task_id": "ISS_Q11",
+    "suite": "isolated",
+    "family_id": "F06",
+    "family_name": "Format incompatibility requiring neutral format conversion",
+    "user_question": "Dissolve the Centre County census tracts into a single county boundary.",
+    "input_artifacts": ["fx_tracts_centre.geojson"],
+    "required_constraints": {
+      "format_converted_to_gpkg": true,
+      "dissolved_geometry": true
+    },
+    "forbidden_behaviors": ["passing_geojson_to_gpkg_only_worker"],
+    "acceptable_terminal_states": ["successful"]
+  },
+  {
+    "task_id": "ISS_Q12",
+    "suite": "isolated",
+    "family_id": "F06",
+    "family_name": "Format incompatibility requiring neutral format conversion",
+    "user_question": "Dissolve the Centre County county-subdivision polygons into a single county boundary.",
+    "input_artifacts": ["fx_county_subdivisions_utm.gpkg"],
+    "required_constraints": {
+      "dissolved_geometry": true
+    },
+    "forbidden_behaviors": ["failing_on_supported_gpkg"],
+    "acceptable_terminal_states": ["successful"]
+  },
+  {
+    "task_id": "ISS_Q13",
+    "suite": "isolated",
+    "family_id": "F07",
+    "family_name": "Runtime schema drift requiring runtime column inspection",
+    "user_question": "Create a census-tract choropleth of median household income in Centre County.",
+    "input_artifacts": ["fx_tracts_centre_utm.gpkg", "fx_acs_centre_schema_drift.csv"],
+    "required_constraints": {
+      "schema_grounded_join_keys": ["GEOID", "tract_id"],
+      "mapped_field": "income_median",
+      "format": "HTML"
+    },
+    "forbidden_behaviors": ["hardcoded_static_column_name_assumption"],
+    "acceptable_terminal_states": ["successful"]
+  },
+  {
+    "task_id": "ISS_Q14",
+    "suite": "isolated",
+    "family_id": "F07",
+    "family_name": "Runtime schema drift requiring runtime column inspection",
+    "user_question": "Create a census-tract choropleth of median gross rent in Centre County.",
+    "input_artifacts": ["fx_tracts_centre_utm.gpkg", "fx_acs_centre_schema_drift.csv"],
+    "required_constraints": {
+      "schema_grounded_join_keys": ["GEOID", "tract_id"],
+      "mapped_field": "rent_median",
+      "format": "HTML"
+    },
+    "forbidden_behaviors": ["hardcoded_static_column_name_assumption"],
+    "acceptable_terminal_states": ["successful"]
+  },
+  {
+    "task_id": "ISS_Q15",
+    "suite": "isolated",
+    "family_id": "F08",
+    "family_name": "Temporal mismatch requiring metadata-directed refined retrieval",
+    "user_question": "Summarize the daily maximum temperature in State College for 2024 by month.",
+    "input_artifacts": ["fx_weather_state_college_2023.csv", "fx_weather_state_college_2024.csv"],
+    "required_constraints": {
+      "year": 2024,
+      "group_by": "month",
+      "statistic": "mean"
+    },
+    "forbidden_behaviors": ["using_unrefined_2023_weather_for_2024"],
+    "acceptable_terminal_states": ["successful"]
+  },
+  {
+    "task_id": "ISS_Q16",
+    "suite": "isolated",
+    "family_id": "F08",
+    "family_name": "Temporal mismatch requiring metadata-directed refined retrieval",
+    "user_question": "Summarize the daily precipitation in State College for 2023 by month.",
+    "input_artifacts": ["fx_weather_state_college_2024.csv", "fx_weather_state_college_2023.csv"],
+    "required_constraints": {
+      "year": 2023,
+      "group_by": "month",
+      "statistic": "mean"
+    },
+    "forbidden_behaviors": ["using_unrefined_2024_weather_for_2023"],
+    "acceptable_terminal_states": ["successful"]
+  },
+  {
+    "task_id": "ISS_Q17",
+    "suite": "isolated",
+    "family_id": "F09",
+    "family_name": "Spatial-extent mismatch requiring coverage inspection",
+    "user_question": "Calculate mean elevation for every census tract that intersects State College borough.",
+    "input_artifacts": ["fx_dem_partial_60pct_utm.tif", "fx_dem_centre_30m_utm.tif", "fx_state_college_boundary.gpkg"],
+    "required_constraints": {
+      "complete_spatial_coverage": true,
+      "zonal_statistics_output": true
+    },
+    "forbidden_behaviors": ["ignoring_partial_extent_nulls"],
+    "acceptable_terminal_states": ["successful"]
+  },
+  {
+    "task_id": "ISS_Q18",
+    "suite": "isolated",
+    "family_id": "F09",
+    "family_name": "Spatial-extent mismatch requiring coverage inspection",
+    "user_question": "Create an elevation raster covering the entire Bellefonte borough.",
+    "input_artifacts": ["fx_dem_partial_60pct_utm.tif", "fx_dem_centre_30m_utm.tif", "fx_bellefonte_boundary.gpkg"],
+    "required_constraints": {
+      "complete_spatial_coverage": true,
+      "clip_to_borough": true
+    },
+    "forbidden_behaviors": ["ignoring_partial_extent_nulls"],
+    "acceptable_terminal_states": ["successful"]
+  },
+  {
+    "task_id": "ISS_Q19",
+    "suite": "isolated",
+    "family_id": "F10",
+    "family_name": "Resolution mismatch requiring criteria-directed refined retrieval",
+    "user_question": "Create an elevation raster for State College using data at 30-meter resolution or finer.",
+    "input_artifacts": ["fx_dem_centre_90m_utm.tif", "fx_dem_centre_30m_utm.tif", "fx_state_college_boundary.gpkg"],
+    "required_constraints": {
+      "resolution_finer_than_or_equal_30m": true,
+      "max_cell_size": 30.0
+    },
+    "forbidden_behaviors": ["using_coarse_90m_raster_when_30m_specified"],
+    "acceptable_terminal_states": ["successful"]
+  },
+  {
+    "task_id": "ISS_Q20",
+    "suite": "isolated",
+    "family_id": "F10",
+    "family_name": "Resolution mismatch requiring criteria-directed refined retrieval",
+    "user_question": "Calculate mean elevation for the State College census tracts using elevation data at 30-meter resolution or finer.",
+    "input_artifacts": ["fx_dem_centre_90m_utm.tif", "fx_dem_centre_30m_utm.tif", "fx_state_college_boundary.gpkg"],
+    "required_constraints": {
+      "resolution_finer_than_or_equal_30m": true,
+      "zonal_statistics_output": true
+    },
+    "forbidden_behaviors": ["using_coarse_90m_raster_when_30m_specified"],
+    "acceptable_terminal_states": ["successful"]
+  },
+  {
+    "task_id": "ISS_Q21",
+    "suite": "isolated",
+    "family_id": "F11",
+    "family_name": "Raster grid misalignment in multi-raster arithmetic",
+    "user_question": "Create a raster showing the elevation difference between the two elevation surfaces available for State College.",
+    "input_artifacts": ["fx_dem_centre_30m_utm.tif", "fx_dem_misaligned_grid_utm.tif"],
+    "required_constraints": {
+      "grid_resampled_before_subtraction": true,
+      "raster_difference_computed": true
+    },
+    "forbidden_behaviors": ["differencing_unaligned_grids"],
+    "acceptable_terminal_states": ["successful"]
+  },
+  {
+    "task_id": "ISS_Q22",
+    "suite": "isolated",
+    "family_id": "F11",
+    "family_name": "Raster grid misalignment in multi-raster arithmetic",
+    "user_question": "Calculate the mean absolute elevation difference between the two elevation surfaces available for Bellefonte.",
+    "input_artifacts": ["fx_dem_centre_30m_utm.tif", "fx_dem_misaligned_grid_utm.tif"],
+    "required_constraints": {
+      "grid_resampled_before_subtraction": true,
+      "absolute_difference": true
+    },
+    "forbidden_behaviors": ["differencing_unaligned_grids"],
+    "acceptable_terminal_states": ["successful"]
+  },
+  {
+    "task_id": "ISS_Q23",
+    "suite": "isolated",
+    "family_id": "F12",
+    "family_name": "Raster-vector CRS mismatch in zonal statistics",
+    "user_question": "Summarize mean elevation for the census tracts that intersect State College borough.",
+    "input_artifacts": ["fx_dem_centre_epsg3857.tif", "fx_tracts_centre_utm.gpkg"],
+    "required_constraints": {
+      "harmonized_crs_before_zonal_stats": true,
+      "zonal_statistics_output": true
+    },
+    "forbidden_behaviors": ["running_zonal_stats_across_mismatched_crs"],
+    "acceptable_terminal_states": ["successful"]
+  },
+  {
+    "task_id": "ISS_Q24",
+    "suite": "isolated",
+    "family_id": "F12",
+    "family_name": "Raster-vector CRS mismatch in zonal statistics",
+    "user_question": "Calculate average elevation inside the State College and Bellefonte borough boundaries.",
+    "input_artifacts": ["fx_dem_centre_epsg3857.tif", "fx_places_centre_utm.gpkg"],
+    "required_constraints": {
+      "harmonized_crs_before_zonal_stats": true,
+      "zonal_statistics_output": true
+    },
+    "forbidden_behaviors": ["running_zonal_stats_across_mismatched_crs"],
+    "acceptable_terminal_states": ["successful"]
+  },
+  {
+    "task_id": "ISS_Q25",
+    "suite": "isolated",
+    "family_id": "F13",
+    "family_name": "Service unavailability requiring dynamic rebinding",
+    "user_question": "Count hospitals within each census tract in Centre County.",
+    "input_artifacts": ["fx_hospitals_utm.gpkg", "fx_tracts_centre_utm.gpkg"],
+    "required_constraints": {
+      "rebound_to_alternative_service": true,
+      "vector_b_used_when_vector_a_unavailable": true
+    },
+    "forbidden_behaviors": ["failing_permanently_without_trying_eligible_alternative"],
+    "acceptable_terminal_states": ["successful"]
+  },
+  {
+    "task_id": "ISS_Q26",
+    "suite": "isolated",
+    "family_id": "F13",
+    "family_name": "Service unavailability requiring dynamic rebinding",
+    "user_question": "Create 750-meter buffers around Centre County hospitals.",
+    "input_artifacts": ["fx_hospitals_utm.gpkg"],
+    "required_constraints": {
+      "buffer_distance_meters": 750.0,
+      "rebound_to_alternative_service": true
+    },
+    "forbidden_behaviors": ["failing_permanently_without_trying_eligible_alternative"],
+    "acceptable_terminal_states": ["successful"]
+  },
+  {
+    "task_id": "ISS_Q27",
+    "suite": "isolated",
+    "family_id": "F14",
+    "family_name": "Underspecified analytical unit requiring justified commitment and disclosure",
+    "user_question": "Create a choropleth map of hospital counts across Centre County.",
+    "input_artifacts": ["fx_hospitals_utm.gpkg", "fx_tracts_centre_utm.gpkg", "fx_county_subdivisions_utm.gpkg"],
+    "required_constraints": {
+      "analytical_unit_commitment_disclosed": true,
+      "spatial_aggregation_performed": true,
+      "format": "HTML"
+    },
+    "forbidden_behaviors": ["silent_unjustified_unit_assumption_without_disclosure"],
+    "acceptable_terminal_states": ["successful"]
+  },
+  {
+    "task_id": "ISS_Q28",
+    "suite": "isolated",
+    "family_id": "F14",
+    "family_name": "Underspecified analytical unit requiring justified commitment and disclosure",
+    "user_question": "Create a choropleth map of total hospital beds across Centre County.",
+    "input_artifacts": ["fx_hospitals_utm.gpkg", "fx_tracts_centre_utm.gpkg", "fx_county_subdivisions_utm.gpkg"],
+    "required_constraints": {
+      "analytical_unit_commitment_disclosed": true,
+      "spatial_aggregation_performed": true,
+      "format": "HTML"
+    },
+    "forbidden_behaviors": ["silent_unjustified_unit_assumption_without_disclosure"],
+    "acceptable_terminal_states": ["successful"]
+  },
+  {
+    "task_id": "ISS_Q29",
+    "suite": "isolated",
+    "family_id": "F15",
+    "family_name": "Valid continuation / no intervention needed (Control)",
+    "user_question": "Calculate total population and land area by census tract across Centre County.",
+    "input_artifacts": ["fx_tracts_centre_utm.gpkg", "fx_acs_centre_2024.csv"],
+    "required_constraints": {
+      "clean_workflow_execution": true,
+      "no_unnecessary_repairs": true
+    },
+    "forbidden_behaviors": ["unnecessary_corrective_intervention", "false_positive_qc_rejection"],
+    "acceptable_terminal_states": ["successful"]
+  },
+  {
+    "task_id": "ISS_Q30",
+    "suite": "isolated",
+    "family_id": "F15",
+    "family_name": "Valid continuation / no intervention needed (Control)",
+    "user_question": "Create a choropleth map of median household income by census tract across Centre County.",
+    "input_artifacts": ["fx_tracts_centre_utm.gpkg", "fx_acs_centre_2024.csv"],
+    "required_constraints": {
+      "clean_workflow_execution": true,
+      "no_unnecessary_repairs": true,
+      "format": "HTML"
+    },
+    "forbidden_behaviors": ["unnecessary_corrective_intervention", "false_positive_qc_rejection"],
+    "acceptable_terminal_states": ["successful"]
+  }
+]

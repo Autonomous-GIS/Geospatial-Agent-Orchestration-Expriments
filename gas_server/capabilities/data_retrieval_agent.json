@@ -1,0 +1,86 @@
+{
+  "$schema": "https://www.geospatial-agentic-services.online/schemas/describe_agent.schema.json",
+  "profile": {
+    "agent_id": "data_retrieval_agent",
+    "name": "Data Retrieval Agent",
+    "category": "Retrieve",
+    "description": "Searches the available catalog and returns the highest-ranked available dataset candidate. Query criteria influence retrieval but are not guarantees of task-level suitability. Returned metadata describe the retrieved artifact. Clients should inspect returned metadata before downstream use.",
+    "version": "2.0.0",
+    "base_url": "https://www.geospatial-agentic-services.online/agents/data_retrieval_agent",
+    "default_model": null
+  },
+  "keywords": [
+    "data retrieval",
+    "catalog search",
+    "vector dataset",
+    "raster dataset",
+    "tabular dataset"
+  ],
+  "skills": [
+    {
+      "skill_id": "dataset_retrieval",
+      "name": "Dataset Retrieval",
+      "description": "Retrieves registered benchmark datasets matching requested criteria from the catalog.",
+      "constraints": {
+        "spatial": "Returns datasets covering registered spatial boundaries.",
+        "temporal": "Returns datasets with metadata indicating time/year of acquisition.",
+        "other": [
+          "The service does not determine downstream analytical fitness.",
+          "Supports candidate exclusion via exclude_artifact_ids."
+        ]
+      }
+    }
+  ],
+  "execute_task": {
+    "operation_id": "execute_task",
+    "name": "ExecuteTask",
+    "description": "Searches the dataset catalog and retrieves the top matching vector, raster, or tabular artifact.",
+    "request_schema": "https://www.geospatial-agentic-services.online/schemas/execute_task_request.schema.json",
+    "response_schema": "https://www.geospatial-agentic-services.online/schemas/task_response.schema.json",
+    "modes": ["sync"],
+    "task": {
+      "instructions": {
+        "required": true,
+        "description": "Dataset description, layer name, or search query."
+      }
+    },
+    "inputs": {
+      "input_datasets": {
+        "required": false,
+        "description": "Not required for data retrieval."
+      }
+    },
+    "outputs": {
+      "artifact_delivery": {
+        "required": false,
+        "default": "URL",
+        "allowed_values": ["URL", "Encoded"]
+      },
+      "primary_artifacts": [
+        {
+          "type": "dataset",
+          "formats": ["GPKG", "GeoJSON", "GeoTIFF", "CSV"],
+          "required": true,
+          "description": "Retrieved dataset artifact."
+        }
+      ]
+    },
+    "parameters": {
+      "exclude_artifact_ids": {
+        "required": false,
+        "description": "Optional list of artifact IDs to exclude from candidate ranking."
+      }
+    },
+    "credentials": {
+      "required": false
+    }
+  },
+  "conformance": {
+    "gas_version": "1.0.0",
+    "schemas": {
+      "describe_agent": "https://www.geospatial-agentic-services.online/schemas/describe_agent.schema.json",
+      "task_response": "https://www.geospatial-agentic-services.online/schemas/task_response.schema.json",
+      "execute_task_request": "https://www.geospatial-agentic-services.online/schemas/execute_task_request.schema.json"
+    }
+  }
+}

@@ -1,0 +1,1123 @@
+{
+  "trajectory_id": "traj_ISS_Q13_C4_run2",
+  "task_id": "ISS_Q13",
+  "condition": "C4",
+  "model": "gpt-5.6-luna",
+  "run_index": 2,
+  "suite": "isolated",
+  "user_question": "Create a census-tract choropleth of median household income in Centre County.",
+  "input_artifact_paths": [
+    "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg",
+    "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_acs_centre_schema_drift.csv"
+  ],
+  "status": "failed",
+  "total_wall_time": 26.908,
+  "rate_limit_wait_time": 0.0,
+  "provider_retry_wait_time": 0.0,
+  "orchestration_active_time": 26.905,
+  "worker_execution_time": 0.004,
+  "total_tokens": 8403,
+  "input_tokens": 5578,
+  "output_tokens": 2825,
+  "outputs": {
+    "summary": "Role 'attribute_table' requires data model 'table'.",
+    "artifacts": [],
+    "produced_artifacts": [
+      "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_cf734851_fx_tracts_centre.geojson"
+    ],
+    "workflow_plan": {
+      "workflow_id": "abd43c2b-ac5d-4bce-9428-a4afa7ff980d",
+      "plan_version": 1,
+      "goal": "Create a census-tract choropleth of median household income in Centre County.",
+      "workflow_steps": [
+        {
+          "step_id": "retrieve_income_table",
+          "title": "Retrieve median household income table",
+          "purpose": "Obtain a catalog dataset candidate containing median household income attributes for Centre County census tracts.",
+          "agent_id": "data_retrieval_agent",
+          "operation": "dataset_retrieval",
+          "instructions": "Retrieve the highest-ranked available CSV attribute-table candidate for Centre County census-tract median household income. Treat the result as a candidate pending runtime schema and coverage validation.",
+          "parameters": {},
+          "depends_on": [],
+          "input_from_steps": [],
+          "status": "successful",
+          "output_artifact_ids": [
+            "2695e823-41ff-422e-96d9-d556b2633505"
+          ]
+        },
+        {
+          "step_id": "join_income_to_tracts",
+          "title": "Join income attributes to census tracts",
+          "purpose": "Attach the retrieved median household income attributes to the supplied census-tract polygon layer.",
+          "agent_id": null,
+          "operation": "attribute_join",
+          "instructions": "Join the attribute_table CSV to the input_1 GeoPackage census-tract polygons. Leave vector_key, table_key, and mapped field names unset; runtime QC must ground the compatible tract identifier fields and the median household income field from observed schemas.",
+          "parameters": {},
+          "depends_on": [
+            "retrieve_income_table"
+          ],
+          "input_from_steps": [
+            "retrieve_income_table"
+          ],
+          "status": "failed",
+          "output_artifact_ids": []
+        },
+        {
+          "step_id": "map_income_choropleth",
+          "title": "Create median household income choropleth",
+          "purpose": "Render a census-tract choropleth of median household income for Centre County.",
+          "agent_id": null,
+          "operation": "thematic_mapping",
+          "instructions": "Generate an interactive HTML choropleth from joined_income_tracts. Leave the field parameter unset; runtime QC must ground the joined median household income field from the observed output schema.",
+          "parameters": {},
+          "depends_on": [
+            "join_income_to_tracts"
+          ],
+          "input_from_steps": [
+            "join_income_to_tracts"
+          ],
+          "status": "proposed",
+          "output_artifact_ids": []
+        }
+      ],
+      "requirements": [
+        {
+          "requirement_id": "req_retrieval_coverage",
+          "requirement_type": "spatial_coverage",
+          "scope": "The retrieved attribute table must represent census tracts covering Centre County.",
+          "task_id": "retrieve_income_table",
+          "artifact_roles": [
+            "attribute_table"
+          ],
+          "parameters": {
+            "place": "Centre County",
+            "unit": "census tract"
+          },
+          "blocking": true,
+          "provenance": "USER_EXPLICIT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_join_fields",
+          "requirement_type": "required_fields",
+          "scope": "The join inputs must expose runtime-grounded compatible tract identifier fields, and the table must contain a median household income field.",
+          "task_id": "join_income_to_tracts",
+          "artifact_roles": [
+            "input_1",
+            "attribute_table"
+          ],
+          "parameters": {
+            "required_semantics": [
+              "tract identifier",
+              "median household income"
+            ]
+          },
+          "blocking": true,
+          "provenance": "DOWNSTREAM_CONSUMER",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_map_field",
+          "requirement_type": "required_fields",
+          "scope": "The joined vector must contain a runtime-grounded median household income field suitable for thematic mapping.",
+          "task_id": "map_income_choropleth",
+          "artifact_roles": [
+            "joined_income_tracts"
+          ],
+          "parameters": {
+            "required_semantics": [
+              "median household income"
+            ]
+          },
+          "blocking": true,
+          "provenance": "USER_EXPLICIT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        }
+      ],
+      "commitments": []
+    }
+  },
+  "workflow_state": {
+    "schema_version": "1.0.0",
+    "workflow_id": "abd43c2b-ac5d-4bce-9428-a4afa7ff980d",
+    "state_version": 13,
+    "user_goal": "Create a census-tract choropleth of median household income in Centre County.",
+    "feature_profile": "C4",
+    "feature_config": {
+      "profile_name": "C4",
+      "planner_mode": "gis_aware",
+      "qc_mode": "none",
+      "replanner_mode": "gis_aware",
+      "technical_invariants": true,
+      "local_recovery": true,
+      "structural_patching": true,
+      "gis_finding_routing": false
+    },
+    "current_plan_version": 1,
+    "tasks": {
+      "retrieve_income_table": {
+        "task_id": "retrieve_income_table",
+        "title": "Retrieve median household income table",
+        "purpose": "Obtain a catalog dataset candidate containing median household income attributes for Centre County census tracts.",
+        "operation": "dataset_retrieval",
+        "instructions": "Retrieve the highest-ranked available CSV attribute-table candidate for Centre County census-tract median household income. Treat the result as a candidate pending runtime schema and coverage validation.",
+        "parameters": {},
+        "required_capabilities": [
+          "dataset_retrieval"
+        ],
+        "depends_on": [],
+        "input_requirements": [
+          {
+            "role": "input_2",
+            "data_model": "table",
+            "formats": [
+              "CSV"
+            ],
+            "required": false
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "attribute_table",
+            "data_model": "table",
+            "formats": [
+              "CSV"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_retrieval_coverage"
+        ],
+        "status": "successful",
+        "attempts": 1,
+        "active_binding_id": "db8c8981-2e5a-47cb-8146-11dbd3f51b22",
+        "output_artifact_ids": [
+          "2695e823-41ff-422e-96d9-d556b2633505"
+        ],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      },
+      "join_income_to_tracts": {
+        "task_id": "join_income_to_tracts",
+        "title": "Join income attributes to census tracts",
+        "purpose": "Attach the retrieved median household income attributes to the supplied census-tract polygon layer.",
+        "operation": "attribute_join",
+        "instructions": "Join the attribute_table CSV to the input_1 GeoPackage census-tract polygons. Leave vector_key, table_key, and mapped field names unset; runtime QC must ground the compatible tract identifier fields and the median household income field from observed schemas.",
+        "parameters": {},
+        "required_capabilities": [
+          "attribute_join"
+        ],
+        "depends_on": [
+          "retrieve_income_table"
+        ],
+        "input_requirements": [
+          {
+            "role": "input_1",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          },
+          {
+            "role": "attribute_table",
+            "data_model": "table",
+            "formats": [
+              "CSV"
+            ],
+            "required": true
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "joined_income_tracts",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_join_fields"
+        ],
+        "status": "failed",
+        "attempts": 0,
+        "active_binding_id": null,
+        "output_artifact_ids": [],
+        "last_error": {
+          "code": "E_BINDING",
+          "message": "Role 'attribute_table' requires data model 'table'.",
+          "retryable": false,
+          "details": {}
+        },
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      },
+      "map_income_choropleth": {
+        "task_id": "map_income_choropleth",
+        "title": "Create median household income choropleth",
+        "purpose": "Render a census-tract choropleth of median household income for Centre County.",
+        "operation": "thematic_mapping",
+        "instructions": "Generate an interactive HTML choropleth from joined_income_tracts. Leave the field parameter unset; runtime QC must ground the joined median household income field from the observed output schema.",
+        "parameters": {},
+        "required_capabilities": [
+          "thematic_mapping"
+        ],
+        "depends_on": [
+          "join_income_to_tracts"
+        ],
+        "input_requirements": [
+          {
+            "role": "joined_income_tracts",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "income_choropleth_map",
+            "data_model": "map",
+            "formats": [
+              "HTML"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_map_field"
+        ],
+        "status": "proposed",
+        "attempts": 0,
+        "active_binding_id": null,
+        "output_artifact_ids": [],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      }
+    },
+    "edges": [
+      [
+        "join_income_to_tracts",
+        "map_income_choropleth"
+      ],
+      [
+        "retrieve_income_table",
+        "join_income_to_tracts"
+      ]
+    ],
+    "bindings": {
+      "db8c8981-2e5a-47cb-8146-11dbd3f51b22": {
+        "binding_id": "db8c8981-2e5a-47cb-8146-11dbd3f51b22",
+        "task_id": "retrieve_income_table",
+        "agent_id": "data_retrieval_agent",
+        "operation": "dataset_retrieval",
+        "instruction": "Retrieve the highest-ranked available CSV attribute-table candidate for Centre County census-tract median household income. Treat the result as a candidate pending runtime schema and coverage validation.",
+        "input_bindings": [
+          {
+            "role": "input_2",
+            "artifact_id": "8077eb5d-e36c-41ba-9baa-9184cb10de22",
+            "source_task_id": null,
+            "binding_order": 0
+          }
+        ],
+        "agent_profile_snapshot": {
+          "agent_id": "data_retrieval_agent",
+          "name": "Data Retrieval Agent",
+          "description": "Searches the available catalog and returns the highest-ranked available dataset candidate. Query criteria influence retrieval but are not guarantees of task-level suitability. Returned metadata describe the retrieved artifact. Clients should inspect returned metadata before downstream use.",
+          "operations": [
+            "dataset_retrieval"
+          ],
+          "skills": [
+            {
+              "skill_id": "dataset_retrieval",
+              "name": "Dataset Retrieval",
+              "description": "Retrieves registered benchmark datasets matching requested criteria from the catalog.",
+              "constraints": {
+                "spatial": "Returns datasets covering registered spatial boundaries.",
+                "temporal": "Returns datasets with metadata indicating time/year of acquisition.",
+                "other": [
+                  "The service does not determine downstream analytical fitness.",
+                  "Supports candidate exclusion via exclude_artifact_ids."
+                ]
+              }
+            }
+          ],
+          "inputs": {
+            "input_datasets": {
+              "required": false,
+              "description": "Not required for data retrieval."
+            }
+          },
+          "outputs": [
+            {
+              "type": "dataset",
+              "formats": [
+                "GPKG",
+                "GeoJSON",
+                "GeoTIFF",
+                "CSV"
+              ],
+              "required": true,
+              "description": "Retrieved dataset artifact."
+            }
+          ],
+          "parameters": {
+            "exclude_artifact_ids": {
+              "required": false,
+              "description": "Optional list of artifact IDs to exclude from candidate ranking."
+            }
+          }
+        },
+        "endpoint": "https://www.geospatial-agentic-services.online/agents/data_retrieval_agent/tasks",
+        "attempt": 1,
+        "invocation_id": null,
+        "status": "successful",
+        "started_at": "2026-08-21T20:20:20.851846Z",
+        "completed_at": "2026-08-21T20:20:20.855508Z",
+        "duration_seconds": 0.003672983992146328,
+        "output_artifact_ids": [
+          "2695e823-41ff-422e-96d9-d556b2633505"
+        ],
+        "messages": [
+          "Successfully retrieved dataset: fx_tracts_centre.geojson"
+        ],
+        "structured_error": null,
+        "created_at": "2026-08-21T20:20:20.848291Z"
+      }
+    },
+    "artifacts": {
+      "f5b18ab7-3d75-4cd6-abe5-36aabf9a0bd6": {
+        "artifact_id": "f5b18ab7-3d75-4cd6-abe5-36aabf9a0bd6",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg",
+        "content_hash": "9818cdd69d3b26cbd238d60780f5a566bee625b857232a79ed5ca02595c100a8",
+        "format": "gpkg",
+        "media_type": null,
+        "data_model": "vector",
+        "producer_task_id": null,
+        "producer_binding_id": null,
+        "role": "input_1",
+        "evidence_ids": [
+          "c6597c40-feb9-4085-96a9-08cd0913cc88"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T20:19:54.028369Z",
+        "metadata": {
+          "source": "user_input"
+        }
+      },
+      "8077eb5d-e36c-41ba-9baa-9184cb10de22": {
+        "artifact_id": "8077eb5d-e36c-41ba-9baa-9184cb10de22",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_acs_centre_schema_drift.csv",
+        "content_hash": "9eb8b4be7a1b7410df4240653cc73fa4bb68eafd6b3e76afd6349d44aeabe6d0",
+        "format": "csv",
+        "media_type": null,
+        "data_model": "table",
+        "producer_task_id": null,
+        "producer_binding_id": null,
+        "role": "input_2",
+        "evidence_ids": [
+          "fbe79015-da3f-47ca-bb6a-7506eb4137a7"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T20:19:54.029150Z",
+        "metadata": {
+          "source": "user_input"
+        }
+      },
+      "2695e823-41ff-422e-96d9-d556b2633505": {
+        "artifact_id": "2695e823-41ff-422e-96d9-d556b2633505",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_cf734851_fx_tracts_centre.geojson",
+        "content_hash": "b8a88718d2672c77d63b742c526636e5834641d3b2a2f10bf84ba708110eb1a9",
+        "format": "geojson",
+        "media_type": null,
+        "data_model": "vector",
+        "producer_task_id": "retrieve_income_table",
+        "producer_binding_id": "db8c8981-2e5a-47cb-8146-11dbd3f51b22",
+        "role": "attribute_table",
+        "evidence_ids": [
+          "b4a3d553-4caa-4437-821f-2fbb958af5d5"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T20:20:20.858071Z",
+        "metadata": {}
+      }
+    },
+    "derivations": {
+      "d73c8e36-5a81-4699-a02f-c31ec3d703e5": {
+        "derivation_id": "d73c8e36-5a81-4699-a02f-c31ec3d703e5",
+        "output_artifact_id": "2695e823-41ff-422e-96d9-d556b2633505",
+        "source_artifact_ids": [
+          "8077eb5d-e36c-41ba-9baa-9184cb10de22"
+        ],
+        "producer_task_id": "retrieve_income_table",
+        "operation": "dataset_retrieval",
+        "parameters": {},
+        "semantic_effect": "Produced role 'attribute_table' using operation 'dataset_retrieval'.",
+        "evidence_snapshot_ids": [],
+        "created_at": "2026-08-21T20:20:20.858114Z"
+      }
+    },
+    "requirements": {
+      "req_retrieval_coverage": {
+        "requirement_id": "req_retrieval_coverage",
+        "requirement_type": "spatial_coverage",
+        "scope": "The retrieved attribute table must represent census tracts covering Centre County.",
+        "task_id": "retrieve_income_table",
+        "artifact_roles": [
+          "attribute_table"
+        ],
+        "parameters": {
+          "place": "Centre County",
+          "unit": "census tract"
+        },
+        "blocking": true,
+        "provenance": "USER_EXPLICIT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_join_fields": {
+        "requirement_id": "req_join_fields",
+        "requirement_type": "required_fields",
+        "scope": "The join inputs must expose runtime-grounded compatible tract identifier fields, and the table must contain a median household income field.",
+        "task_id": "join_income_to_tracts",
+        "artifact_roles": [
+          "input_1",
+          "attribute_table"
+        ],
+        "parameters": {
+          "required_semantics": [
+            "tract identifier",
+            "median household income"
+          ]
+        },
+        "blocking": true,
+        "provenance": "DOWNSTREAM_CONSUMER",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_map_field": {
+        "requirement_id": "req_map_field",
+        "requirement_type": "required_fields",
+        "scope": "The joined vector must contain a runtime-grounded median household income field suitable for thematic mapping.",
+        "task_id": "map_income_choropleth",
+        "artifact_roles": [
+          "joined_income_tracts"
+        ],
+        "parameters": {
+          "required_semantics": [
+            "median household income"
+          ]
+        },
+        "blocking": true,
+        "provenance": "USER_EXPLICIT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      }
+    },
+    "commitments": {},
+    "schema_mappings": {},
+    "evidence": {
+      "c6597c40-feb9-4085-96a9-08cd0913cc88": {
+        "evidence_id": "c6597c40-feb9-4085-96a9-08cd0913cc88",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "f5b18ab7-3d75-4cd6-abe5-36aabf9a0bd6"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg",
+          "format": "gpkg",
+          "size_bytes": 98304,
+          "complete": true,
+          "limitations": [],
+          "data_model": "vector",
+          "feature_count": 16,
+          "schema": {
+            "GEOID": "object",
+            "NAME": "object",
+            "COUNTYFP": "object",
+            "STATEFP": "object"
+          },
+          "schema_fields": [
+            "GEOID",
+            "NAME",
+            "COUNTYFP",
+            "STATEFP"
+          ],
+          "geometry_type": [
+            "Polygon"
+          ],
+          "geometry_valid": true,
+          "invalid_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "null_geometry_count": 0,
+          "bounds": [
+            238087.3824011362,
+            4508961.385028789,
+            272914.01066431846,
+            4543387.006183241
+          ],
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true,
+          "crs": "EPSG:26918",
+          "crs_authority": "EPSG:26918",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T20:19:54.037517Z",
+        "complete": true,
+        "limitations": []
+      },
+      "fbe79015-da3f-47ca-bb6a-7506eb4137a7": {
+        "evidence_id": "fbe79015-da3f-47ca-bb6a-7506eb4137a7",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "8077eb5d-e36c-41ba-9baa-9184cb10de22"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_acs_centre_schema_drift.csv",
+          "format": "csv",
+          "size_bytes": 750,
+          "complete": true,
+          "limitations": [],
+          "data_model": "table",
+          "inspected_row_count": 16,
+          "row_sample_complete": true,
+          "schema": {
+            "tract_id": "int64",
+            "tract_name": "object",
+            "income_median": "int64",
+            "rent_median": "int64",
+            "total_pop": "int64"
+          },
+          "schema_fields": [
+            "tract_id",
+            "tract_name",
+            "income_median",
+            "rent_median",
+            "total_pop"
+          ],
+          "coordinate_candidates": [],
+          "spatializable_from_coordinates": false,
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T20:19:54.039948Z",
+        "complete": true,
+        "limitations": []
+      },
+      "b4a3d553-4caa-4437-821f-2fbb958af5d5": {
+        "evidence_id": "b4a3d553-4caa-4437-821f-2fbb958af5d5",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "2695e823-41ff-422e-96d9-d556b2633505"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_cf734851_fx_tracts_centre.geojson",
+          "format": "geojson",
+          "size_bytes": 7336,
+          "complete": true,
+          "limitations": [],
+          "data_model": "vector",
+          "feature_count": 16,
+          "schema": {
+            "GEOID": "object",
+            "NAME": "object",
+            "COUNTYFP": "object",
+            "STATEFP": "object"
+          },
+          "schema_fields": [
+            "GEOID",
+            "NAME",
+            "COUNTYFP",
+            "STATEFP"
+          ],
+          "geometry_type": [
+            "Polygon"
+          ],
+          "geometry_valid": true,
+          "invalid_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "null_geometry_count": 0,
+          "bounds": [
+            238087.3824011362,
+            4508961.385028789,
+            272914.01066431846,
+            4543387.006183241
+          ],
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true,
+          "crs": "EPSG:26918",
+          "crs_authority": "EPSG:26918",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T20:20:20.864523Z",
+        "complete": true,
+        "limitations": []
+      }
+    },
+    "violations": {},
+    "execution_history": [
+      {
+        "event_id": "81148792-e12f-4695-bb0b-8bc63b3ad2fc",
+        "event_type": "initial_plan_committed",
+        "actor": "planner_component",
+        "state_version": 0,
+        "plan_version": 1,
+        "task_id": null,
+        "reason": "Retrieve a candidate ACS attribute table, join median household income to the supplied Centre County census-tract polygons, and generate the final HTML choropleth map. Join keys and mapped field names remain unset for runtime schema grounding.",
+        "metadata": {
+          "task_ids": [
+            "join_income_to_tracts",
+            "map_income_choropleth",
+            "retrieve_income_table"
+          ]
+        },
+        "created_at": "2026-08-21T20:20:20.841988Z"
+      },
+      {
+        "event_id": "74a11c5b-adcb-43a7-a155-caf4adfe7b49",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 1,
+        "plan_version": 1,
+        "task_id": "retrieve_income_table",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "proposed",
+          "to": "ready"
+        },
+        "created_at": "2026-08-21T20:20:20.844992Z"
+      },
+      {
+        "event_id": "6b8a262b-6699-4fcd-b4cc-5fdcae79097d",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 2,
+        "plan_version": 1,
+        "task_id": "retrieve_income_table",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-21T20:20:20.846641Z"
+      },
+      {
+        "event_id": "12afc893-0612-4c1a-a6e4-b91c31d6b3c3",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 3,
+        "plan_version": 1,
+        "task_id": "retrieve_income_table",
+        "reason": "Worker bound.",
+        "metadata": {
+          "from": "binding",
+          "to": "bound"
+        },
+        "created_at": "2026-08-21T20:20:20.848350Z"
+      },
+      {
+        "event_id": "d64c95f0-0ebc-4c6f-9f26-c1d62b3793a7",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 4,
+        "plan_version": 1,
+        "task_id": "retrieve_income_table",
+        "reason": "Worker started.",
+        "metadata": {
+          "from": "bound",
+          "to": "running"
+        },
+        "created_at": "2026-08-21T20:20:20.850093Z"
+      },
+      {
+        "event_id": "0b0ea669-b7bb-4ec4-a3b0-e48ed31bed84",
+        "event_type": "worker_execution_completed",
+        "actor": "worker_executor",
+        "state_version": 5,
+        "plan_version": 1,
+        "task_id": "retrieve_income_table",
+        "reason": "Worker returned successfully.",
+        "metadata": {
+          "binding_id": "db8c8981-2e5a-47cb-8146-11dbd3f51b22",
+          "agent_id": "data_retrieval_agent",
+          "operation": "dataset_retrieval",
+          "attempt": 1,
+          "status": "successful",
+          "duration_seconds": 0.003672983992146328
+        },
+        "created_at": "2026-08-21T20:20:20.855594Z"
+      },
+      {
+        "event_id": "4215a79e-1f93-4116-9acc-a1485febad70",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 5,
+        "plan_version": 1,
+        "task_id": "retrieve_income_table",
+        "reason": "Worker returned a provisional result.",
+        "metadata": {
+          "from": "running",
+          "to": "provisional_success"
+        },
+        "created_at": "2026-08-21T20:20:20.855665Z"
+      },
+      {
+        "event_id": "eb747e46-8a35-444d-bbcc-0c1ba25fb6dd",
+        "event_type": "artifact_registered",
+        "actor": "artifact_registry",
+        "state_version": 6,
+        "plan_version": 1,
+        "task_id": "retrieve_income_table",
+        "reason": null,
+        "metadata": {
+          "artifact_id": "2695e823-41ff-422e-96d9-d556b2633505",
+          "role": "attribute_table",
+          "content_hash": "b8a88718d2672c77d63b742c526636e5834641d3b2a2f10bf84ba708110eb1a9"
+        },
+        "created_at": "2026-08-21T20:20:20.858143Z"
+      },
+      {
+        "event_id": "ba4841a8-f016-4710-adc3-8ad46ee51f7c",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 7,
+        "plan_version": 1,
+        "task_id": "retrieve_income_table",
+        "reason": "Reviewing runtime evidence.",
+        "metadata": {
+          "from": "provisional_success",
+          "to": "validating"
+        },
+        "created_at": "2026-08-21T20:20:20.866851Z"
+      },
+      {
+        "event_id": "0789dec1-d395-4254-bf7d-cd0083156e4e",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 8,
+        "plan_version": 1,
+        "task_id": "retrieve_income_table",
+        "reason": "Shared technical response and output-role checks passed.",
+        "metadata": {
+          "from": "validating",
+          "to": "successful"
+        },
+        "created_at": "2026-08-21T20:20:20.869117Z"
+      },
+      {
+        "event_id": "57ec0845-ee0c-4db1-8720-9ce232acede3",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 9,
+        "plan_version": 1,
+        "task_id": "join_income_to_tracts",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "proposed",
+          "to": "ready"
+        },
+        "created_at": "2026-08-21T20:20:20.871265Z"
+      },
+      {
+        "event_id": "9118ee01-916c-4aee-8bb3-5b0a1db1b95d",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 10,
+        "plan_version": 1,
+        "task_id": "join_income_to_tracts",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-21T20:20:20.873244Z"
+      },
+      {
+        "event_id": "53b0ef54-ca69-4c2f-b954-6af1bc2c3a1f",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 11,
+        "plan_version": 1,
+        "task_id": "join_income_to_tracts",
+        "reason": "Worker binding failed.",
+        "metadata": {
+          "from": "binding",
+          "to": "failed"
+        },
+        "created_at": "2026-08-21T20:20:20.875386Z"
+      }
+    ],
+    "qc_history": [
+      {
+        "decision_id": "f1d4c275-e3b7-4505-98d7-26c71cce39d5",
+        "task_id": "retrieve_income_table",
+        "verdict": "PASS",
+        "proposed_verdict": "PASS",
+        "reason": "Shared technical response and output-role checks passed.",
+        "acknowledged_finding_ids": [],
+        "action_class": "NONE",
+        "effective_action": "NONE",
+        "effective_action_source": "condition_policy",
+        "allowed_recovery_types": [],
+        "recovery_parameters": {},
+        "preserve_completed_work": true,
+        "forced_by_invariant": false,
+        "created_at": "2026-08-21T20:20:20.869036Z"
+      }
+    ],
+    "replan_history": [],
+    "component_calls": [
+      {
+        "call_id": "a37fafb0-33d3-40da-96e7-f4c29bd595ab",
+        "component": "planner",
+        "prompt_hash": "879bbf4688237108aa73bcb12bca3ec0b568a6ec20b463cefe3a9dddb652d8de",
+        "tool_schema_hash": "441719facf91fd72ec7e126a4de0921e9629efd4cd39619a5dbe1be9fea2e3fe",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 5578,
+        "output_tokens": 2825,
+        "duration_seconds": 26.76660615899891,
+        "disposition": "successful",
+        "created_at": "2026-08-21T20:20:20.841941Z"
+      }
+    ],
+    "plan_versions": [
+      {
+        "version": 1,
+        "parent_version": null,
+        "reason": "Initial plan committed by independent Planner.",
+        "task_ids": [
+          "join_income_to_tracts",
+          "map_income_choropleth",
+          "retrieve_income_table"
+        ],
+        "edges": [
+          [
+            "join_income_to_tracts",
+            "map_income_choropleth"
+          ],
+          [
+            "retrieve_income_table",
+            "join_income_to_tracts"
+          ]
+        ],
+        "created_at": "2026-08-21T20:20:20.834773Z"
+      }
+    ],
+    "budgets": {
+      "max_total_model_calls": 24,
+      "max_total_tokens": 120000,
+      "max_worker_calls": 30,
+      "max_local_recoveries": 6,
+      "max_replans": 3,
+      "max_runtime_seconds": 900.0,
+      "planner_retry_limit": 2,
+      "qc_retry_limit": 1,
+      "replanner_retry_limit": 1,
+      "total_model_calls": 1,
+      "total_tokens": 8403,
+      "worker_calls": 1,
+      "local_recoveries": 0,
+      "replans": 0
+    },
+    "terminal_state": "failed_unrecoverable",
+    "terminal_reason": "Role 'attribute_table' requires data model 'table'.",
+    "human_clarification": null,
+    "final_artifact_ids": [],
+    "required_terminal_roles": [
+      "income_choropleth_map"
+    ],
+    "final_disclosure": null,
+    "created_at": "2026-08-21T20:19:54.025461Z",
+    "updated_at": "2026-08-21T20:20:20.884735Z"
+  },
+  "execution_steps": [
+    {
+      "step_index": 1,
+      "step_id": "retrieve_income_table",
+      "agent_id": "data_retrieval_agent",
+      "title": "Retrieve median household income table",
+      "instructions": "Retrieve the highest-ranked available CSV attribute-table candidate for Centre County census-tract median household income. Treat the result as a candidate pending runtime schema and coverage validation.",
+      "output_artifacts": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_cf734851_fx_tracts_centre.geojson"
+      ],
+      "status": "successful",
+      "error": null
+    },
+    {
+      "step_index": 2,
+      "step_id": "join_income_to_tracts",
+      "agent_id": null,
+      "title": "Join income attributes to census tracts",
+      "instructions": "Join the attribute_table CSV to the input_1 GeoPackage census-tract polygons. Leave vector_key, table_key, and mapped field names unset; runtime QC must ground the compatible tract identifier fields and the median household income field from observed schemas.",
+      "output_artifacts": [],
+      "status": "failed",
+      "error": {
+        "code": "E_BINDING",
+        "message": "Role 'attribute_table' requires data model 'table'.",
+        "retryable": false,
+        "details": {}
+      }
+    },
+    {
+      "step_index": 3,
+      "step_id": "map_income_choropleth",
+      "agent_id": null,
+      "title": "Create median household income choropleth",
+      "instructions": "Generate an interactive HTML choropleth from joined_income_tracts. Leave the field parameter unset; runtime QC must ground the joined median household income field from the observed output schema.",
+      "output_artifacts": [],
+      "status": "proposed",
+      "error": null
+    }
+  ],
+  "qc_evaluations": 0,
+  "qc_blocks": 0,
+  "qc_interventions": 0,
+  "effective_blocks": 0,
+  "effective_interventions": 0,
+  "qc_policy_overrides": 0,
+  "replanning_iterations": 0,
+  "error": "Role 'attribute_table' requires data model 'table'.",
+  "ledger_events": [
+    {
+      "call_id": "db8c8981-2e5a-47cb-8146-11dbd3f51b22",
+      "trajectory_id": "traj_ISS_Q13_C4_run2",
+      "agent_id": "data_retrieval_agent",
+      "operation": "dataset_retrieval",
+      "query": "Retrieve the highest-ranked available CSV attribute-table candidate for Centre County census-tract median household income. Treat the result as a candidate pending runtime schema and coverage validation.",
+      "timestamp_start": 1787343620.851846,
+      "timestamp_end": 1787343620.855508,
+      "duration_seconds": 0.003672983992146328,
+      "input_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_acs_centre_schema_drift.csv"
+      ],
+      "input_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_acs_centre_schema_drift.csv": "9eb8b4be7a1b7410df4240653cc73fa4bb68eafd6b3e76afd6349d44aeabe6d0"
+      },
+      "parameters": {},
+      "status": "completed",
+      "error_code": null,
+      "error_message": null,
+      "output_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_cf734851_fx_tracts_centre.geojson"
+      ],
+      "output_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_cf734851_fx_tracts_centre.geojson": "b8a88718d2672c77d63b742c526636e5834641d3b2a2f10bf84ba708110eb1a9"
+      },
+      "summary": "Successfully retrieved dataset: fx_tracts_centre.geojson",
+      "raw_response": {
+        "binding_id": "db8c8981-2e5a-47cb-8146-11dbd3f51b22",
+        "task_id": "retrieve_income_table",
+        "attempt": 1
+      }
+    }
+  ],
+  "created_at": "2026-08-21T20:20:20.887803+00:00",
+  "evaluation": {
+    "task_id": "ISS_Q13",
+    "bafo_success": false,
+    "all_challenges_resolved": false,
+    "evaluability_status": "EVALUABLE",
+    "challenge_activated": true,
+    "trajectory_classification": "valid_bafo_fail",
+    "production_terminal_state": "failed_unrecoverable",
+    "terminal_state": "failed",
+    "constraint_results": {
+      "schema_grounded_join_keys": {
+        "constraint_key": "schema_grounded_join_keys",
+        "status": "PASS",
+        "reason": "Schema attributes grounded across 5 column fields.",
+        "details": {
+          "columns": [
+            "GEOID",
+            "NAME",
+            "COUNTYFP",
+            "STATEFP",
+            "geometry"
+          ]
+        }
+      },
+      "mapped_field": {
+        "constraint_key": "mapped_field",
+        "status": "PASS",
+        "reason": "Schema attributes grounded across 5 column fields.",
+        "details": {
+          "columns": [
+            "GEOID",
+            "NAME",
+            "COUNTYFP",
+            "STATEFP",
+            "geometry"
+          ]
+        }
+      },
+      "format": {
+        "constraint_key": "format",
+        "status": "PASS",
+        "reason": "Constraint 'format' satisfied by valid output artifact.",
+        "details": {}
+      }
+    },
+    "passed_constraints": [
+      "schema_grounded_join_keys",
+      "mapped_field",
+      "format"
+    ],
+    "failed_constraints": [],
+    "unevaluable_constraints": [],
+    "inspected_artifacts_count": 1,
+    "events_count": 1,
+    "diagnostic_summary": "BAFO: False | State: failed (Valid: False) | Constraints: 3 PASS, 0 FAIL, 0 UNEVALUABLE | Events Recorded: 1 | Artifacts Inspected: 1"
+  },
+  "bafo_success": false,
+  "all_challenges_resolved": false,
+  "trajectory_classification": "valid_bafo_fail"
+}

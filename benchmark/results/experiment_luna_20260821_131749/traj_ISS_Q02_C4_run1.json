@@ -1,0 +1,1676 @@
+{
+  "trajectory_id": "traj_ISS_Q02_C4_run1",
+  "task_id": "ISS_Q02",
+  "condition": "C4",
+  "model": "gpt-5.6-luna",
+  "run_index": 1,
+  "suite": "isolated",
+  "user_question": "Create 2-km buffers around the hospital locations in Centre County and return the buffer layer.",
+  "input_artifact_paths": [
+    "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_hospitals_wgs84.gpkg"
+  ],
+  "status": "successful",
+  "total_wall_time": 28.99,
+  "rate_limit_wait_time": 0.0,
+  "provider_retry_wait_time": 0.0,
+  "orchestration_active_time": 28.937,
+  "worker_execution_time": 0.053,
+  "total_tokens": 14655,
+  "input_tokens": 11810,
+  "output_tokens": 2845,
+  "outputs": {
+    "summary": "Workflow completed with accepted terminal artifacts.",
+    "artifacts": [
+      "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_a/buffer_2000m_c7d7947c.gpkg"
+    ],
+    "produced_artifacts": [
+      "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/projection_agent/reprojected_d0e66273.gpkg",
+      "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_a/buffer_2000m_c7d7947c.gpkg"
+    ],
+    "workflow_plan": {
+      "workflow_id": "3c9ed8b8-136c-46e6-b372-8bb231d70549",
+      "plan_version": 2,
+      "goal": "Create 2-km buffers around the hospital locations in Centre County and return the buffer layer.",
+      "workflow_steps": [
+        {
+          "step_id": "reproject_hospitals",
+          "title": "Reproject hospital locations",
+          "purpose": "Transform the hospital point geometries from EPSG:4326 into an explicitly identified projected metric CRS suitable for a 2-km buffer.",
+          "agent_id": "projection_agent",
+          "operation": "reproject",
+          "instructions": "Reproject the input hospital vector layer from its observed source CRS EPSG:4326 to EPSG:26918 (NAD83 / UTM zone 18N), preserving the hospital point features and writing a GeoPackage output.",
+          "parameters": {
+            "operation": "reproject",
+            "target_crs": "EPSG:26918"
+          },
+          "depends_on": [],
+          "input_from_steps": [],
+          "status": "successful",
+          "output_artifact_ids": [
+            "5a85d3bd-4976-4f21-82ad-45b2439d1f38"
+          ]
+        },
+        {
+          "step_id": "buffer_hospitals",
+          "title": "Create 2-km hospital buffers",
+          "purpose": "Create 2-km buffers around the hospital point locations in a projected metric CRS.",
+          "agent_id": "vector_analysis_a",
+          "operation": "buffer",
+          "instructions": "Buffer every hospital geometry by 2 kilometers and write the resulting vector layer as GeoPackage. Preserve the hospital-derived buffer features.",
+          "parameters": {
+            "operation": "buffer",
+            "distance": 2,
+            "unit": "km"
+          },
+          "depends_on": [
+            "reproject_hospitals"
+          ],
+          "input_from_steps": [
+            "reproject_hospitals"
+          ],
+          "status": "successful",
+          "output_artifact_ids": [
+            "3027f875-da81-464e-b61d-184a29a27060"
+          ]
+        }
+      ],
+      "requirements": [
+        {
+          "requirement_id": "req_projected_crs",
+          "requirement_type": "compatible_crs",
+          "scope": "The reprojected hospital layer must have an explicitly identified projected CRS with metric linear units suitable for the requested distance operation.",
+          "task_id": "reproject_hospitals",
+          "artifact_roles": [
+            "projected_hospitals"
+          ],
+          "parameters": {
+            "source_crs": "EPSG:4326",
+            "target_crs": null
+          },
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_metric_buffer",
+          "requirement_type": "metric_distance",
+          "scope": "The buffer distance must be interpreted as 2 kilometers in metric units.",
+          "task_id": "buffer_hospitals",
+          "artifact_roles": [
+            "projected_hospitals"
+          ],
+          "parameters": {
+            "distance": 2,
+            "unit": "km"
+          },
+          "blocking": true,
+          "provenance": "USER_EXPLICIT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_buffer_crs",
+          "requirement_type": "crs_present",
+          "scope": "The buffer input must have a defined CRS before metric buffering.",
+          "task_id": "buffer_hospitals",
+          "artifact_roles": [
+            "projected_hospitals"
+          ],
+          "parameters": {},
+          "blocking": true,
+          "provenance": "DOWNSTREAM_CONSUMER",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "b1106e46-2e19-427c-82b4-54133f82b165",
+          "requirement_type": "metric_distance",
+          "scope": "task_transition",
+          "task_id": "buffer_hospitals",
+          "artifact_roles": [
+            "projected_hospitals"
+          ],
+          "parameters": {},
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "operation_contract_catalog",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        }
+      ],
+      "commitments": []
+    }
+  },
+  "workflow_state": {
+    "schema_version": "1.0.0",
+    "workflow_id": "3c9ed8b8-136c-46e6-b372-8bb231d70549",
+    "state_version": 24,
+    "user_goal": "Create 2-km buffers around the hospital locations in Centre County and return the buffer layer.",
+    "feature_profile": "C4",
+    "feature_config": {
+      "profile_name": "C4",
+      "planner_mode": "gis_aware",
+      "qc_mode": "none",
+      "replanner_mode": "gis_aware",
+      "technical_invariants": true,
+      "local_recovery": true,
+      "structural_patching": true,
+      "gis_finding_routing": false
+    },
+    "current_plan_version": 2,
+    "tasks": {
+      "reproject_hospitals": {
+        "task_id": "reproject_hospitals",
+        "title": "Reproject hospital locations",
+        "purpose": "Transform the hospital point geometries from EPSG:4326 into an explicitly identified projected metric CRS suitable for a 2-km buffer.",
+        "operation": "reproject",
+        "instructions": "Reproject the input hospital vector layer from its observed source CRS EPSG:4326 to EPSG:26918 (NAD83 / UTM zone 18N), preserving the hospital point features and writing a GeoPackage output.",
+        "parameters": {
+          "operation": "reproject",
+          "target_crs": "EPSG:26918"
+        },
+        "required_capabilities": [
+          "projection_agent"
+        ],
+        "depends_on": [],
+        "input_requirements": [
+          {
+            "role": "input_1",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "projected_hospitals",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_projected_crs"
+        ],
+        "status": "successful",
+        "attempts": 2,
+        "active_binding_id": "50cc5180-1783-456c-a814-915c60687e90",
+        "output_artifact_ids": [
+          "5a85d3bd-4976-4f21-82ad-45b2439d1f38"
+        ],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      },
+      "buffer_hospitals": {
+        "task_id": "buffer_hospitals",
+        "title": "Create 2-km hospital buffers",
+        "purpose": "Create 2-km buffers around the hospital point locations in a projected metric CRS.",
+        "operation": "buffer",
+        "instructions": "Buffer every hospital geometry by 2 kilometers and write the resulting vector layer as GeoPackage. Preserve the hospital-derived buffer features.",
+        "parameters": {
+          "operation": "buffer",
+          "distance": 2,
+          "unit": "km"
+        },
+        "required_capabilities": [
+          "buffer"
+        ],
+        "depends_on": [
+          "reproject_hospitals"
+        ],
+        "input_requirements": [
+          {
+            "role": "projected_hospitals",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "buffer_layer",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_metric_buffer",
+          "req_buffer_crs",
+          "b1106e46-2e19-427c-82b4-54133f82b165"
+        ],
+        "status": "successful",
+        "attempts": 1,
+        "active_binding_id": "bb15041b-5512-4e8b-8345-0bd28e9d84ce",
+        "output_artifact_ids": [
+          "3027f875-da81-464e-b61d-184a29a27060"
+        ],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      }
+    },
+    "edges": [
+      [
+        "reproject_hospitals",
+        "buffer_hospitals"
+      ]
+    ],
+    "bindings": {
+      "9527e77b-2d8c-4ec0-aa71-ad3559c24ac6": {
+        "binding_id": "9527e77b-2d8c-4ec0-aa71-ad3559c24ac6",
+        "task_id": "reproject_hospitals",
+        "agent_id": "projection_agent",
+        "operation": "reproject",
+        "instruction": "Reproject the input hospital vector layer to a suitable projected metric CRS. Do not infer or assign a CRS without an explicit target CRS; if the target CRS cannot be grounded at runtime, request clarification.",
+        "input_bindings": [
+          {
+            "role": "input_1",
+            "artifact_id": "6043b549-66a4-44a5-9885-8ddd5eafedce",
+            "source_task_id": null,
+            "binding_order": 0
+          }
+        ],
+        "agent_profile_snapshot": {
+          "agent_id": "projection_agent",
+          "name": "Projection Agent",
+          "description": "Reprojects vector artifacts between explicitly identified coordinate reference systems and assigns a CRS when explicitly supplied. The service never guesses an unknown CRS.",
+          "operations": [
+            "assign_crs",
+            "coordinate_transformation",
+            "reproject"
+          ],
+          "skills": [
+            {
+              "skill_id": "coordinate_transformation",
+              "name": "Coordinate Transformation",
+              "description": "Transforms vector geometry coordinates to a target CRS or defines an explicit CRS on datasets with missing metadata.",
+              "constraints": {
+                "spatial": "Reprojection requires a known source CRS and an explicit target CRS. assign_crs requires an explicit CRS to assign.",
+                "temporal": null,
+                "other": [
+                  "The service does not infer or guess unknown coordinate reference systems."
+                ]
+              }
+            }
+          ],
+          "inputs": {
+            "input_datasets": {
+              "required": true,
+              "description": "Vector dataset in GeoPackage or GeoJSON format."
+            }
+          },
+          "outputs": [
+            {
+              "type": "vector",
+              "formats": [
+                "GPKG"
+              ],
+              "required": true,
+              "description": "Reprojected or CRS-assigned vector dataset."
+            }
+          ],
+          "parameters": {
+            "operation": {
+              "required": false,
+              "description": "Explicit operation name (reproject, assign_crs)."
+            },
+            "target_crs": {
+              "required": false,
+              "description": "Explicit target EPSG/CRS identifier."
+            }
+          }
+        },
+        "endpoint": "https://www.geospatial-agentic-services.online/agents/projection_agent/tasks",
+        "attempt": 1,
+        "invocation_id": null,
+        "status": "failed",
+        "started_at": "2026-08-22T16:48:00.587113Z",
+        "completed_at": "2026-08-22T16:48:00.594405Z",
+        "duration_seconds": 0.007301852994714864,
+        "output_artifact_ids": [],
+        "messages": [],
+        "structured_error": {
+          "code": "E_MISSING_CRS",
+          "message": "Explicit CRS parameter is required for assign_crs. Service does not guess unknown CRS.",
+          "retryable": false,
+          "details": {}
+        },
+        "created_at": "2026-08-22T16:48:00.583790Z"
+      },
+      "50cc5180-1783-456c-a814-915c60687e90": {
+        "binding_id": "50cc5180-1783-456c-a814-915c60687e90",
+        "task_id": "reproject_hospitals",
+        "agent_id": "projection_agent",
+        "operation": "reproject",
+        "instruction": "Reproject the input hospital vector layer from its observed source CRS EPSG:4326 to EPSG:26918 (NAD83 / UTM zone 18N), preserving the hospital point features and writing a GeoPackage output.",
+        "input_bindings": [
+          {
+            "role": "input_1",
+            "artifact_id": "6043b549-66a4-44a5-9885-8ddd5eafedce",
+            "source_task_id": null,
+            "binding_order": 0
+          }
+        ],
+        "agent_profile_snapshot": {
+          "agent_id": "projection_agent",
+          "name": "Projection Agent",
+          "description": "Reprojects vector artifacts between explicitly identified coordinate reference systems and assigns a CRS when explicitly supplied. The service never guesses an unknown CRS.",
+          "operations": [
+            "assign_crs",
+            "coordinate_transformation",
+            "reproject"
+          ],
+          "skills": [
+            {
+              "skill_id": "coordinate_transformation",
+              "name": "Coordinate Transformation",
+              "description": "Transforms vector geometry coordinates to a target CRS or defines an explicit CRS on datasets with missing metadata.",
+              "constraints": {
+                "spatial": "Reprojection requires a known source CRS and an explicit target CRS. assign_crs requires an explicit CRS to assign.",
+                "temporal": null,
+                "other": [
+                  "The service does not infer or guess unknown coordinate reference systems."
+                ]
+              }
+            }
+          ],
+          "inputs": {
+            "input_datasets": {
+              "required": true,
+              "description": "Vector dataset in GeoPackage or GeoJSON format."
+            }
+          },
+          "outputs": [
+            {
+              "type": "vector",
+              "formats": [
+                "GPKG"
+              ],
+              "required": true,
+              "description": "Reprojected or CRS-assigned vector dataset."
+            }
+          ],
+          "parameters": {
+            "operation": {
+              "required": false,
+              "description": "Explicit operation name (reproject, assign_crs)."
+            },
+            "target_crs": {
+              "required": false,
+              "description": "Explicit target EPSG/CRS identifier."
+            }
+          }
+        },
+        "endpoint": "https://www.geospatial-agentic-services.online/agents/projection_agent/tasks",
+        "attempt": 2,
+        "invocation_id": null,
+        "status": "successful",
+        "started_at": "2026-08-22T16:48:12.092906Z",
+        "completed_at": "2026-08-22T16:48:12.117273Z",
+        "duration_seconds": 0.024379112001042813,
+        "output_artifact_ids": [
+          "5a85d3bd-4976-4f21-82ad-45b2439d1f38"
+        ],
+        "messages": [
+          "Reprojected 3 features to EPSG:26918."
+        ],
+        "structured_error": null,
+        "created_at": "2026-08-22T16:48:12.088637Z"
+      },
+      "bb15041b-5512-4e8b-8345-0bd28e9d84ce": {
+        "binding_id": "bb15041b-5512-4e8b-8345-0bd28e9d84ce",
+        "task_id": "buffer_hospitals",
+        "agent_id": "vector_analysis_a",
+        "operation": "buffer",
+        "instruction": "Buffer every hospital geometry by 2 kilometers and write the resulting vector layer as GeoPackage. Preserve the hospital-derived buffer features.",
+        "input_bindings": [
+          {
+            "role": "projected_hospitals",
+            "artifact_id": "5a85d3bd-4976-4f21-82ad-45b2439d1f38",
+            "source_task_id": "reproject_hospitals",
+            "binding_order": 0
+          }
+        ],
+        "agent_profile_snapshot": {
+          "agent_id": "vector_analysis_a",
+          "name": "Vector Analysis A",
+          "description": "Performs deterministic vector geoprocessing including buffering, clipping, overlay/intersection, explicit geometry repair, and spatial joins. Binary spatial operations require compatible coordinate reference systems. Distance operations use the coordinate system and units of the provided input artifact.",
+          "operations": [
+            "buffer",
+            "clip",
+            "geometry_repair",
+            "overlay",
+            "spatial_join",
+            "vector_geoprocessing"
+          ],
+          "skills": [
+            {
+              "skill_id": "vector_geoprocessing",
+              "name": "Vector Geoprocessing",
+              "description": "Performs spatial buffering, clipping, polygon intersection overlay, geometry validation/repair, and spatial joins.",
+              "constraints": {
+                "spatial": "Requires matching coordinate reference systems for binary operations. Distance operations require projected coordinate reference systems.",
+                "temporal": null,
+                "other": [
+                  "The service performs only the requested operation.",
+                  "It does not automatically reproject inputs or repair geometries unless explicitly requested."
+                ]
+              }
+            }
+          ],
+          "inputs": {
+            "input_datasets": {
+              "required": true,
+              "description": "One or two vector datasets in GeoPackage (.gpkg) or GeoJSON format."
+            }
+          },
+          "outputs": [
+            {
+              "type": "vector",
+              "formats": [
+                "GPKG",
+                "GeoJSON"
+              ],
+              "required": true,
+              "description": "Processed vector dataset."
+            }
+          ],
+          "parameters": {
+            "operation": {
+              "required": false,
+              "description": "Explicit operation name (buffer, clip, overlay, geometry_repair, spatial_join)."
+            },
+            "distance": {
+              "required": false,
+              "description": "Buffer distance value."
+            },
+            "unit": {
+              "required": false,
+              "default": "meters",
+              "description": "Buffer distance unit (meters, km)."
+            }
+          }
+        },
+        "endpoint": "https://www.geospatial-agentic-services.online/agents/vector_analysis_a/tasks",
+        "attempt": 1,
+        "invocation_id": null,
+        "status": "successful",
+        "started_at": "2026-08-22T16:48:12.144060Z",
+        "completed_at": "2026-08-22T16:48:12.165853Z",
+        "duration_seconds": 0.02180524100549519,
+        "output_artifact_ids": [
+          "3027f875-da81-464e-b61d-184a29a27060"
+        ],
+        "messages": [
+          "Created 2000.0m buffer for 3 features."
+        ],
+        "structured_error": null,
+        "created_at": "2026-08-22T16:48:12.139582Z"
+      }
+    },
+    "artifacts": {
+      "6043b549-66a4-44a5-9885-8ddd5eafedce": {
+        "artifact_id": "6043b549-66a4-44a5-9885-8ddd5eafedce",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_hospitals_wgs84.gpkg",
+        "content_hash": "01efdcc53ac8c9e81f3f6ddce74ffc81240a3661e3535f85a2fdc3573f75f53a",
+        "format": "gpkg",
+        "media_type": null,
+        "data_model": "vector",
+        "producer_task_id": null,
+        "producer_binding_id": null,
+        "role": "input_1",
+        "evidence_ids": [
+          "f60831bf-ad7d-40c0-8bf9-5889b05b729a"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-22T16:47:43.232470Z",
+        "metadata": {
+          "source": "user_input"
+        }
+      },
+      "5a85d3bd-4976-4f21-82ad-45b2439d1f38": {
+        "artifact_id": "5a85d3bd-4976-4f21-82ad-45b2439d1f38",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/projection_agent/reprojected_d0e66273.gpkg",
+        "content_hash": "80fe42e7170c46a46cdf64247c527fd1b8711544e3869219c1dfcfd3cd1ce505",
+        "format": "gpkg",
+        "media_type": null,
+        "data_model": "vector",
+        "producer_task_id": "reproject_hospitals",
+        "producer_binding_id": "50cc5180-1783-456c-a814-915c60687e90",
+        "role": "projected_hospitals",
+        "evidence_ids": [
+          "0e8cd8bd-6d8d-495c-9981-c95e40920e1b"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-22T16:48:12.120754Z",
+        "metadata": {}
+      },
+      "3027f875-da81-464e-b61d-184a29a27060": {
+        "artifact_id": "3027f875-da81-464e-b61d-184a29a27060",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_a/buffer_2000m_c7d7947c.gpkg",
+        "content_hash": "53d76d9e9c7d8dfcc66c1036ed1dce03b793eedf3162f4ed1499e1ac8d04110b",
+        "format": "gpkg",
+        "media_type": null,
+        "data_model": "vector",
+        "producer_task_id": "buffer_hospitals",
+        "producer_binding_id": "bb15041b-5512-4e8b-8345-0bd28e9d84ce",
+        "role": "buffer_layer",
+        "evidence_ids": [
+          "e782df36-125b-4f85-b705-01a689d6921d"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-22T16:48:12.169117Z",
+        "metadata": {}
+      }
+    },
+    "derivations": {
+      "7ee59131-b0e9-45ba-b515-3c482ac02171": {
+        "derivation_id": "7ee59131-b0e9-45ba-b515-3c482ac02171",
+        "output_artifact_id": "5a85d3bd-4976-4f21-82ad-45b2439d1f38",
+        "source_artifact_ids": [
+          "6043b549-66a4-44a5-9885-8ddd5eafedce"
+        ],
+        "producer_task_id": "reproject_hospitals",
+        "operation": "reproject",
+        "parameters": {
+          "operation": "reproject",
+          "target_crs": "EPSG:26918"
+        },
+        "semantic_effect": "Produced role 'projected_hospitals' using operation 'reproject'.",
+        "evidence_snapshot_ids": [],
+        "created_at": "2026-08-22T16:48:12.120789Z"
+      },
+      "6057f451-d830-4e94-b958-41e31dd36535": {
+        "derivation_id": "6057f451-d830-4e94-b958-41e31dd36535",
+        "output_artifact_id": "3027f875-da81-464e-b61d-184a29a27060",
+        "source_artifact_ids": [
+          "5a85d3bd-4976-4f21-82ad-45b2439d1f38"
+        ],
+        "producer_task_id": "buffer_hospitals",
+        "operation": "buffer",
+        "parameters": {
+          "operation": "buffer",
+          "distance": 2,
+          "unit": "km"
+        },
+        "semantic_effect": "Produced role 'buffer_layer' using operation 'buffer'.",
+        "evidence_snapshot_ids": [],
+        "created_at": "2026-08-22T16:48:12.169148Z"
+      }
+    },
+    "requirements": {
+      "req_projected_crs": {
+        "requirement_id": "req_projected_crs",
+        "requirement_type": "compatible_crs",
+        "scope": "The reprojected hospital layer must have an explicitly identified projected CRS with metric linear units suitable for the requested distance operation.",
+        "task_id": "reproject_hospitals",
+        "artifact_roles": [
+          "projected_hospitals"
+        ],
+        "parameters": {
+          "source_crs": "EPSG:4326",
+          "target_crs": null
+        },
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_metric_buffer": {
+        "requirement_id": "req_metric_buffer",
+        "requirement_type": "metric_distance",
+        "scope": "The buffer distance must be interpreted as 2 kilometers in metric units.",
+        "task_id": "buffer_hospitals",
+        "artifact_roles": [
+          "projected_hospitals"
+        ],
+        "parameters": {
+          "distance": 2,
+          "unit": "km"
+        },
+        "blocking": true,
+        "provenance": "USER_EXPLICIT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_buffer_crs": {
+        "requirement_id": "req_buffer_crs",
+        "requirement_type": "crs_present",
+        "scope": "The buffer input must have a defined CRS before metric buffering.",
+        "task_id": "buffer_hospitals",
+        "artifact_roles": [
+          "projected_hospitals"
+        ],
+        "parameters": {},
+        "blocking": true,
+        "provenance": "DOWNSTREAM_CONSUMER",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "b1106e46-2e19-427c-82b4-54133f82b165": {
+        "requirement_id": "b1106e46-2e19-427c-82b4-54133f82b165",
+        "requirement_type": "metric_distance",
+        "scope": "task_transition",
+        "task_id": "buffer_hospitals",
+        "artifact_roles": [
+          "projected_hospitals"
+        ],
+        "parameters": {},
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "operation_contract_catalog",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      }
+    },
+    "commitments": {},
+    "schema_mappings": {},
+    "evidence": {
+      "f60831bf-ad7d-40c0-8bf9-5889b05b729a": {
+        "evidence_id": "f60831bf-ad7d-40c0-8bf9-5889b05b729a",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "6043b549-66a4-44a5-9885-8ddd5eafedce"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_hospitals_wgs84.gpkg",
+          "format": "gpkg",
+          "size_bytes": 98304,
+          "complete": true,
+          "limitations": [],
+          "data_model": "vector",
+          "feature_count": 3,
+          "schema": {
+            "ID": "object",
+            "NAME": "object",
+            "LATITUDE": "float64",
+            "LONGITUDE": "float64",
+            "BEDS": "int64",
+            "TYPE": "object"
+          },
+          "schema_fields": [
+            "ID",
+            "NAME",
+            "LATITUDE",
+            "LONGITUDE",
+            "BEDS",
+            "TYPE"
+          ],
+          "geometry_type": [
+            "Point"
+          ],
+          "geometry_valid": true,
+          "invalid_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "null_geometry_count": 0,
+          "bounds": [
+            -77.882,
+            40.785,
+            -77.775,
+            40.912
+          ],
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true,
+          "crs": "EPSG:4326",
+          "crs_authority": "EPSG:4326",
+          "is_projected": false,
+          "is_geographic": true,
+          "linear_unit": "degree",
+          "linear_unit_to_meter": 0.017453292519943295,
+          "is_metric_crs": false
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-22T16:47:43.239483Z",
+        "complete": true,
+        "limitations": []
+      },
+      "0e8cd8bd-6d8d-495c-9981-c95e40920e1b": {
+        "evidence_id": "0e8cd8bd-6d8d-495c-9981-c95e40920e1b",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "5a85d3bd-4976-4f21-82ad-45b2439d1f38"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/projection_agent/reprojected_d0e66273.gpkg",
+          "format": "gpkg",
+          "size_bytes": 98304,
+          "complete": true,
+          "limitations": [],
+          "data_model": "vector",
+          "feature_count": 3,
+          "schema": {
+            "ID": "object",
+            "NAME": "object",
+            "LATITUDE": "float64",
+            "LONGITUDE": "float64",
+            "BEDS": "int64",
+            "TYPE": "object"
+          },
+          "schema_fields": [
+            "ID",
+            "NAME",
+            "LATITUDE",
+            "LONGITUDE",
+            "BEDS",
+            "TYPE"
+          ],
+          "geometry_type": [
+            "Point"
+          ],
+          "geometry_valid": true,
+          "invalid_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "null_geometry_count": 0,
+          "bounds": [
+            256818.2654212941,
+            4518887.443384948,
+            266294.9591627252,
+            4532696.270440303
+          ],
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true,
+          "crs": "EPSG:26918",
+          "crs_authority": "EPSG:26918",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-22T16:48:12.128162Z",
+        "complete": true,
+        "limitations": []
+      },
+      "e782df36-125b-4f85-b705-01a689d6921d": {
+        "evidence_id": "e782df36-125b-4f85-b705-01a689d6921d",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "3027f875-da81-464e-b61d-184a29a27060"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_a/buffer_2000m_c7d7947c.gpkg",
+          "format": "gpkg",
+          "size_bytes": 98304,
+          "complete": true,
+          "limitations": [],
+          "data_model": "vector",
+          "feature_count": 3,
+          "schema": {
+            "ID": "object",
+            "NAME": "object",
+            "LATITUDE": "float64",
+            "LONGITUDE": "float64",
+            "BEDS": "int64",
+            "TYPE": "object"
+          },
+          "schema_fields": [
+            "ID",
+            "NAME",
+            "LATITUDE",
+            "LONGITUDE",
+            "BEDS",
+            "TYPE"
+          ],
+          "geometry_type": [
+            "Polygon"
+          ],
+          "geometry_valid": true,
+          "invalid_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "null_geometry_count": 0,
+          "bounds": [
+            254818.2654212941,
+            4516887.443384948,
+            268294.9591627252,
+            4534696.270440303
+          ],
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true,
+          "crs": "EPSG:26918",
+          "crs_authority": "EPSG:26918",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-22T16:48:12.175507Z",
+        "complete": true,
+        "limitations": []
+      }
+    },
+    "violations": {},
+    "execution_history": [
+      {
+        "event_id": "2f4bc215-95f8-406d-982e-1a91dad2139a",
+        "event_type": "initial_plan_committed",
+        "actor": "planner_component",
+        "state_version": 0,
+        "plan_version": 1,
+        "task_id": null,
+        "reason": "Reproject the hospital point layer to a suitable metric CRS, then create 2-km buffers and return the resulting GeoPackage buffer layer. The target CRS remains unset for runtime clarification or grounding because the input CRS is geographic and the user did not specify a target CRS.",
+        "metadata": {
+          "task_ids": [
+            "buffer_hospitals",
+            "reproject_hospitals"
+          ]
+        },
+        "created_at": "2026-08-22T16:48:00.577177Z"
+      },
+      {
+        "event_id": "f72246e8-bf9b-4751-9d39-8bba4ff21926",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 1,
+        "plan_version": 1,
+        "task_id": "reproject_hospitals",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "proposed",
+          "to": "ready"
+        },
+        "created_at": "2026-08-22T16:48:00.581127Z"
+      },
+      {
+        "event_id": "f329b5bb-3926-422d-adfe-25004155f71f",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 2,
+        "plan_version": 1,
+        "task_id": "reproject_hospitals",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-22T16:48:00.582473Z"
+      },
+      {
+        "event_id": "e4908f8a-4135-4cef-b458-5ef640e5e9dd",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 3,
+        "plan_version": 1,
+        "task_id": "reproject_hospitals",
+        "reason": "Worker bound.",
+        "metadata": {
+          "from": "binding",
+          "to": "bound"
+        },
+        "created_at": "2026-08-22T16:48:00.583839Z"
+      },
+      {
+        "event_id": "e9684df1-6090-48cf-9a90-949041c1f202",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 4,
+        "plan_version": 1,
+        "task_id": "reproject_hospitals",
+        "reason": "Worker started.",
+        "metadata": {
+          "from": "bound",
+          "to": "running"
+        },
+        "created_at": "2026-08-22T16:48:00.585394Z"
+      },
+      {
+        "event_id": "ae934a64-a7f1-411b-8dea-d87ab16fcb80",
+        "event_type": "worker_execution_completed",
+        "actor": "worker_executor",
+        "state_version": 5,
+        "plan_version": 1,
+        "task_id": "reproject_hospitals",
+        "reason": "Explicit CRS parameter is required for assign_crs. Service does not guess unknown CRS.",
+        "metadata": {
+          "binding_id": "9527e77b-2d8c-4ec0-aa71-ad3559c24ac6",
+          "agent_id": "projection_agent",
+          "operation": "reproject",
+          "attempt": 1,
+          "status": "failed",
+          "duration_seconds": 0.007301852994714864
+        },
+        "created_at": "2026-08-22T16:48:00.594487Z"
+      },
+      {
+        "event_id": "e342a4b6-1933-426f-9471-3027535a9745",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 5,
+        "plan_version": 1,
+        "task_id": "reproject_hospitals",
+        "reason": "Worker execution failed.",
+        "metadata": {
+          "from": "running",
+          "to": "failed"
+        },
+        "created_at": "2026-08-22T16:48:00.594557Z"
+      },
+      {
+        "event_id": "e39617bf-67a3-4044-a7cd-d9eb80cd0411",
+        "event_type": "graph_patch_committed",
+        "actor": "graph_controller",
+        "state_version": 6,
+        "plan_version": 2,
+        "task_id": null,
+        "reason": "Repair the failed reprojection by supplying the explicit projected metric CRS EPSG:26918 (NAD83 / UTM zone 18N), which is suitable for the observed Centre County hospital extent and supports the required 2-km metric buffer. Preserve the existing projected_hospitals role and buffer dependency.",
+        "metadata": {
+          "inserted": [],
+          "removed": [],
+          "superseded": [],
+          "stale": [
+            "buffer_hospitals",
+            "reproject_hospitals"
+          ]
+        },
+        "created_at": "2026-08-22T16:48:12.072185Z"
+      },
+      {
+        "event_id": "e77e04c4-d778-4f4e-b1d3-755482400d74",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 7,
+        "plan_version": 2,
+        "task_id": "reproject_hospitals",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "blocked",
+          "to": "ready"
+        },
+        "created_at": "2026-08-22T16:48:12.084599Z"
+      },
+      {
+        "event_id": "fc2ae98c-8757-4940-a115-632ee158b300",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 8,
+        "plan_version": 2,
+        "task_id": "reproject_hospitals",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-22T16:48:12.086572Z"
+      },
+      {
+        "event_id": "83783fe8-3f05-4852-a84c-ee5124d36c3f",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 9,
+        "plan_version": 2,
+        "task_id": "reproject_hospitals",
+        "reason": "Worker bound.",
+        "metadata": {
+          "from": "binding",
+          "to": "bound"
+        },
+        "created_at": "2026-08-22T16:48:12.088699Z"
+      },
+      {
+        "event_id": "0081cf02-6bf5-40d3-95f4-e2f5935a5165",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 10,
+        "plan_version": 2,
+        "task_id": "reproject_hospitals",
+        "reason": "Worker started.",
+        "metadata": {
+          "from": "bound",
+          "to": "running"
+        },
+        "created_at": "2026-08-22T16:48:12.090827Z"
+      },
+      {
+        "event_id": "e369229e-d0c8-48c5-899e-735b7dd6e681",
+        "event_type": "worker_execution_completed",
+        "actor": "worker_executor",
+        "state_version": 11,
+        "plan_version": 2,
+        "task_id": "reproject_hospitals",
+        "reason": "Worker returned successfully.",
+        "metadata": {
+          "binding_id": "50cc5180-1783-456c-a814-915c60687e90",
+          "agent_id": "projection_agent",
+          "operation": "reproject",
+          "attempt": 2,
+          "status": "successful",
+          "duration_seconds": 0.024379112001042813
+        },
+        "created_at": "2026-08-22T16:48:12.117360Z"
+      },
+      {
+        "event_id": "2d46d177-cfc8-40d3-8f55-7f577e70d8b7",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 11,
+        "plan_version": 2,
+        "task_id": "reproject_hospitals",
+        "reason": "Worker returned a provisional result.",
+        "metadata": {
+          "from": "running",
+          "to": "provisional_success"
+        },
+        "created_at": "2026-08-22T16:48:12.117427Z"
+      },
+      {
+        "event_id": "f40aa454-7c5c-4a80-8db1-7fa88c940820",
+        "event_type": "artifact_registered",
+        "actor": "artifact_registry",
+        "state_version": 12,
+        "plan_version": 2,
+        "task_id": "reproject_hospitals",
+        "reason": null,
+        "metadata": {
+          "artifact_id": "5a85d3bd-4976-4f21-82ad-45b2439d1f38",
+          "role": "projected_hospitals",
+          "content_hash": "80fe42e7170c46a46cdf64247c527fd1b8711544e3869219c1dfcfd3cd1ce505"
+        },
+        "created_at": "2026-08-22T16:48:12.120815Z"
+      },
+      {
+        "event_id": "ef131780-3dfc-4675-9203-f147e66f2404",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 13,
+        "plan_version": 2,
+        "task_id": "reproject_hospitals",
+        "reason": "Reviewing runtime evidence.",
+        "metadata": {
+          "from": "provisional_success",
+          "to": "validating"
+        },
+        "created_at": "2026-08-22T16:48:12.130644Z"
+      },
+      {
+        "event_id": "9542cc42-dce8-4610-a797-42a39b3d2ef6",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 14,
+        "plan_version": 2,
+        "task_id": "reproject_hospitals",
+        "reason": "Shared technical response and output-role checks passed.",
+        "metadata": {
+          "from": "validating",
+          "to": "successful"
+        },
+        "created_at": "2026-08-22T16:48:12.132974Z"
+      },
+      {
+        "event_id": "44bb0fe2-8776-450b-ba89-a6b1b5cd9a16",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 15,
+        "plan_version": 2,
+        "task_id": "buffer_hospitals",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "proposed",
+          "to": "ready"
+        },
+        "created_at": "2026-08-22T16:48:12.135284Z"
+      },
+      {
+        "event_id": "dd40529f-2457-460d-a76c-5764d88d1c21",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 16,
+        "plan_version": 2,
+        "task_id": "buffer_hospitals",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-22T16:48:12.137369Z"
+      },
+      {
+        "event_id": "5022a6b3-1d62-4655-9eed-38f58656686b",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 17,
+        "plan_version": 2,
+        "task_id": "buffer_hospitals",
+        "reason": "Worker bound.",
+        "metadata": {
+          "from": "binding",
+          "to": "bound"
+        },
+        "created_at": "2026-08-22T16:48:12.139631Z"
+      },
+      {
+        "event_id": "7236f1bd-eba5-4d48-8ef4-cd3c2f4e3957",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 18,
+        "plan_version": 2,
+        "task_id": "buffer_hospitals",
+        "reason": "Worker started.",
+        "metadata": {
+          "from": "bound",
+          "to": "running"
+        },
+        "created_at": "2026-08-22T16:48:12.141811Z"
+      },
+      {
+        "event_id": "1c05d8f9-24f3-4d62-b5c2-9168aab50a59",
+        "event_type": "worker_execution_completed",
+        "actor": "worker_executor",
+        "state_version": 19,
+        "plan_version": 2,
+        "task_id": "buffer_hospitals",
+        "reason": "Worker returned successfully.",
+        "metadata": {
+          "binding_id": "bb15041b-5512-4e8b-8345-0bd28e9d84ce",
+          "agent_id": "vector_analysis_a",
+          "operation": "buffer",
+          "attempt": 1,
+          "status": "successful",
+          "duration_seconds": 0.02180524100549519
+        },
+        "created_at": "2026-08-22T16:48:12.165929Z"
+      },
+      {
+        "event_id": "a207681a-25be-4709-a6e8-3861e0b3616f",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 19,
+        "plan_version": 2,
+        "task_id": "buffer_hospitals",
+        "reason": "Worker returned a provisional result.",
+        "metadata": {
+          "from": "running",
+          "to": "provisional_success"
+        },
+        "created_at": "2026-08-22T16:48:12.165992Z"
+      },
+      {
+        "event_id": "5ef87463-adbe-491b-bb78-93f16a2611b5",
+        "event_type": "artifact_registered",
+        "actor": "artifact_registry",
+        "state_version": 20,
+        "plan_version": 2,
+        "task_id": "buffer_hospitals",
+        "reason": null,
+        "metadata": {
+          "artifact_id": "3027f875-da81-464e-b61d-184a29a27060",
+          "role": "buffer_layer",
+          "content_hash": "53d76d9e9c7d8dfcc66c1036ed1dce03b793eedf3162f4ed1499e1ac8d04110b"
+        },
+        "created_at": "2026-08-22T16:48:12.169169Z"
+      },
+      {
+        "event_id": "2eee250a-636d-4a67-b027-415a9be893dd",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 21,
+        "plan_version": 2,
+        "task_id": "buffer_hospitals",
+        "reason": "Reviewing runtime evidence.",
+        "metadata": {
+          "from": "provisional_success",
+          "to": "validating"
+        },
+        "created_at": "2026-08-22T16:48:12.178268Z"
+      },
+      {
+        "event_id": "7b35b673-480e-445c-9bf1-c5cb03a877c8",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 22,
+        "plan_version": 2,
+        "task_id": "buffer_hospitals",
+        "reason": "Shared technical response and output-role checks passed.",
+        "metadata": {
+          "from": "validating",
+          "to": "successful"
+        },
+        "created_at": "2026-08-22T16:48:12.180831Z"
+      },
+      {
+        "event_id": "9487b2d7-f27c-464b-8f07-0a4740a4edd7",
+        "event_type": "workflow_completed",
+        "actor": "completion_policy",
+        "state_version": 23,
+        "plan_version": 2,
+        "task_id": null,
+        "reason": "All active tasks, blocking requirements, and terminal outputs are satisfied.",
+        "metadata": {
+          "final_artifact_ids": [
+            "3027f875-da81-464e-b61d-184a29a27060"
+          ]
+        },
+        "created_at": "2026-08-22T16:48:12.187330Z"
+      }
+    ],
+    "qc_history": [
+      {
+        "decision_id": "3eca326c-4fdb-4ba8-8c4e-820626bd1a05",
+        "task_id": "reproject_hospitals",
+        "verdict": "BLOCK",
+        "proposed_verdict": "BLOCK",
+        "reason": "Explicit worker failure: Explicit CRS parameter is required for assign_crs. Service does not guess unknown CRS.",
+        "acknowledged_finding_ids": [],
+        "action_class": "STRUCTURAL_REPLAN",
+        "effective_action": "STRUCTURAL_REPLAN",
+        "effective_action_source": "condition_policy",
+        "allowed_recovery_types": [],
+        "recovery_parameters": {},
+        "preserve_completed_work": true,
+        "forced_by_invariant": false,
+        "created_at": "2026-08-22T16:48:00.596756Z"
+      },
+      {
+        "decision_id": "32401ae9-cb32-4548-abb5-7cc1acee1e3a",
+        "task_id": "reproject_hospitals",
+        "verdict": "PASS",
+        "proposed_verdict": "PASS",
+        "reason": "Shared technical response and output-role checks passed.",
+        "acknowledged_finding_ids": [],
+        "action_class": "NONE",
+        "effective_action": "NONE",
+        "effective_action_source": "condition_policy",
+        "allowed_recovery_types": [],
+        "recovery_parameters": {},
+        "preserve_completed_work": true,
+        "forced_by_invariant": false,
+        "created_at": "2026-08-22T16:48:12.132906Z"
+      },
+      {
+        "decision_id": "1abf3120-8057-467b-b099-bf75bae08f83",
+        "task_id": "buffer_hospitals",
+        "verdict": "PASS",
+        "proposed_verdict": "PASS",
+        "reason": "Shared technical response and output-role checks passed.",
+        "acknowledged_finding_ids": [],
+        "action_class": "NONE",
+        "effective_action": "NONE",
+        "effective_action_source": "condition_policy",
+        "allowed_recovery_types": [],
+        "recovery_parameters": {},
+        "preserve_completed_work": true,
+        "forced_by_invariant": false,
+        "created_at": "2026-08-22T16:48:12.180763Z"
+      }
+    ],
+    "replan_history": [
+      {
+        "decision_id": "139d5d89-012d-48ae-8f87-80d5e00bc36a",
+        "base_plan_version": 1,
+        "rationale": "Repair the failed reprojection by supplying the explicit projected metric CRS EPSG:26918 (NAD83 / UTM zone 18N), which is suitable for the observed Centre County hospital extent and supports the required 2-km metric buffer. Preserve the existing projected_hospitals role and buffer dependency.",
+        "patch": {
+          "base_plan_version": 1,
+          "rationale": "Repair the failed reprojection by supplying the explicit projected metric CRS EPSG:26918 (NAD83 / UTM zone 18N), which is suitable for the observed Centre County hospital extent and supports the required 2-km metric buffer. Preserve the existing projected_hospitals role and buffer dependency.",
+          "insert_tasks": [],
+          "remove_task_ids": [],
+          "supersede_task_ids": [],
+          "update_tasks": {
+            "reproject_hospitals": {
+              "task_id": null,
+              "title": null,
+              "purpose": null,
+              "operation": null,
+              "instructions": "Reproject the input hospital vector layer from its observed source CRS EPSG:4326 to EPSG:26918 (NAD83 / UTM zone 18N), preserving the hospital point features and writing a GeoPackage output.",
+              "parameters": {
+                "operation": "reproject",
+                "target_crs": "EPSG:26918"
+              },
+              "required_capabilities": [
+                "projection_agent"
+              ],
+              "depends_on": null,
+              "input_requirements": null,
+              "expected_outputs": null,
+              "requirement_ids": null,
+              "status": null,
+              "attempts": null,
+              "active_binding_id": null,
+              "output_artifact_ids": null,
+              "last_error": null,
+              "created_in_plan_version": null,
+              "superseded_in_plan_version": null,
+              "metadata": null
+            }
+          },
+          "add_dependencies": [],
+          "remove_dependencies": [],
+          "reuse_artifact_ids": [],
+          "reset_task_ids": [
+            "reproject_hospitals"
+          ],
+          "commitment_revisions": []
+        },
+        "accepted": true,
+        "created_at": "2026-08-22T16:48:12.072332Z"
+      }
+    ],
+    "component_calls": [
+      {
+        "call_id": "46cf5dff-bf9e-4cb4-84fd-825825bd885b",
+        "component": "planner",
+        "prompt_hash": "879bbf4688237108aa73bcb12bca3ec0b568a6ec20b463cefe3a9dddb652d8de",
+        "tool_schema_hash": "441719facf91fd72ec7e126a4de0921e9629efd4cd39619a5dbe1be9fea2e3fe",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 5257,
+        "output_tokens": 1818,
+        "duration_seconds": 17.30699865698989,
+        "disposition": "successful",
+        "created_at": "2026-08-22T16:48:00.577141Z"
+      },
+      {
+        "call_id": "9b90ceeb-fbca-4cb2-b0a9-90e1a72285b4",
+        "component": "replanner",
+        "prompt_hash": "f44710a3ce878e6a4887fd0f8c607350a27b597530562dd74f9ecf59fc440071",
+        "tool_schema_hash": "7e4bffd48521db6cb33fd211812492847a9f5babb3e39c9ed1a4933eb33e3e0a",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 6553,
+        "output_tokens": 1027,
+        "duration_seconds": 11.461617239998304,
+        "disposition": "successful",
+        "created_at": "2026-08-22T16:48:12.081313Z"
+      }
+    ],
+    "plan_versions": [
+      {
+        "version": 1,
+        "parent_version": null,
+        "reason": "Initial plan committed by independent Planner.",
+        "task_ids": [
+          "buffer_hospitals",
+          "reproject_hospitals"
+        ],
+        "edges": [
+          [
+            "reproject_hospitals",
+            "buffer_hospitals"
+          ]
+        ],
+        "created_at": "2026-08-22T16:48:00.570354Z"
+      },
+      {
+        "version": 2,
+        "parent_version": 1,
+        "reason": "Repair the failed reprojection by supplying the explicit projected metric CRS EPSG:26918 (NAD83 / UTM zone 18N), which is suitable for the observed Centre County hospital extent and supports the required 2-km metric buffer. Preserve the existing projected_hospitals role and buffer dependency.",
+        "task_ids": [
+          "buffer_hospitals",
+          "reproject_hospitals"
+        ],
+        "edges": [
+          [
+            "reproject_hospitals",
+            "buffer_hospitals"
+          ]
+        ],
+        "created_at": "2026-08-22T16:48:12.072128Z"
+      }
+    ],
+    "budgets": {
+      "max_total_model_calls": 24,
+      "max_total_tokens": 120000,
+      "max_worker_calls": 30,
+      "max_local_recoveries": 6,
+      "max_replans": 3,
+      "max_runtime_seconds": 900.0,
+      "planner_retry_limit": 2,
+      "qc_retry_limit": 1,
+      "replanner_retry_limit": 1,
+      "total_model_calls": 2,
+      "total_tokens": 14655,
+      "worker_calls": 3,
+      "local_recoveries": 0,
+      "replans": 1
+    },
+    "terminal_state": "completed",
+    "terminal_reason": "All active tasks, blocking requirements, and terminal outputs are satisfied.",
+    "human_clarification": null,
+    "final_artifact_ids": [
+      "3027f875-da81-464e-b61d-184a29a27060"
+    ],
+    "required_terminal_roles": [
+      "buffer_layer"
+    ],
+    "final_disclosure": "Workflow completed with accepted terminal artifacts.",
+    "created_at": "2026-08-22T16:47:43.231294Z",
+    "updated_at": "2026-08-22T16:48:12.188588Z"
+  },
+  "execution_steps": [
+    {
+      "step_index": 1,
+      "step_id": "reproject_hospitals",
+      "agent_id": "projection_agent",
+      "title": "Reproject hospital locations",
+      "instructions": "Reproject the input hospital vector layer from its observed source CRS EPSG:4326 to EPSG:26918 (NAD83 / UTM zone 18N), preserving the hospital point features and writing a GeoPackage output.",
+      "output_artifacts": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/projection_agent/reprojected_d0e66273.gpkg"
+      ],
+      "status": "successful",
+      "error": null
+    },
+    {
+      "step_index": 2,
+      "step_id": "buffer_hospitals",
+      "agent_id": "vector_analysis_a",
+      "title": "Create 2-km hospital buffers",
+      "instructions": "Buffer every hospital geometry by 2 kilometers and write the resulting vector layer as GeoPackage. Preserve the hospital-derived buffer features.",
+      "output_artifacts": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_a/buffer_2000m_c7d7947c.gpkg"
+      ],
+      "status": "successful",
+      "error": null
+    }
+  ],
+  "qc_evaluations": 0,
+  "qc_blocks": 1,
+  "qc_interventions": 1,
+  "effective_blocks": 1,
+  "effective_interventions": 1,
+  "qc_policy_overrides": 0,
+  "replanning_iterations": 1,
+  "error": null,
+  "ledger_events": [
+    {
+      "call_id": "9527e77b-2d8c-4ec0-aa71-ad3559c24ac6",
+      "trajectory_id": "traj_ISS_Q02_C4_run1",
+      "agent_id": "projection_agent",
+      "operation": "reproject",
+      "query": "Reproject the input hospital vector layer to a suitable projected metric CRS. Do not infer or assign a CRS without an explicit target CRS; if the target CRS cannot be grounded at runtime, request clarification.",
+      "timestamp_start": 1787417280.587113,
+      "timestamp_end": 1787417280.594405,
+      "duration_seconds": 0.007301852994714864,
+      "input_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_hospitals_wgs84.gpkg"
+      ],
+      "input_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_hospitals_wgs84.gpkg": "01efdcc53ac8c9e81f3f6ddce74ffc81240a3661e3535f85a2fdc3573f75f53a"
+      },
+      "parameters": {
+        "operation": "reproject",
+        "target_crs": "EPSG:26918"
+      },
+      "status": "failed",
+      "error_code": "E_MISSING_CRS",
+      "error_message": "Explicit CRS parameter is required for assign_crs. Service does not guess unknown CRS.",
+      "output_artifact_paths": [],
+      "output_artifact_hashes": {},
+      "summary": "",
+      "raw_response": {
+        "binding_id": "9527e77b-2d8c-4ec0-aa71-ad3559c24ac6",
+        "task_id": "reproject_hospitals",
+        "attempt": 1
+      }
+    },
+    {
+      "call_id": "50cc5180-1783-456c-a814-915c60687e90",
+      "trajectory_id": "traj_ISS_Q02_C4_run1",
+      "agent_id": "projection_agent",
+      "operation": "reproject",
+      "query": "Reproject the input hospital vector layer from its observed source CRS EPSG:4326 to EPSG:26918 (NAD83 / UTM zone 18N), preserving the hospital point features and writing a GeoPackage output.",
+      "timestamp_start": 1787417292.092906,
+      "timestamp_end": 1787417292.117273,
+      "duration_seconds": 0.024379112001042813,
+      "input_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_hospitals_wgs84.gpkg"
+      ],
+      "input_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_hospitals_wgs84.gpkg": "01efdcc53ac8c9e81f3f6ddce74ffc81240a3661e3535f85a2fdc3573f75f53a"
+      },
+      "parameters": {
+        "operation": "reproject",
+        "target_crs": "EPSG:26918"
+      },
+      "status": "completed",
+      "error_code": null,
+      "error_message": null,
+      "output_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/projection_agent/reprojected_d0e66273.gpkg"
+      ],
+      "output_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/projection_agent/reprojected_d0e66273.gpkg": "80fe42e7170c46a46cdf64247c527fd1b8711544e3869219c1dfcfd3cd1ce505"
+      },
+      "summary": "Reprojected 3 features to EPSG:26918.",
+      "raw_response": {
+        "binding_id": "50cc5180-1783-456c-a814-915c60687e90",
+        "task_id": "reproject_hospitals",
+        "attempt": 2
+      }
+    },
+    {
+      "call_id": "bb15041b-5512-4e8b-8345-0bd28e9d84ce",
+      "trajectory_id": "traj_ISS_Q02_C4_run1",
+      "agent_id": "vector_analysis_a",
+      "operation": "buffer",
+      "query": "Buffer every hospital geometry by 2 kilometers and write the resulting vector layer as GeoPackage. Preserve the hospital-derived buffer features.",
+      "timestamp_start": 1787417292.14406,
+      "timestamp_end": 1787417292.165853,
+      "duration_seconds": 0.02180524100549519,
+      "input_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/projection_agent/reprojected_d0e66273.gpkg"
+      ],
+      "input_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/projection_agent/reprojected_d0e66273.gpkg": "80fe42e7170c46a46cdf64247c527fd1b8711544e3869219c1dfcfd3cd1ce505"
+      },
+      "parameters": {
+        "operation": "buffer",
+        "distance": 2,
+        "unit": "km"
+      },
+      "status": "completed",
+      "error_code": null,
+      "error_message": null,
+      "output_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_a/buffer_2000m_c7d7947c.gpkg"
+      ],
+      "output_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_a/buffer_2000m_c7d7947c.gpkg": "53d76d9e9c7d8dfcc66c1036ed1dce03b793eedf3162f4ed1499e1ac8d04110b"
+      },
+      "summary": "Created 2000.0m buffer for 3 features.",
+      "raw_response": {
+        "binding_id": "bb15041b-5512-4e8b-8345-0bd28e9d84ce",
+        "task_id": "buffer_hospitals",
+        "attempt": 1
+      }
+    }
+  ],
+  "created_at": "2026-08-22T16:48:12.193367+00:00",
+  "evaluation": {
+    "task_id": "ISS_Q02",
+    "bafo_success": true,
+    "all_challenges_resolved": true,
+    "evaluability_status": "EVALUABLE",
+    "challenge_activated": true,
+    "trajectory_classification": "valid_bafo_pass",
+    "production_terminal_state": "completed",
+    "terminal_state": "successful",
+    "constraint_results": {
+      "buffer_distance_meters": {
+        "constraint_key": "buffer_distance_meters",
+        "status": "PASS",
+        "reason": "Buffer verified in projected coordinate system (EPSG:26918) for requested 2000.0m distance.",
+        "details": {
+          "crs": "EPSG:26918",
+          "requested_distance_m": 2000.0,
+          "bounds": [
+            254818.2654212941,
+            4516887.443384948,
+            268294.9591627252,
+            4534696.270440303
+          ]
+        }
+      },
+      "requires_projected_crs": {
+        "constraint_key": "requires_projected_crs",
+        "status": "PASS",
+        "reason": "Artifact in projected CRS verified (EPSG:26918).",
+        "details": {
+          "crs": "EPSG:26918",
+          "is_projected": true
+        }
+      },
+      "geometry_type": {
+        "constraint_key": "geometry_type",
+        "status": "PASS",
+        "reason": "Constraint 'geometry_type' satisfied by valid output artifact.",
+        "details": {}
+      }
+    },
+    "passed_constraints": [
+      "buffer_distance_meters",
+      "requires_projected_crs",
+      "geometry_type"
+    ],
+    "failed_constraints": [],
+    "unevaluable_constraints": [],
+    "inspected_artifacts_count": 2,
+    "events_count": 3,
+    "diagnostic_summary": "BAFO: True | State: successful (Valid: True) | Constraints: 3 PASS, 0 FAIL, 0 UNEVALUABLE | Events Recorded: 3 | Artifacts Inspected: 2"
+  },
+  "bafo_success": true,
+  "all_challenges_resolved": true,
+  "trajectory_classification": "valid_bafo_pass"
+}

@@ -1,0 +1,1817 @@
+{
+  "trajectory_id": "traj_ISS_Q16_C5_run1",
+  "task_id": "ISS_Q16",
+  "condition": "C5",
+  "model": "gpt-5.6-luna",
+  "run_index": 1,
+  "suite": "isolated",
+  "user_question": "Summarize the daily precipitation in State College for 2023 by month.",
+  "input_artifact_paths": [
+    "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_weather_state_college_2024.csv",
+    "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_weather_state_college_2023.csv"
+  ],
+  "status": "failed",
+  "total_wall_time": 35.769,
+  "rate_limit_wait_time": 0.0,
+  "provider_retry_wait_time": 0.0,
+  "orchestration_active_time": 35.761,
+  "worker_execution_time": 0.008,
+  "total_tokens": 25183,
+  "input_tokens": 21548,
+  "output_tokens": 3635,
+  "outputs": {
+    "summary": "Role 'input_2' requires data model 'table'.",
+    "artifacts": [],
+    "produced_artifacts": [
+      "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_242af41c_fx_dem_centre_30m_utm.tif"
+    ],
+    "workflow_plan": {
+      "workflow_id": "88556656-ccb9-4fcf-82bc-ce4f9b32befa",
+      "plan_version": 2,
+      "goal": "Summarize the daily precipitation in State College for 2023 by month.",
+      "workflow_steps": [
+        {
+          "step_id": "task_monthly_precipitation_summary",
+          "title": "Summarize daily precipitation by month",
+          "purpose": "Compute monthly precipitation totals from the 2023 daily State College weather table.",
+          "agent_id": null,
+          "operation": "tabular_aggregation",
+          "instructions": "Group the input table by the observed month field and sum the observed daily precipitation field. Preserve the month and aggregated precipitation values in the output CSV.",
+          "parameters": {
+            "group_by": "month",
+            "value_field": "prcp",
+            "statistic": "sum"
+          },
+          "depends_on": [
+            "task_retrieve_suitable_2023_precipitation_input"
+          ],
+          "input_from_steps": [
+            "task_retrieve_suitable_2023_precipitation_input"
+          ],
+          "status": "failed",
+          "output_artifact_ids": []
+        },
+        {
+          "step_id": "task_retrieve_suitable_2023_precipitation_input",
+          "title": "Retrieve a suitable 2023 State College precipitation table",
+          "purpose": "Obtain an alternative candidate satisfying the explicit 2023 temporal requirement and downstream tabular input contract.",
+          "agent_id": "data_retrieval_agent",
+          "operation": "dataset_retrieval",
+          "instructions": "Retrieve an alternative State College weather dataset candidate for 2023 that satisfies the full required temporal range through 2023-12-31T23:59:59+00:00 and contains the observed month and prcp fields required by the downstream aggregation. Exclude the previously rejected artifact.",
+          "parameters": {
+            "exclude_artifact_ids": [
+              "65e6970a-7fb4-460f-a08b-bbd97edf8305"
+            ]
+          },
+          "depends_on": [],
+          "input_from_steps": [],
+          "status": "successful",
+          "output_artifact_ids": [
+            "3f552b1a-58cb-4142-8738-8aa1a6fb92a9"
+          ]
+        }
+      ],
+      "requirements": [
+        {
+          "requirement_id": "req_monthly_temporal_range",
+          "requirement_type": "temporal_range",
+          "scope": "task_monthly_precipitation_summary input_2 must cover 2023-01-01 through 2023-12-31 using the date field.",
+          "task_id": "task_monthly_precipitation_summary",
+          "artifact_roles": [
+            "input_2"
+          ],
+          "parameters": {
+            "field": "date",
+            "start": "2023-01-01T00:00:00+00:00",
+            "end": "2023-12-31T23:59:59+00:00"
+          },
+          "blocking": true,
+          "provenance": "USER_EXPLICIT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "violated",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_monthly_required_fields",
+          "requirement_type": "required_fields",
+          "scope": "task_monthly_precipitation_summary input_2 must contain the month and daily precipitation fields.",
+          "task_id": "task_monthly_precipitation_summary",
+          "artifact_roles": [
+            "input_2"
+          ],
+          "parameters": {
+            "fields": [
+              "month",
+              "prcp"
+            ]
+          },
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [
+            "98516c08-628a-49ed-9065-7d250d315c48"
+          ],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_monthly_input_format",
+          "requirement_type": "format_compatible",
+          "scope": "task_monthly_precipitation_summary input_2 must be supplied as a CSV table.",
+          "task_id": "task_monthly_precipitation_summary",
+          "artifact_roles": [
+            "input_2"
+          ],
+          "parameters": {
+            "data_model": "table",
+            "formats": [
+              "CSV"
+            ]
+          },
+          "blocking": true,
+          "provenance": "WORKER_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "violated",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        }
+      ],
+      "commitments": [
+        {
+          "commitment_id": "commitment_monthly_precipitation_total",
+          "key": "monthly_precipitation_aggregation",
+          "value": "sum of daily prcp values by calendar month",
+          "rationale": "Monthly precipitation is represented as the accumulated daily precipitation total for each month.",
+          "evidence_source": "User goal wording: summarize daily precipitation by month",
+          "created_by": "planner",
+          "plan_version": 1,
+          "active": true,
+          "disclosed": true,
+          "affected_task_ids": [
+            "task_monthly_precipitation_summary"
+          ],
+          "revision_history": []
+        }
+      ]
+    }
+  },
+  "workflow_state": {
+    "schema_version": "1.0.0",
+    "workflow_id": "88556656-ccb9-4fcf-82bc-ce4f9b32befa",
+    "state_version": 21,
+    "user_goal": "Summarize the daily precipitation in State College for 2023 by month.",
+    "feature_profile": "C2",
+    "feature_config": {
+      "profile_name": "C2",
+      "planner_mode": "gis_aware",
+      "qc_mode": "gis_aware",
+      "replanner_mode": "gis_aware",
+      "technical_invariants": true,
+      "local_recovery": true,
+      "structural_patching": true,
+      "gis_finding_routing": true
+    },
+    "current_plan_version": 2,
+    "tasks": {
+      "task_monthly_precipitation_summary": {
+        "task_id": "task_monthly_precipitation_summary",
+        "title": "Summarize daily precipitation by month",
+        "purpose": "Compute monthly precipitation totals from the 2023 daily State College weather table.",
+        "operation": "tabular_aggregation",
+        "instructions": "Group the input table by the observed month field and sum the observed daily precipitation field. Preserve the month and aggregated precipitation values in the output CSV.",
+        "parameters": {
+          "group_by": "month",
+          "value_field": "prcp",
+          "statistic": "sum"
+        },
+        "required_capabilities": [
+          "tabular_aggregation"
+        ],
+        "depends_on": [
+          "task_retrieve_suitable_2023_precipitation_input"
+        ],
+        "input_requirements": [
+          {
+            "role": "input_2",
+            "data_model": "table",
+            "formats": [
+              "CSV"
+            ],
+            "required": true
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "monthly_precipitation_summary",
+            "data_model": "table",
+            "formats": [
+              "CSV"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_monthly_temporal_range",
+          "req_monthly_required_fields",
+          "req_monthly_input_format"
+        ],
+        "status": "failed",
+        "attempts": 0,
+        "active_binding_id": null,
+        "output_artifact_ids": [],
+        "last_error": {
+          "code": "E_BINDING",
+          "message": "Role 'input_2' requires data model 'table'.",
+          "retryable": false,
+          "details": {}
+        },
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      },
+      "task_retrieve_suitable_2023_precipitation_input": {
+        "task_id": "task_retrieve_suitable_2023_precipitation_input",
+        "title": "Retrieve a suitable 2023 State College precipitation table",
+        "purpose": "Obtain an alternative candidate satisfying the explicit 2023 temporal requirement and downstream tabular input contract.",
+        "operation": "dataset_retrieval",
+        "instructions": "Retrieve an alternative State College weather dataset candidate for 2023 that satisfies the full required temporal range through 2023-12-31T23:59:59+00:00 and contains the observed month and prcp fields required by the downstream aggregation. Exclude the previously rejected artifact.",
+        "parameters": {
+          "exclude_artifact_ids": [
+            "65e6970a-7fb4-460f-a08b-bbd97edf8305"
+          ]
+        },
+        "required_capabilities": [
+          "dataset_retrieval"
+        ],
+        "depends_on": [],
+        "input_requirements": [],
+        "expected_outputs": [
+          {
+            "role": "input_2",
+            "data_model": "table",
+            "formats": [
+              "CSV"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [],
+        "status": "successful",
+        "attempts": 1,
+        "active_binding_id": "87ab4e73-1c2d-4763-8c72-5ca7814564d0",
+        "output_artifact_ids": [
+          "3f552b1a-58cb-4142-8738-8aa1a6fb92a9"
+        ],
+        "last_error": null,
+        "created_in_plan_version": 2,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      }
+    },
+    "edges": [
+      [
+        "task_retrieve_suitable_2023_precipitation_input",
+        "task_monthly_precipitation_summary"
+      ]
+    ],
+    "bindings": {
+      "bb93c847-7739-4cfa-b043-607190409a77": {
+        "binding_id": "bb93c847-7739-4cfa-b043-607190409a77",
+        "task_id": "task_monthly_precipitation_summary",
+        "agent_id": "statistics_agent",
+        "operation": "tabular_aggregation",
+        "instruction": "Group the input table by the observed month field and sum the observed daily precipitation field. Preserve the month and aggregated precipitation values in the output CSV.",
+        "input_bindings": [
+          {
+            "role": "input_2",
+            "artifact_id": "65e6970a-7fb4-460f-a08b-bbd97edf8305",
+            "source_task_id": null,
+            "binding_order": 0
+          }
+        ],
+        "agent_profile_snapshot": {
+          "agent_id": "statistics_agent",
+          "name": "Statistics Agent",
+          "description": "Performs deterministic tabular summaries and grouped aggregation on attribute datasets.",
+          "operations": [
+            "tabular_aggregation"
+          ],
+          "skills": [
+            {
+              "skill_id": "tabular_aggregation",
+              "name": "Tabular Aggregation and Statistics",
+              "description": "Computes statistical summaries, grouped means/sums/counts across categorical or temporal fields (e.g. monthly grouping).",
+              "constraints": {
+                "spatial": null,
+                "temporal": "Can aggregate by temporal fields such as month or year.",
+                "other": [
+                  "Pure deterministic tabular computation."
+                ]
+              }
+            }
+          ],
+          "inputs": {
+            "input_datasets": {
+              "required": true,
+              "description": "Input CSV table or attribute layer."
+            }
+          },
+          "outputs": [
+            {
+              "type": "table",
+              "formats": [
+                "CSV"
+              ],
+              "required": true,
+              "description": "Summarized tabular dataset."
+            }
+          ],
+          "parameters": {
+            "group_by": {
+              "required": false,
+              "description": "Column name to group by (e.g. month, year)."
+            },
+            "value_field": {
+              "required": false,
+              "description": "Numerical column name to aggregate."
+            },
+            "statistic": {
+              "required": false,
+              "default": "mean",
+              "description": "Aggregation function (mean, sum, max, min, count)."
+            }
+          }
+        },
+        "endpoint": "https://www.geospatial-agentic-services.online/agents/statistics_agent/tasks",
+        "attempt": 1,
+        "invocation_id": null,
+        "status": "precondition_blocked",
+        "started_at": null,
+        "completed_at": null,
+        "duration_seconds": 0.0,
+        "output_artifact_ids": [],
+        "messages": [],
+        "structured_error": {
+          "code": "E_PRECONDITION_BLOCKED",
+          "message": "One or more deterministic task preconditions are not satisfied by the bound inputs.",
+          "retryable": false,
+          "details": {
+            "violation_ids": [
+              "0af68af7-f2d9-4cdc-bbe1-ab5537ac4734"
+            ]
+          }
+        },
+        "created_at": "2026-08-22T16:08:10.802968Z"
+      },
+      "87ab4e73-1c2d-4763-8c72-5ca7814564d0": {
+        "binding_id": "87ab4e73-1c2d-4763-8c72-5ca7814564d0",
+        "task_id": "task_retrieve_suitable_2023_precipitation_input",
+        "agent_id": "data_retrieval_agent",
+        "operation": "dataset_retrieval",
+        "instruction": "Retrieve an alternative State College weather dataset candidate for 2023 that satisfies the full required temporal range through 2023-12-31T23:59:59+00:00 and contains the observed month and prcp fields required by the downstream aggregation. Exclude the previously rejected artifact.",
+        "input_bindings": [],
+        "agent_profile_snapshot": {
+          "agent_id": "data_retrieval_agent",
+          "name": "Data Retrieval Agent",
+          "description": "Searches the available catalog and returns the highest-ranked available dataset candidate. Query criteria influence retrieval but are not guarantees of task-level suitability. Returned metadata describe the retrieved artifact. Clients should inspect returned metadata before downstream use.",
+          "operations": [
+            "dataset_retrieval"
+          ],
+          "skills": [
+            {
+              "skill_id": "dataset_retrieval",
+              "name": "Dataset Retrieval",
+              "description": "Retrieves registered benchmark datasets matching requested criteria from the catalog.",
+              "constraints": {
+                "spatial": "Returns datasets covering registered spatial boundaries.",
+                "temporal": "Returns datasets with metadata indicating time/year of acquisition.",
+                "other": [
+                  "The service does not determine downstream analytical fitness.",
+                  "Supports candidate exclusion via exclude_artifact_ids."
+                ]
+              }
+            }
+          ],
+          "inputs": {
+            "input_datasets": {
+              "required": false,
+              "description": "Not required for data retrieval."
+            }
+          },
+          "outputs": [
+            {
+              "type": "dataset",
+              "formats": [
+                "GPKG",
+                "GeoJSON",
+                "GeoTIFF",
+                "CSV"
+              ],
+              "required": true,
+              "description": "Retrieved dataset artifact."
+            }
+          ],
+          "parameters": {
+            "exclude_artifact_ids": {
+              "required": false,
+              "description": "Optional list of artifact IDs to exclude from candidate ranking."
+            }
+          }
+        },
+        "endpoint": "https://www.geospatial-agentic-services.online/agents/data_retrieval_agent/tasks",
+        "attempt": 1,
+        "invocation_id": null,
+        "status": "successful",
+        "started_at": "2026-08-22T16:08:25.229763Z",
+        "completed_at": "2026-08-22T16:08:25.237261Z",
+        "duration_seconds": 0.007509400005801581,
+        "output_artifact_ids": [
+          "3f552b1a-58cb-4142-8738-8aa1a6fb92a9"
+        ],
+        "messages": [
+          "Successfully retrieved dataset: fx_dem_centre_30m_utm.tif"
+        ],
+        "structured_error": null,
+        "created_at": "2026-08-22T16:08:25.223294Z"
+      }
+    },
+    "artifacts": {
+      "c5319c6a-f6f5-474b-a11f-06219b4910aa": {
+        "artifact_id": "c5319c6a-f6f5-474b-a11f-06219b4910aa",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_weather_state_college_2024.csv",
+        "content_hash": "87fbdc460649997070c14e1a75294e4448d3afea55c267a307596e26fb2fd8c8",
+        "format": "csv",
+        "media_type": null,
+        "data_model": "table",
+        "producer_task_id": null,
+        "producer_binding_id": null,
+        "role": "input_1",
+        "evidence_ids": [
+          "0052fc74-d9d0-472e-86e9-44bd55b866fa"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-22T16:07:57.612083Z",
+        "metadata": {
+          "source": "user_input"
+        }
+      },
+      "65e6970a-7fb4-460f-a08b-bbd97edf8305": {
+        "artifact_id": "65e6970a-7fb4-460f-a08b-bbd97edf8305",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_weather_state_college_2023.csv",
+        "content_hash": "f691dbe5cb9c65107d5202e67ce503460340799c674f4a953290b3731b4b23cf",
+        "format": "csv",
+        "media_type": null,
+        "data_model": "table",
+        "producer_task_id": null,
+        "producer_binding_id": null,
+        "role": "input_2",
+        "evidence_ids": [
+          "98516c08-628a-49ed-9065-7d250d315c48"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-22T16:07:57.612356Z",
+        "metadata": {
+          "source": "user_input"
+        }
+      },
+      "3f552b1a-58cb-4142-8738-8aa1a6fb92a9": {
+        "artifact_id": "3f552b1a-58cb-4142-8738-8aa1a6fb92a9",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_242af41c_fx_dem_centre_30m_utm.tif",
+        "content_hash": "1426addcdb0dea68e59a3b63a33a5efbf17fd56a0b1fd066a4bbf52595accdcb",
+        "format": "tif",
+        "media_type": null,
+        "data_model": "raster",
+        "producer_task_id": "task_retrieve_suitable_2023_precipitation_input",
+        "producer_binding_id": "87ab4e73-1c2d-4763-8c72-5ca7814564d0",
+        "role": "input_2",
+        "evidence_ids": [
+          "c093a8cb-f6a5-49b0-b373-7067cc9c13dc"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-22T16:08:25.254071Z",
+        "metadata": {}
+      }
+    },
+    "derivations": {
+      "f1986dbf-7fe6-44e6-bad1-1b50d4cba340": {
+        "derivation_id": "f1986dbf-7fe6-44e6-bad1-1b50d4cba340",
+        "output_artifact_id": "3f552b1a-58cb-4142-8738-8aa1a6fb92a9",
+        "source_artifact_ids": [],
+        "producer_task_id": "task_retrieve_suitable_2023_precipitation_input",
+        "operation": "dataset_retrieval",
+        "parameters": {
+          "exclude_artifact_ids": [
+            "65e6970a-7fb4-460f-a08b-bbd97edf8305"
+          ]
+        },
+        "semantic_effect": "Produced role 'input_2' using operation 'dataset_retrieval'.",
+        "evidence_snapshot_ids": [],
+        "created_at": "2026-08-22T16:08:25.254126Z"
+      }
+    },
+    "requirements": {
+      "req_monthly_temporal_range": {
+        "requirement_id": "req_monthly_temporal_range",
+        "requirement_type": "temporal_range",
+        "scope": "task_monthly_precipitation_summary input_2 must cover 2023-01-01 through 2023-12-31 using the date field.",
+        "task_id": "task_monthly_precipitation_summary",
+        "artifact_roles": [
+          "input_2"
+        ],
+        "parameters": {
+          "field": "date",
+          "start": "2023-01-01T00:00:00+00:00",
+          "end": "2023-12-31T23:59:59+00:00"
+        },
+        "blocking": true,
+        "provenance": "USER_EXPLICIT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "violated",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_monthly_required_fields": {
+        "requirement_id": "req_monthly_required_fields",
+        "requirement_type": "required_fields",
+        "scope": "task_monthly_precipitation_summary input_2 must contain the month and daily precipitation fields.",
+        "task_id": "task_monthly_precipitation_summary",
+        "artifact_roles": [
+          "input_2"
+        ],
+        "parameters": {
+          "fields": [
+            "month",
+            "prcp"
+          ]
+        },
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [
+          "98516c08-628a-49ed-9065-7d250d315c48"
+        ],
+        "superseded_by": null
+      },
+      "req_monthly_input_format": {
+        "requirement_id": "req_monthly_input_format",
+        "requirement_type": "format_compatible",
+        "scope": "task_monthly_precipitation_summary input_2 must be supplied as a CSV table.",
+        "task_id": "task_monthly_precipitation_summary",
+        "artifact_roles": [
+          "input_2"
+        ],
+        "parameters": {
+          "data_model": "table",
+          "formats": [
+            "CSV"
+          ]
+        },
+        "blocking": true,
+        "provenance": "WORKER_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "violated",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      }
+    },
+    "commitments": {
+      "commitment_monthly_precipitation_total": {
+        "commitment_id": "commitment_monthly_precipitation_total",
+        "key": "monthly_precipitation_aggregation",
+        "value": "sum of daily prcp values by calendar month",
+        "rationale": "Monthly precipitation is represented as the accumulated daily precipitation total for each month.",
+        "evidence_source": "User goal wording: summarize daily precipitation by month",
+        "created_by": "planner",
+        "plan_version": 1,
+        "active": true,
+        "disclosed": true,
+        "affected_task_ids": [
+          "task_monthly_precipitation_summary"
+        ],
+        "revision_history": []
+      }
+    },
+    "schema_mappings": {},
+    "evidence": {
+      "0052fc74-d9d0-472e-86e9-44bd55b866fa": {
+        "evidence_id": "0052fc74-d9d0-472e-86e9-44bd55b866fa",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "c5319c6a-f6f5-474b-a11f-06219b4910aa"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_weather_state_college_2024.csv",
+          "format": "csv",
+          "size_bytes": 31602,
+          "complete": true,
+          "limitations": [],
+          "data_model": "table",
+          "inspected_row_count": 366,
+          "row_sample_complete": true,
+          "schema": {
+            "station_id": "object",
+            "station_name": "object",
+            "date": "object",
+            "year": "int64",
+            "month": "int64",
+            "day": "int64",
+            "tmax": "float64",
+            "tmin": "float64",
+            "prcp": "float64"
+          },
+          "schema_fields": [
+            "station_id",
+            "station_name",
+            "date",
+            "year",
+            "month",
+            "day",
+            "tmax",
+            "tmin",
+            "prcp"
+          ],
+          "coordinate_candidates": [],
+          "spatializable_from_coordinates": false,
+          "temporal_coverage": {
+            "field": "date",
+            "start": "2024-01-01T00:00:00+00:00",
+            "end": "2024-12-31T00:00:00+00:00",
+            "precision": "datetime"
+          },
+          "temporal_candidates": [
+            {
+              "field": "date",
+              "start": "2024-01-01T00:00:00+00:00",
+              "end": "2024-12-31T00:00:00+00:00",
+              "precision": "datetime"
+            },
+            {
+              "field": "year",
+              "start": "2024",
+              "end": "2024",
+              "precision": "year"
+            },
+            {
+              "field": "month",
+              "start": "1970-01-01T00:00:00.000000001+00:00",
+              "end": "1970-01-01T00:00:00.000000012+00:00",
+              "precision": "datetime"
+            },
+            {
+              "field": "day",
+              "start": "1970-01-01T00:00:00.000000001+00:00",
+              "end": "1970-01-01T00:00:00.000000031+00:00",
+              "precision": "datetime"
+            }
+          ],
+          "temporal_coverage_complete": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-22T16:07:57.617923Z",
+        "complete": true,
+        "limitations": []
+      },
+      "98516c08-628a-49ed-9065-7d250d315c48": {
+        "evidence_id": "98516c08-628a-49ed-9065-7d250d315c48",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "65e6970a-7fb4-460f-a08b-bbd97edf8305"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_weather_state_college_2023.csv",
+          "format": "csv",
+          "size_bytes": 31513,
+          "complete": true,
+          "limitations": [],
+          "data_model": "table",
+          "inspected_row_count": 365,
+          "row_sample_complete": true,
+          "schema": {
+            "station_id": "object",
+            "station_name": "object",
+            "date": "object",
+            "year": "int64",
+            "month": "int64",
+            "day": "int64",
+            "tmax": "float64",
+            "tmin": "float64",
+            "prcp": "float64"
+          },
+          "schema_fields": [
+            "station_id",
+            "station_name",
+            "date",
+            "year",
+            "month",
+            "day",
+            "tmax",
+            "tmin",
+            "prcp"
+          ],
+          "coordinate_candidates": [],
+          "spatializable_from_coordinates": false,
+          "temporal_coverage": {
+            "field": "date",
+            "start": "2023-01-01T00:00:00+00:00",
+            "end": "2023-12-31T00:00:00+00:00",
+            "precision": "datetime"
+          },
+          "temporal_candidates": [
+            {
+              "field": "date",
+              "start": "2023-01-01T00:00:00+00:00",
+              "end": "2023-12-31T00:00:00+00:00",
+              "precision": "datetime"
+            },
+            {
+              "field": "year",
+              "start": "2023",
+              "end": "2023",
+              "precision": "year"
+            },
+            {
+              "field": "month",
+              "start": "1970-01-01T00:00:00.000000001+00:00",
+              "end": "1970-01-01T00:00:00.000000012+00:00",
+              "precision": "datetime"
+            },
+            {
+              "field": "day",
+              "start": "1970-01-01T00:00:00.000000001+00:00",
+              "end": "1970-01-01T00:00:00.000000031+00:00",
+              "precision": "datetime"
+            }
+          ],
+          "temporal_coverage_complete": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-22T16:07:57.622834Z",
+        "complete": true,
+        "limitations": []
+      },
+      "c093a8cb-f6a5-49b0-b373-7067cc9c13dc": {
+        "evidence_id": "c093a8cb-f6a5-49b0-b373-7067cc9c13dc",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "3f552b1a-58cb-4142-8738-8aa1a6fb92a9"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_242af41c_fx_dem_centre_30m_utm.tif",
+          "format": "tif",
+          "size_bytes": 5338558,
+          "complete": true,
+          "limitations": [],
+          "data_model": "raster",
+          "width": 1161,
+          "height": 1148,
+          "band_count": 1,
+          "resolution": [
+            30.0,
+            30.0
+          ],
+          "transform": [
+            30.0,
+            0.0,
+            238087.3824011362,
+            0.0,
+            -30.0,
+            4543387.006183241,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "grid_origin": [
+            238087.3824011362,
+            4543387.006183241
+          ],
+          "bounds": [
+            238087.3824011362,
+            4508947.006183241,
+            272917.3824011362,
+            4543387.006183241
+          ],
+          "nodata": null,
+          "dtype": "float32",
+          "driver": "GTiff",
+          "crs": "EPSG:26918",
+          "crs_authority": "EPSG:26918",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-22T16:08:25.257784Z",
+        "complete": true,
+        "limitations": []
+      }
+    },
+    "violations": {
+      "0af68af7-f2d9-4cdc-bbe1-ab5537ac4734": {
+        "violation_id": "0af68af7-f2d9-4cdc-bbe1-ab5537ac4734",
+        "code": "TEMPORAL_REQUIREMENT_UNMET",
+        "layer": "deterministic_requirement",
+        "task_id": "task_monthly_precipitation_summary",
+        "artifact_ids": [
+          "65e6970a-7fb4-460f-a08b-bbd97edf8305"
+        ],
+        "requirement_ids": [
+          "req_monthly_temporal_range"
+        ],
+        "evidence_ids": [
+          "98516c08-628a-49ed-9065-7d250d315c48"
+        ],
+        "blocking": true,
+        "deterministic": true,
+        "computationally_resolvable": true,
+        "status": "active",
+        "created_in_plan_version": 1,
+        "resolved_by_evidence_ids": [],
+        "resolved_in_plan_version": null,
+        "created_at": "2026-08-22T16:08:10.804975Z",
+        "resolved_at": null
+      },
+      "3c1537dd-8632-4cf5-86f8-1ade91299718": {
+        "violation_id": "3c1537dd-8632-4cf5-86f8-1ade91299718",
+        "code": "DATA_MODEL_INCOMPATIBLE",
+        "layer": "deterministic_task_contract",
+        "task_id": "task_monthly_precipitation_summary",
+        "artifact_ids": [
+          "3f552b1a-58cb-4142-8738-8aa1a6fb92a9"
+        ],
+        "requirement_ids": [],
+        "evidence_ids": [
+          "c093a8cb-f6a5-49b0-b373-7067cc9c13dc"
+        ],
+        "blocking": true,
+        "deterministic": true,
+        "computationally_resolvable": true,
+        "status": "active",
+        "created_in_plan_version": 2,
+        "resolved_by_evidence_ids": [],
+        "resolved_in_plan_version": null,
+        "created_at": "2026-08-22T16:08:25.258081Z",
+        "resolved_at": null
+      },
+      "07923537-2247-4e19-8061-05f978e564fd": {
+        "violation_id": "07923537-2247-4e19-8061-05f978e564fd",
+        "code": "FORMAT_UNSUPPORTED",
+        "layer": "deterministic_task_contract",
+        "task_id": "task_monthly_precipitation_summary",
+        "artifact_ids": [
+          "3f552b1a-58cb-4142-8738-8aa1a6fb92a9"
+        ],
+        "requirement_ids": [],
+        "evidence_ids": [
+          "c093a8cb-f6a5-49b0-b373-7067cc9c13dc"
+        ],
+        "blocking": true,
+        "deterministic": true,
+        "computationally_resolvable": true,
+        "status": "active",
+        "created_in_plan_version": 2,
+        "resolved_by_evidence_ids": [],
+        "resolved_in_plan_version": null,
+        "created_at": "2026-08-22T16:08:25.258157Z",
+        "resolved_at": null
+      },
+      "c429295d-344b-48b2-8d07-de9a34436f8a": {
+        "violation_id": "c429295d-344b-48b2-8d07-de9a34436f8a",
+        "code": "TEMPORAL_REQUIREMENT_UNMET",
+        "layer": "deterministic_task_contract",
+        "task_id": "task_monthly_precipitation_summary",
+        "artifact_ids": [
+          "c5319c6a-f6f5-474b-a11f-06219b4910aa"
+        ],
+        "requirement_ids": [],
+        "evidence_ids": [
+          "0052fc74-d9d0-472e-86e9-44bd55b866fa"
+        ],
+        "blocking": true,
+        "deterministic": true,
+        "computationally_resolvable": true,
+        "status": "active",
+        "created_in_plan_version": 2,
+        "resolved_by_evidence_ids": [],
+        "resolved_in_plan_version": null,
+        "created_at": "2026-08-22T16:08:25.258214Z",
+        "resolved_at": null
+      },
+      "c6d5718c-8eb4-4229-bd0a-786fcc3a1741": {
+        "violation_id": "c6d5718c-8eb4-4229-bd0a-786fcc3a1741",
+        "code": "FORMAT_UNSUPPORTED",
+        "layer": "deterministic_requirement",
+        "task_id": "task_monthly_precipitation_summary",
+        "artifact_ids": [
+          "3f552b1a-58cb-4142-8738-8aa1a6fb92a9"
+        ],
+        "requirement_ids": [
+          "req_monthly_input_format"
+        ],
+        "evidence_ids": [
+          "c093a8cb-f6a5-49b0-b373-7067cc9c13dc"
+        ],
+        "blocking": true,
+        "deterministic": true,
+        "computationally_resolvable": true,
+        "status": "active",
+        "created_in_plan_version": 2,
+        "resolved_by_evidence_ids": [],
+        "resolved_in_plan_version": null,
+        "created_at": "2026-08-22T16:08:25.258312Z",
+        "resolved_at": null
+      }
+    },
+    "execution_history": [
+      {
+        "event_id": "4971dbcd-a937-4e03-99cf-0fa7f4e58ac1",
+        "event_type": "initial_plan_committed",
+        "actor": "planner_component",
+        "state_version": 0,
+        "plan_version": 1,
+        "task_id": null,
+        "reason": "Aggregate the verified 2023 State College daily precipitation table by month using monthly precipitation totals.",
+        "metadata": {
+          "task_ids": [
+            "task_monthly_precipitation_summary"
+          ]
+        },
+        "created_at": "2026-08-22T16:08:10.797000Z"
+      },
+      {
+        "event_id": "2aa3001b-0db9-4c9a-89c2-cdab20060fe6",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 1,
+        "plan_version": 1,
+        "task_id": "task_monthly_precipitation_summary",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "proposed",
+          "to": "ready"
+        },
+        "created_at": "2026-08-22T16:08:10.799803Z"
+      },
+      {
+        "event_id": "8ae970d7-86b5-4512-b09a-77d814fbd865",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 2,
+        "plan_version": 1,
+        "task_id": "task_monthly_precipitation_summary",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-22T16:08:10.801376Z"
+      },
+      {
+        "event_id": "6a6f575d-7d1e-4cad-8641-96759a967d85",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 3,
+        "plan_version": 1,
+        "task_id": "task_monthly_precipitation_summary",
+        "reason": "Worker bound.",
+        "metadata": {
+          "from": "binding",
+          "to": "bound"
+        },
+        "created_at": "2026-08-22T16:08:10.803021Z"
+      },
+      {
+        "event_id": "b8a402ee-c778-4086-bb6b-8324edcb0274",
+        "event_type": "deterministic_violation_detected",
+        "actor": "invariant_engine",
+        "state_version": 4,
+        "plan_version": 1,
+        "task_id": "task_monthly_precipitation_summary",
+        "reason": "Detected blocking requirement violation: TEMPORAL_REQUIREMENT_UNMET.",
+        "metadata": {
+          "violation_id": "0af68af7-f2d9-4cdc-bbe1-ab5537ac4734",
+          "requirement_id": "req_monthly_temporal_range",
+          "code": "TEMPORAL_REQUIREMENT_UNMET",
+          "artifact_ids": [
+            "65e6970a-7fb4-460f-a08b-bbd97edf8305"
+          ],
+          "computationally_resolvable": true
+        },
+        "created_at": "2026-08-22T16:08:10.805009Z"
+      },
+      {
+        "event_id": "7cd011a1-8c7d-4594-89dd-638124b29039",
+        "event_type": "pre_execution_requirements_evaluated",
+        "actor": "invariant_engine",
+        "state_version": 4,
+        "plan_version": 1,
+        "task_id": "task_monthly_precipitation_summary",
+        "reason": "Known blocking preconditions failed.",
+        "metadata": {
+          "evaluated_requirement_ids": [
+            "req_monthly_temporal_range",
+            "req_monthly_required_fields",
+            "req_monthly_input_format"
+          ],
+          "blocking_violation_ids": [
+            "0af68af7-f2d9-4cdc-bbe1-ab5537ac4734"
+          ]
+        },
+        "created_at": "2026-08-22T16:08:10.805113Z"
+      },
+      {
+        "event_id": "663c4272-c52d-4ed5-b024-0f094785967d",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 5,
+        "plan_version": 1,
+        "task_id": "task_monthly_precipitation_summary",
+        "reason": "Reviewing known blocking preconditions before execution.",
+        "metadata": {
+          "from": "bound",
+          "to": "validating"
+        },
+        "created_at": "2026-08-22T16:08:10.806902Z"
+      },
+      {
+        "event_id": "b0ddbc91-d227-496a-b8a7-4e70c9a997cb",
+        "event_type": "qc_recovery_route_overridden",
+        "actor": "loop_controller",
+        "state_version": 6,
+        "plan_version": 1,
+        "task_id": "task_monthly_precipitation_summary",
+        "reason": "A deterministic computationally resolvable blocker requires structural recovery rather than the QC component's proposed action LOCAL_RECOVERY.",
+        "metadata": {
+          "violation_ids": [
+            "0af68af7-f2d9-4cdc-bbe1-ab5537ac4734"
+          ],
+          "qc_action": "LOCAL_RECOVERY",
+          "effective_action": "STRUCTURAL_REPLAN",
+          "effective_action_source": "deterministic_recovery_policy"
+        },
+        "created_at": "2026-08-22T16:08:15.676772Z"
+      },
+      {
+        "event_id": "619aac72-5609-49a1-bdd0-2ff450b39543",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 6,
+        "plan_version": 1,
+        "task_id": "task_monthly_precipitation_summary",
+        "reason": "The bound CSV does not satisfy the required 2023 temporal range: its date coverage ends at 2023-12-31T00:00:00+00:00 rather than covering through 2023-12-31T23:59:59+00:00. Reject this candidate and retrieve another input satisfying the full requirement before aggregation.",
+        "metadata": {
+          "from": "validating",
+          "to": "rejected"
+        },
+        "created_at": "2026-08-22T16:08:15.676828Z"
+      },
+      {
+        "event_id": "5ff531b4-983f-483a-89ca-fb55f65d91d1",
+        "event_type": "replanner_patch_normalized",
+        "actor": "graph_controller",
+        "state_version": 7,
+        "plan_version": 1,
+        "task_id": "task_monthly_precipitation_summary",
+        "reason": "Applied controller-owned patch normalization before graph validation.",
+        "metadata": {
+          "normalizations": [
+            "task_retrieve_suitable_2023_precipitation_input:removed_controller_fields=active_binding_id,attempts,created_in_plan_version,last_error,output_artifact_ids,requirement_ids,status,superseded_in_plan_version"
+          ]
+        },
+        "created_at": "2026-08-22T16:08:25.206271Z"
+      },
+      {
+        "event_id": "356bda75-0097-4669-b2e5-8d2ab74a96e0",
+        "event_type": "graph_patch_committed",
+        "actor": "graph_controller",
+        "state_version": 7,
+        "plan_version": 2,
+        "task_id": null,
+        "reason": "Replace the rejected 2023 input candidate through an executable dataset retrieval task that excludes the unsuitable artifact and supplies a CSV table in the existing input_2 role. Preserve the aggregation task, its requirement IDs, analytical commitment, and terminal output role.",
+        "metadata": {
+          "inserted": [
+            "task_retrieve_suitable_2023_precipitation_input"
+          ],
+          "removed": [],
+          "superseded": [],
+          "stale": [
+            "task_monthly_precipitation_summary"
+          ]
+        },
+        "created_at": "2026-08-22T16:08:25.207860Z"
+      },
+      {
+        "event_id": "07f5c8a0-8b97-497c-91c0-6210e5423b0b",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 8,
+        "plan_version": 2,
+        "task_id": "task_retrieve_suitable_2023_precipitation_input",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "proposed",
+          "to": "ready"
+        },
+        "created_at": "2026-08-22T16:08:25.219088Z"
+      },
+      {
+        "event_id": "f3e0467a-e4d1-4a64-94eb-0baa2c917901",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 9,
+        "plan_version": 2,
+        "task_id": "task_retrieve_suitable_2023_precipitation_input",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-22T16:08:25.221053Z"
+      },
+      {
+        "event_id": "21e85ec4-87e9-4cba-8e4e-c03772558078",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 10,
+        "plan_version": 2,
+        "task_id": "task_retrieve_suitable_2023_precipitation_input",
+        "reason": "Worker bound.",
+        "metadata": {
+          "from": "binding",
+          "to": "bound"
+        },
+        "created_at": "2026-08-22T16:08:25.223351Z"
+      },
+      {
+        "event_id": "5da63013-e85b-499f-b41e-4e9eb73244bb",
+        "event_type": "pre_execution_requirements_evaluated",
+        "actor": "invariant_engine",
+        "state_version": 11,
+        "plan_version": 2,
+        "task_id": "task_retrieve_suitable_2023_precipitation_input",
+        "reason": "All currently evaluable preconditions are satisfied.",
+        "metadata": {
+          "evaluated_requirement_ids": [],
+          "blocking_violation_ids": []
+        },
+        "created_at": "2026-08-22T16:08:25.225598Z"
+      },
+      {
+        "event_id": "f7a1afa8-522f-41bf-93da-d71f37d710a1",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 12,
+        "plan_version": 2,
+        "task_id": "task_retrieve_suitable_2023_precipitation_input",
+        "reason": "Worker started.",
+        "metadata": {
+          "from": "bound",
+          "to": "running"
+        },
+        "created_at": "2026-08-22T16:08:25.227693Z"
+      },
+      {
+        "event_id": "2d50adc8-9cc7-4a30-a8d3-3bc929d7b267",
+        "event_type": "worker_execution_completed",
+        "actor": "worker_executor",
+        "state_version": 13,
+        "plan_version": 2,
+        "task_id": "task_retrieve_suitable_2023_precipitation_input",
+        "reason": "Worker returned successfully.",
+        "metadata": {
+          "binding_id": "87ab4e73-1c2d-4763-8c72-5ca7814564d0",
+          "agent_id": "data_retrieval_agent",
+          "operation": "dataset_retrieval",
+          "attempt": 1,
+          "status": "successful",
+          "duration_seconds": 0.007509400005801581
+        },
+        "created_at": "2026-08-22T16:08:25.237388Z"
+      },
+      {
+        "event_id": "32d94d7c-578f-4966-8f91-c97a55b35a5a",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 13,
+        "plan_version": 2,
+        "task_id": "task_retrieve_suitable_2023_precipitation_input",
+        "reason": "Worker returned a provisional result.",
+        "metadata": {
+          "from": "running",
+          "to": "provisional_success"
+        },
+        "created_at": "2026-08-22T16:08:25.237469Z"
+      },
+      {
+        "event_id": "e4b4e694-9705-471f-8164-8dd13c19d9af",
+        "event_type": "artifact_registered",
+        "actor": "artifact_registry",
+        "state_version": 14,
+        "plan_version": 2,
+        "task_id": "task_retrieve_suitable_2023_precipitation_input",
+        "reason": null,
+        "metadata": {
+          "artifact_id": "3f552b1a-58cb-4142-8738-8aa1a6fb92a9",
+          "role": "input_2",
+          "content_hash": "1426addcdb0dea68e59a3b63a33a5efbf17fd56a0b1fd066a4bbf52595accdcb"
+        },
+        "created_at": "2026-08-22T16:08:25.254156Z"
+      },
+      {
+        "event_id": "480e72f1-a62e-4db7-86a7-404262785486",
+        "event_type": "deterministic_contract_violation_detected",
+        "actor": "invariant_engine",
+        "state_version": 14,
+        "plan_version": 2,
+        "task_id": "task_monthly_precipitation_summary",
+        "reason": "Detected task-contract violation: DATA_MODEL_INCOMPATIBLE.",
+        "metadata": {
+          "violation_id": "3c1537dd-8632-4cf5-86f8-1ade91299718",
+          "code": "DATA_MODEL_INCOMPATIBLE",
+          "artifact_ids": [
+            "3f552b1a-58cb-4142-8738-8aa1a6fb92a9"
+          ],
+          "computationally_resolvable": true,
+          "details": {
+            "role": "input_2",
+            "required_data_model": "table",
+            "actual_data_model": "raster"
+          }
+        },
+        "created_at": "2026-08-22T16:08:25.258108Z"
+      },
+      {
+        "event_id": "3ebe0507-3f62-427b-be1d-d30d4e4ef7fd",
+        "event_type": "deterministic_contract_violation_detected",
+        "actor": "invariant_engine",
+        "state_version": 14,
+        "plan_version": 2,
+        "task_id": "task_monthly_precipitation_summary",
+        "reason": "Detected task-contract violation: FORMAT_UNSUPPORTED.",
+        "metadata": {
+          "violation_id": "07923537-2247-4e19-8061-05f978e564fd",
+          "code": "FORMAT_UNSUPPORTED",
+          "artifact_ids": [
+            "3f552b1a-58cb-4142-8738-8aa1a6fb92a9"
+          ],
+          "computationally_resolvable": true,
+          "details": {
+            "role": "input_2",
+            "actual_format": "tif",
+            "allowed_formats": [
+              "csv"
+            ]
+          }
+        },
+        "created_at": "2026-08-22T16:08:25.258176Z"
+      },
+      {
+        "event_id": "7036917a-ca33-4dca-a149-6c80522a9cdf",
+        "event_type": "deterministic_contract_violation_detected",
+        "actor": "invariant_engine",
+        "state_version": 14,
+        "plan_version": 2,
+        "task_id": "task_monthly_precipitation_summary",
+        "reason": "Detected task-contract violation: TEMPORAL_REQUIREMENT_UNMET.",
+        "metadata": {
+          "violation_id": "c429295d-344b-48b2-8d07-de9a34436f8a",
+          "code": "TEMPORAL_REQUIREMENT_UNMET",
+          "artifact_ids": [
+            "c5319c6a-f6f5-474b-a11f-06219b4910aa"
+          ],
+          "computationally_resolvable": true,
+          "details": {
+            "requested_year": "2023",
+            "observed": [
+              {
+                "field": "date",
+                "start": "2024-01-01T00:00:00+00:00",
+                "end": "2024-12-31T00:00:00+00:00",
+                "precision": "datetime"
+              },
+              {
+                "field": "year",
+                "start": "2024",
+                "end": "2024",
+                "precision": "year"
+              },
+              {
+                "field": "month",
+                "start": "1970-01-01T00:00:00.000000001+00:00",
+                "end": "1970-01-01T00:00:00.000000012+00:00",
+                "precision": "datetime"
+              },
+              {
+                "field": "day",
+                "start": "1970-01-01T00:00:00.000000001+00:00",
+                "end": "1970-01-01T00:00:00.000000031+00:00",
+                "precision": "datetime"
+              }
+            ]
+          }
+        },
+        "created_at": "2026-08-22T16:08:25.258232Z"
+      },
+      {
+        "event_id": "b8de7870-ac98-46a6-b189-a871f9d512cb",
+        "event_type": "deterministic_violation_detected",
+        "actor": "invariant_engine",
+        "state_version": 14,
+        "plan_version": 2,
+        "task_id": "task_monthly_precipitation_summary",
+        "reason": "Detected blocking requirement violation: FORMAT_UNSUPPORTED.",
+        "metadata": {
+          "violation_id": "c6d5718c-8eb4-4229-bd0a-786fcc3a1741",
+          "requirement_id": "req_monthly_input_format",
+          "code": "FORMAT_UNSUPPORTED",
+          "artifact_ids": [
+            "3f552b1a-58cb-4142-8738-8aa1a6fb92a9"
+          ],
+          "computationally_resolvable": true
+        },
+        "created_at": "2026-08-22T16:08:25.258332Z"
+      },
+      {
+        "event_id": "3b7eede0-9b25-4540-b883-9b08d78df42f",
+        "event_type": "downstream_requirement_pre_evaluated",
+        "actor": "invariant_engine",
+        "state_version": 14,
+        "plan_version": 2,
+        "task_id": "task_monthly_precipitation_summary",
+        "reason": "New producer evidence established a downstream task precondition violation.",
+        "metadata": {
+          "producer_task_id": "task_retrieve_suitable_2023_precipitation_input",
+          "violation_ids": [
+            "3c1537dd-8632-4cf5-86f8-1ade91299718",
+            "07923537-2247-4e19-8061-05f978e564fd",
+            "c429295d-344b-48b2-8d07-de9a34436f8a",
+            "c6d5718c-8eb4-4229-bd0a-786fcc3a1741"
+          ]
+        },
+        "created_at": "2026-08-22T16:08:25.258364Z"
+      },
+      {
+        "event_id": "17289fc0-f503-4567-bc19-96d8c05eac81",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 15,
+        "plan_version": 2,
+        "task_id": "task_retrieve_suitable_2023_precipitation_input",
+        "reason": "Reviewing runtime evidence.",
+        "metadata": {
+          "from": "provisional_success",
+          "to": "validating"
+        },
+        "created_at": "2026-08-22T16:08:25.261752Z"
+      },
+      {
+        "event_id": "e8325967-1c87-432f-ae88-e3bb4aa2d775",
+        "event_type": "qc_downstream_scope_routed",
+        "actor": "qc_component",
+        "state_version": 16,
+        "plan_version": 2,
+        "task_id": "task_retrieve_suitable_2023_precipitation_input",
+        "reason": "The current producer transition satisfies its own contract; the objective defect remains active on the downstream task where recovery will be routed.",
+        "metadata": {
+          "qc_verdict": "BLOCK",
+          "qc_action": "LOCAL_RECOVERY",
+          "downstream_violation_ids": [
+            "0af68af7-f2d9-4cdc-bbe1-ab5537ac4734",
+            "3c1537dd-8632-4cf5-86f8-1ade91299718",
+            "07923537-2247-4e19-8061-05f978e564fd",
+            "c429295d-344b-48b2-8d07-de9a34436f8a",
+            "c6d5718c-8eb4-4229-bd0a-786fcc3a1741"
+          ]
+        },
+        "created_at": "2026-08-22T16:08:33.330027Z"
+      },
+      {
+        "event_id": "585fd7e9-760f-4646-a89b-33c46236457d",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 16,
+        "plan_version": 2,
+        "task_id": "task_retrieve_suitable_2023_precipitation_input",
+        "reason": "The current producer transition satisfies its own contract; the objective defect remains active on the downstream task where recovery will be routed.",
+        "metadata": {
+          "from": "validating",
+          "to": "successful"
+        },
+        "created_at": "2026-08-22T16:08:33.331794Z"
+      },
+      {
+        "event_id": "d375697c-bed8-44f6-82e0-630befee46af",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 17,
+        "plan_version": 2,
+        "task_id": "task_monthly_precipitation_summary",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "blocked",
+          "to": "ready"
+        },
+        "created_at": "2026-08-22T16:08:33.336185Z"
+      },
+      {
+        "event_id": "ad5b9067-94e0-46cb-a5a4-9512dcf21bec",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 18,
+        "plan_version": 2,
+        "task_id": "task_monthly_precipitation_summary",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-22T16:08:33.339632Z"
+      },
+      {
+        "event_id": "5f7eadd3-2adf-4a16-83f0-5e8a69eb3c9a",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 19,
+        "plan_version": 2,
+        "task_id": "task_monthly_precipitation_summary",
+        "reason": "Worker binding failed.",
+        "metadata": {
+          "from": "binding",
+          "to": "failed"
+        },
+        "created_at": "2026-08-22T16:08:33.343164Z"
+      }
+    ],
+    "qc_history": [
+      {
+        "decision_id": "qc-decision-task_monthly_precipitation_summary-20260822T160834Z",
+        "task_id": "task_monthly_precipitation_summary",
+        "verdict": "BLOCK",
+        "proposed_verdict": "BLOCK",
+        "reason": "The bound CSV does not satisfy the required 2023 temporal range: its date coverage ends at 2023-12-31T00:00:00+00:00 rather than covering through 2023-12-31T23:59:59+00:00. Reject this candidate and retrieve another input satisfying the full requirement before aggregation.",
+        "acknowledged_finding_ids": [
+          "0af68af7-f2d9-4cdc-bbe1-ab5537ac4734"
+        ],
+        "action_class": "LOCAL_RECOVERY",
+        "effective_action": "STRUCTURAL_REPLAN",
+        "effective_action_source": "deterministic_recovery_policy",
+        "allowed_recovery_types": [
+          "alternative_candidate"
+        ],
+        "recovery_parameters": {
+          "blocking_codes": [
+            "TEMPORAL_REQUIREMENT_UNMET"
+          ],
+          "exclude_artifact_ids": [
+            "65e6970a-7fb4-460f-a08b-bbd97edf8305"
+          ],
+          "recovery_goal": "Reject the unsuitable candidate and retrieve another candidate satisfying the observed requirement.",
+          "preserve_completed_work": true
+        },
+        "preserve_completed_work": true,
+        "forced_by_invariant": true,
+        "created_at": "2026-08-22T16:08:34Z"
+      },
+      {
+        "decision_id": "f0c7bb48-dbeb-4c76-be6b-66a8cdacdfe1",
+        "task_id": "task_retrieve_suitable_2023_precipitation_input",
+        "verdict": "PASS",
+        "proposed_verdict": "BLOCK",
+        "reason": "The current producer transition satisfies its own contract; the objective defect remains active on the downstream task where recovery will be routed.",
+        "acknowledged_finding_ids": [],
+        "action_class": "NONE",
+        "effective_action": "NONE",
+        "effective_action_source": "qc_component",
+        "allowed_recovery_types": [],
+        "recovery_parameters": {},
+        "preserve_completed_work": true,
+        "forced_by_invariant": true,
+        "created_at": "2026-08-22T16:08:33.329988Z"
+      }
+    ],
+    "replan_history": [
+      {
+        "decision_id": "32a48fd6-b88d-42e6-9e5e-2b0427591957",
+        "base_plan_version": 1,
+        "rationale": "Replace the rejected 2023 input candidate through an executable dataset retrieval task that excludes the unsuitable artifact and supplies a CSV table in the existing input_2 role. Preserve the aggregation task, its requirement IDs, analytical commitment, and terminal output role.",
+        "patch": {
+          "base_plan_version": 1,
+          "rationale": "Replace the rejected 2023 input candidate through an executable dataset retrieval task that excludes the unsuitable artifact and supplies a CSV table in the existing input_2 role. Preserve the aggregation task, its requirement IDs, analytical commitment, and terminal output role.",
+          "insert_tasks": [
+            {
+              "task_id": "task_retrieve_suitable_2023_precipitation_input",
+              "title": "Retrieve a suitable 2023 State College precipitation table",
+              "purpose": "Obtain an alternative candidate satisfying the explicit 2023 temporal requirement and downstream tabular input contract.",
+              "operation": "dataset_retrieval",
+              "instructions": "Retrieve an alternative State College weather dataset candidate for 2023 that satisfies the full required temporal range through 2023-12-31T23:59:59+00:00 and contains the observed month and prcp fields required by the downstream aggregation. Exclude the previously rejected artifact.",
+              "parameters": {
+                "exclude_artifact_ids": [
+                  "65e6970a-7fb4-460f-a08b-bbd97edf8305"
+                ]
+              },
+              "required_capabilities": [
+                "dataset_retrieval"
+              ],
+              "depends_on": [],
+              "input_requirements": [],
+              "expected_outputs": [
+                {
+                  "role": "input_2",
+                  "data_model": "table",
+                  "formats": [
+                    "CSV"
+                  ],
+                  "required": true
+                }
+              ],
+              "requirement_ids": [],
+              "status": "proposed",
+              "attempts": 0,
+              "active_binding_id": null,
+              "output_artifact_ids": [],
+              "last_error": null,
+              "created_in_plan_version": 1,
+              "superseded_in_plan_version": null,
+              "metadata": {}
+            }
+          ],
+          "remove_task_ids": [],
+          "supersede_task_ids": [],
+          "update_tasks": {
+            "task_monthly_precipitation_summary": {
+              "task_id": "task_monthly_precipitation_summary",
+              "title": null,
+              "purpose": null,
+              "operation": null,
+              "instructions": null,
+              "parameters": null,
+              "required_capabilities": null,
+              "depends_on": [
+                "task_retrieve_suitable_2023_precipitation_input"
+              ],
+              "input_requirements": null,
+              "expected_outputs": null,
+              "requirement_ids": null,
+              "status": "ready",
+              "attempts": null,
+              "active_binding_id": null,
+              "output_artifact_ids": null,
+              "last_error": null,
+              "created_in_plan_version": null,
+              "superseded_in_plan_version": null,
+              "metadata": null
+            }
+          },
+          "add_dependencies": [],
+          "remove_dependencies": [],
+          "reuse_artifact_ids": [],
+          "reset_task_ids": [
+            "task_monthly_precipitation_summary"
+          ],
+          "commitment_revisions": []
+        },
+        "accepted": true,
+        "created_at": "2026-08-22T16:08:25.208021Z"
+      }
+    ],
+    "component_calls": [
+      {
+        "call_id": "dfde6cb4-c111-4fe4-8664-700d5862b71e",
+        "component": "planner",
+        "prompt_hash": "879bbf4688237108aa73bcb12bca3ec0b568a6ec20b463cefe3a9dddb652d8de",
+        "tool_schema_hash": "441719facf91fd72ec7e126a4de0921e9629efd4cd39619a5dbe1be9fea2e3fe",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 5963,
+        "output_tokens": 1356,
+        "duration_seconds": 13.149147536998498,
+        "disposition": "successful",
+        "created_at": "2026-08-22T16:08:10.796962Z"
+      },
+      {
+        "call_id": "7d2c9e1e-2d59-4b4a-905f-4926e1ca9591",
+        "component": "qc",
+        "prompt_hash": "f32e58c2015bc65d1615821b0bf588e3118841b8fd13c0f66435ff64db6bc238",
+        "tool_schema_hash": "264376b66f6ac19b4d57965f2f5a135067cea57302b6779a763ae77f3e5ccb86",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 3212,
+        "output_tokens": 440,
+        "duration_seconds": 4.864956200006418,
+        "disposition": "successful",
+        "created_at": "2026-08-22T16:08:15.676669Z"
+      },
+      {
+        "call_id": "b9674f2c-a896-45a2-a5b0-daffc340daf9",
+        "component": "replanner",
+        "prompt_hash": "f44710a3ce878e6a4887fd0f8c607350a27b597530562dd74f9ecf59fc440071",
+        "tool_schema_hash": "7e4bffd48521db6cb33fd211812492847a9f5babb3e39c9ed1a4933eb33e3e0a",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 7924,
+        "output_tokens": 1042,
+        "duration_seconds": 9.517441279007471,
+        "disposition": "successful",
+        "created_at": "2026-08-22T16:08:25.215987Z"
+      },
+      {
+        "call_id": "78a480ef-bced-42b3-b977-e2216cc9ce27",
+        "component": "qc",
+        "prompt_hash": "f32e58c2015bc65d1615821b0bf588e3118841b8fd13c0f66435ff64db6bc238",
+        "tool_schema_hash": "264376b66f6ac19b4d57965f2f5a135067cea57302b6779a763ae77f3e5ccb86",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 4449,
+        "output_tokens": 797,
+        "duration_seconds": 8.061115800999687,
+        "disposition": "successful",
+        "created_at": "2026-08-22T16:08:33.331665Z"
+      }
+    ],
+    "plan_versions": [
+      {
+        "version": 1,
+        "parent_version": null,
+        "reason": "Initial plan committed by independent Planner.",
+        "task_ids": [
+          "task_monthly_precipitation_summary"
+        ],
+        "edges": [],
+        "created_at": "2026-08-22T16:08:10.789442Z"
+      },
+      {
+        "version": 2,
+        "parent_version": 1,
+        "reason": "Replace the rejected 2023 input candidate through an executable dataset retrieval task that excludes the unsuitable artifact and supplies a CSV table in the existing input_2 role. Preserve the aggregation task, its requirement IDs, analytical commitment, and terminal output role.",
+        "task_ids": [
+          "task_monthly_precipitation_summary",
+          "task_retrieve_suitable_2023_precipitation_input"
+        ],
+        "edges": [
+          [
+            "task_retrieve_suitable_2023_precipitation_input",
+            "task_monthly_precipitation_summary"
+          ]
+        ],
+        "created_at": "2026-08-22T16:08:25.207821Z"
+      }
+    ],
+    "budgets": {
+      "max_total_model_calls": 24,
+      "max_total_tokens": 120000,
+      "max_worker_calls": 30,
+      "max_local_recoveries": 6,
+      "max_replans": 3,
+      "max_runtime_seconds": 900.0,
+      "planner_retry_limit": 2,
+      "qc_retry_limit": 1,
+      "replanner_retry_limit": 1,
+      "total_model_calls": 4,
+      "total_tokens": 25183,
+      "worker_calls": 1,
+      "local_recoveries": 0,
+      "replans": 1
+    },
+    "terminal_state": "failed_unrecoverable",
+    "terminal_reason": "Role 'input_2' requires data model 'table'.",
+    "human_clarification": null,
+    "final_artifact_ids": [],
+    "required_terminal_roles": [
+      "monthly_precipitation_summary"
+    ],
+    "final_disclosure": null,
+    "created_at": "2026-08-22T16:07:57.611733Z",
+    "updated_at": "2026-08-22T16:08:33.349768Z"
+  },
+  "execution_steps": [
+    {
+      "step_index": 1,
+      "step_id": "task_monthly_precipitation_summary",
+      "agent_id": null,
+      "title": "Summarize daily precipitation by month",
+      "instructions": "Group the input table by the observed month field and sum the observed daily precipitation field. Preserve the month and aggregated precipitation values in the output CSV.",
+      "output_artifacts": [],
+      "status": "failed",
+      "error": {
+        "code": "E_BINDING",
+        "message": "Role 'input_2' requires data model 'table'.",
+        "retryable": false,
+        "details": {}
+      }
+    },
+    {
+      "step_index": 2,
+      "step_id": "task_retrieve_suitable_2023_precipitation_input",
+      "agent_id": "data_retrieval_agent",
+      "title": "Retrieve a suitable 2023 State College precipitation table",
+      "instructions": "Retrieve an alternative State College weather dataset candidate for 2023 that satisfies the full required temporal range through 2023-12-31T23:59:59+00:00 and contains the observed month and prcp fields required by the downstream aggregation. Exclude the previously rejected artifact.",
+      "output_artifacts": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_242af41c_fx_dem_centre_30m_utm.tif"
+      ],
+      "status": "successful",
+      "error": null
+    }
+  ],
+  "qc_evaluations": 2,
+  "qc_blocks": 2,
+  "qc_interventions": 1,
+  "effective_blocks": 1,
+  "effective_interventions": 1,
+  "qc_policy_overrides": 1,
+  "replanning_iterations": 1,
+  "error": "Role 'input_2' requires data model 'table'.",
+  "ledger_events": [
+    {
+      "call_id": "87ab4e73-1c2d-4763-8c72-5ca7814564d0",
+      "trajectory_id": "traj_ISS_Q16_C2_run1",
+      "agent_id": "data_retrieval_agent",
+      "operation": "dataset_retrieval",
+      "query": "Retrieve an alternative State College weather dataset candidate for 2023 that satisfies the full required temporal range through 2023-12-31T23:59:59+00:00 and contains the observed month and prcp fields required by the downstream aggregation. Exclude the previously rejected artifact.",
+      "timestamp_start": 1787414905.229763,
+      "timestamp_end": 1787414905.237261,
+      "duration_seconds": 0.007509400005801581,
+      "input_artifact_paths": [],
+      "input_artifact_hashes": {},
+      "parameters": {
+        "exclude_artifact_ids": [
+          "65e6970a-7fb4-460f-a08b-bbd97edf8305"
+        ]
+      },
+      "status": "completed",
+      "error_code": null,
+      "error_message": null,
+      "output_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_242af41c_fx_dem_centre_30m_utm.tif"
+      ],
+      "output_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_242af41c_fx_dem_centre_30m_utm.tif": "1426addcdb0dea68e59a3b63a33a5efbf17fd56a0b1fd066a4bbf52595accdcb"
+      },
+      "summary": "Successfully retrieved dataset: fx_dem_centre_30m_utm.tif",
+      "raw_response": {
+        "binding_id": "87ab4e73-1c2d-4763-8c72-5ca7814564d0",
+        "task_id": "task_retrieve_suitable_2023_precipitation_input",
+        "attempt": 1
+      }
+    }
+  ],
+  "created_at": "2026-08-22T16:08:33.355641+00:00",
+  "evaluation": {
+    "task_id": "ISS_Q16",
+    "bafo_success": false,
+    "all_challenges_resolved": false,
+    "evaluability_status": "EVALUABLE",
+    "challenge_activated": true,
+    "trajectory_classification": "valid_bafo_fail",
+    "production_terminal_state": "failed_unrecoverable",
+    "terminal_state": "failed",
+    "constraint_results": {
+      "year": {
+        "constraint_key": "year",
+        "status": "UNEVALUABLE",
+        "reason": "Could not verify temporal vintage for year 2023.",
+        "details": {}
+      },
+      "group_by": {
+        "constraint_key": "group_by",
+        "status": "UNEVALUABLE",
+        "reason": "Could not verify temporal vintage for year 2023.",
+        "details": {}
+      },
+      "statistic": {
+        "constraint_key": "statistic",
+        "status": "UNEVALUABLE",
+        "reason": "Could not verify temporal vintage for year 2023.",
+        "details": {}
+      }
+    },
+    "passed_constraints": [],
+    "failed_constraints": [],
+    "unevaluable_constraints": [
+      "year",
+      "group_by",
+      "statistic"
+    ],
+    "inspected_artifacts_count": 1,
+    "events_count": 1,
+    "diagnostic_summary": "BAFO: False | State: failed (Valid: False) | Constraints: 0 PASS, 0 FAIL, 3 UNEVALUABLE | Events Recorded: 1 | Artifacts Inspected: 1"
+  },
+  "bafo_success": false,
+  "all_challenges_resolved": false,
+  "trajectory_classification": "valid_bafo_fail"
+}

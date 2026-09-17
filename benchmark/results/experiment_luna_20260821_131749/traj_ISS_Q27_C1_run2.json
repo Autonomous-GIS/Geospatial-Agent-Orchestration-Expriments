@@ -1,0 +1,2017 @@
+{
+  "trajectory_id": "traj_ISS_Q27_C1_run2",
+  "task_id": "ISS_Q27",
+  "condition": "C1",
+  "model": "gpt-5.6-luna",
+  "run_index": 2,
+  "suite": "isolated",
+  "user_question": "Create a choropleth map of hospital counts across Centre County.",
+  "input_artifact_paths": [
+    "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_hospitals_utm.gpkg",
+    "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg",
+    "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_county_subdivisions_utm.gpkg"
+  ],
+  "status": "successful",
+  "total_wall_time": 40.14,
+  "rate_limit_wait_time": 0.0,
+  "provider_retry_wait_time": 0.0,
+  "orchestration_active_time": 40.079,
+  "worker_execution_time": 0.061,
+  "total_tokens": 16745,
+  "input_tokens": 12546,
+  "output_tokens": 4199,
+  "outputs": {
+    "summary": "Workflow completed with accepted terminal artifacts.",
+    "artifacts": [
+      "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/mapping_agent/map_8bc9b9ca.html"
+    ],
+    "produced_artifacts": [
+      "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_a/clipped_efd381a8.gpkg",
+      "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/point_aggregate_b_e74556df.gpkg",
+      "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/mapping_agent/map_8bc9b9ca.html"
+    ],
+    "workflow_plan": {
+      "workflow_id": "98020b85-e534-4133-adeb-86d13f8ed82f",
+      "plan_version": 1,
+      "goal": "Create a choropleth map of hospital counts across Centre County.",
+      "workflow_steps": [
+        {
+          "step_id": "task_clip_hospitals_to_centre_county",
+          "title": "Clip hospitals to Centre County",
+          "purpose": "Restrict hospital points to the supplied Centre County county-subdivision boundary.",
+          "agent_id": "vector_analysis_a",
+          "operation": "clip",
+          "instructions": "Clip the hospital point layer using the county-subdivision polygon layer as the clipping boundary. Preserve the hospital point attributes and write the result as a GeoPackage vector layer.",
+          "parameters": {
+            "operation": "clip"
+          },
+          "depends_on": [],
+          "input_from_steps": [],
+          "status": "successful",
+          "output_artifact_ids": [
+            "3a7c37d8-3b29-4eee-97e7-60995804e91d"
+          ]
+        },
+        {
+          "step_id": "task_count_hospitals_by_tract",
+          "title": "Count hospitals by census tract",
+          "purpose": "Compute the number of clipped hospitals within each supplied Centre County census tract.",
+          "agent_id": "vector_analysis_b",
+          "operation": "point_count_by_polygon",
+          "instructions": "Count point features from the clipped hospital layer within each census tract polygon. Store the count in a new field named hospital_count and write the result as a GeoPackage vector layer.",
+          "parameters": {
+            "operation": "point_count_by_polygon",
+            "count_field": "hospital_count"
+          },
+          "depends_on": [
+            "task_clip_hospitals_to_centre_county"
+          ],
+          "input_from_steps": [
+            "task_clip_hospitals_to_centre_county"
+          ],
+          "status": "successful",
+          "output_artifact_ids": [
+            "09782ac1-1520-4509-bc53-32f7fdec720e"
+          ]
+        },
+        {
+          "step_id": "task_create_hospital_count_choropleth",
+          "title": "Create hospital-count choropleth",
+          "purpose": "Produce an interactive choropleth map showing hospital counts by census tract across Centre County.",
+          "agent_id": "mapping_agent",
+          "operation": "thematic_mapping",
+          "instructions": "Generate an interactive HTML choropleth map from the tract layer with hospital_count as the mapped field. Embed the source artifact and CRS verification metadata.",
+          "parameters": {
+            "field": "hospital_count"
+          },
+          "depends_on": [
+            "task_count_hospitals_by_tract"
+          ],
+          "input_from_steps": [
+            "task_count_hospitals_by_tract"
+          ],
+          "status": "successful",
+          "output_artifact_ids": [
+            "ec46544b-868e-434b-84e9-2c6273983df6"
+          ]
+        }
+      ],
+      "requirements": [
+        {
+          "requirement_id": "req_clip_compatible_crs",
+          "requirement_type": "compatible_crs",
+          "scope": "Binary spatial clip of hospital points by county-subdivision polygons.",
+          "task_id": "task_clip_hospitals_to_centre_county",
+          "artifact_roles": [
+            "input_1",
+            "input_3"
+          ],
+          "parameters": {
+            "required_relationship": "matching CRS"
+          },
+          "blocking": true,
+          "provenance": "WORKER_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_count_compatible_crs",
+          "requirement_type": "compatible_crs",
+          "scope": "Point-in-polygon hospital count using clipped hospital points and census tract polygons.",
+          "task_id": "task_count_hospitals_by_tract",
+          "artifact_roles": [
+            "centre_county_hospitals",
+            "input_2"
+          ],
+          "parameters": {
+            "required_relationship": "matching CRS"
+          },
+          "blocking": true,
+          "provenance": "WORKER_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "a3c13382-5f4d-4454-9484-0bff6dd1b92a",
+          "requirement_type": "valid_geometry",
+          "scope": "task_transition",
+          "task_id": "task_clip_hospitals_to_centre_county",
+          "artifact_roles": [
+            "input_1",
+            "input_3"
+          ],
+          "parameters": {},
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "operation_contract_catalog",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        }
+      ],
+      "commitments": []
+    }
+  },
+  "workflow_state": {
+    "schema_version": "1.0.0",
+    "workflow_id": "98020b85-e534-4133-adeb-86d13f8ed82f",
+    "state_version": 26,
+    "user_goal": "Create a choropleth map of hospital counts across Centre County.",
+    "feature_profile": "C1",
+    "feature_config": {
+      "profile_name": "C1",
+      "planner_mode": "generic",
+      "qc_mode": "generic",
+      "replanner_mode": "generic",
+      "technical_invariants": true,
+      "local_recovery": true,
+      "structural_patching": true,
+      "gis_finding_routing": false
+    },
+    "current_plan_version": 1,
+    "tasks": {
+      "task_clip_hospitals_to_centre_county": {
+        "task_id": "task_clip_hospitals_to_centre_county",
+        "title": "Clip hospitals to Centre County",
+        "purpose": "Restrict hospital points to the supplied Centre County county-subdivision boundary.",
+        "operation": "clip",
+        "instructions": "Clip the hospital point layer using the county-subdivision polygon layer as the clipping boundary. Preserve the hospital point attributes and write the result as a GeoPackage vector layer.",
+        "parameters": {
+          "operation": "clip"
+        },
+        "required_capabilities": [
+          "vector_geoprocessing"
+        ],
+        "depends_on": [],
+        "input_requirements": [
+          {
+            "role": "input_1",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          },
+          {
+            "role": "input_3",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "centre_county_hospitals",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_clip_compatible_crs",
+          "a3c13382-5f4d-4454-9484-0bff6dd1b92a"
+        ],
+        "status": "successful",
+        "attempts": 1,
+        "active_binding_id": "ea47f20a-fe47-4737-b9a1-2b7c539722c5",
+        "output_artifact_ids": [
+          "3a7c37d8-3b29-4eee-97e7-60995804e91d"
+        ],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      },
+      "task_count_hospitals_by_tract": {
+        "task_id": "task_count_hospitals_by_tract",
+        "title": "Count hospitals by census tract",
+        "purpose": "Compute the number of clipped hospitals within each supplied Centre County census tract.",
+        "operation": "point_count_by_polygon",
+        "instructions": "Count point features from the clipped hospital layer within each census tract polygon. Store the count in a new field named hospital_count and write the result as a GeoPackage vector layer.",
+        "parameters": {
+          "operation": "point_count_by_polygon",
+          "count_field": "hospital_count"
+        },
+        "required_capabilities": [
+          "vector_aggregation_and_joins"
+        ],
+        "depends_on": [
+          "task_clip_hospitals_to_centre_county"
+        ],
+        "input_requirements": [
+          {
+            "role": "centre_county_hospitals",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          },
+          {
+            "role": "input_2",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "tracts_with_hospital_counts",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_count_compatible_crs"
+        ],
+        "status": "successful",
+        "attempts": 1,
+        "active_binding_id": "8c41d2dc-fe81-4826-bbad-b5501cbe722a",
+        "output_artifact_ids": [
+          "09782ac1-1520-4509-bc53-32f7fdec720e"
+        ],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      },
+      "task_create_hospital_count_choropleth": {
+        "task_id": "task_create_hospital_count_choropleth",
+        "title": "Create hospital-count choropleth",
+        "purpose": "Produce an interactive choropleth map showing hospital counts by census tract across Centre County.",
+        "operation": "thematic_mapping",
+        "instructions": "Generate an interactive HTML choropleth map from the tract layer with hospital_count as the mapped field. Embed the source artifact and CRS verification metadata.",
+        "parameters": {
+          "field": "hospital_count"
+        },
+        "required_capabilities": [
+          "thematic_mapping"
+        ],
+        "depends_on": [
+          "task_count_hospitals_by_tract"
+        ],
+        "input_requirements": [
+          {
+            "role": "tracts_with_hospital_counts",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "hospital_count_choropleth_map",
+            "data_model": "map",
+            "formats": [
+              "HTML"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [],
+        "status": "successful",
+        "attempts": 1,
+        "active_binding_id": "d0535760-10d7-4f04-b78f-89965e2ab729",
+        "output_artifact_ids": [
+          "ec46544b-868e-434b-84e9-2c6273983df6"
+        ],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      }
+    },
+    "edges": [
+      [
+        "task_clip_hospitals_to_centre_county",
+        "task_count_hospitals_by_tract"
+      ],
+      [
+        "task_count_hospitals_by_tract",
+        "task_create_hospital_count_choropleth"
+      ]
+    ],
+    "bindings": {
+      "ea47f20a-fe47-4737-b9a1-2b7c539722c5": {
+        "binding_id": "ea47f20a-fe47-4737-b9a1-2b7c539722c5",
+        "task_id": "task_clip_hospitals_to_centre_county",
+        "agent_id": "vector_analysis_a",
+        "operation": "clip",
+        "instruction": "Clip the hospital point layer using the county-subdivision polygon layer as the clipping boundary. Preserve the hospital point attributes and write the result as a GeoPackage vector layer.",
+        "input_bindings": [
+          {
+            "role": "input_1",
+            "artifact_id": "f6832412-0381-489b-aa23-35af73dd794c",
+            "source_task_id": null,
+            "binding_order": 0
+          },
+          {
+            "role": "input_3",
+            "artifact_id": "ede81c57-f921-4ae2-b63f-20407d706752",
+            "source_task_id": null,
+            "binding_order": 1
+          }
+        ],
+        "agent_profile_snapshot": {
+          "agent_id": "vector_analysis_a",
+          "name": "Vector Analysis A",
+          "description": "Performs deterministic vector geoprocessing including buffering, clipping, overlay/intersection, explicit geometry repair, and spatial joins. Binary spatial operations require compatible coordinate reference systems. Distance operations use the coordinate system and units of the provided input artifact.",
+          "operations": [
+            "buffer",
+            "clip",
+            "geometry_repair",
+            "overlay",
+            "spatial_join",
+            "vector_geoprocessing"
+          ],
+          "skills": [
+            {
+              "skill_id": "vector_geoprocessing",
+              "name": "Vector Geoprocessing",
+              "description": "Performs spatial buffering, clipping, polygon intersection overlay, geometry validation/repair, and spatial joins.",
+              "constraints": {
+                "spatial": "Requires matching coordinate reference systems for binary operations. Distance operations require projected coordinate reference systems.",
+                "temporal": null,
+                "other": [
+                  "The service performs only the requested operation.",
+                  "It does not automatically reproject inputs or repair geometries unless explicitly requested."
+                ]
+              }
+            }
+          ],
+          "inputs": {
+            "input_datasets": {
+              "required": true,
+              "description": "One or two vector datasets in GeoPackage (.gpkg) or GeoJSON format."
+            }
+          },
+          "outputs": [
+            {
+              "type": "vector",
+              "formats": [
+                "GPKG",
+                "GeoJSON"
+              ],
+              "required": true,
+              "description": "Processed vector dataset."
+            }
+          ],
+          "parameters": {
+            "operation": {
+              "required": false,
+              "description": "Explicit operation name (buffer, clip, overlay, geometry_repair, spatial_join)."
+            },
+            "distance": {
+              "required": false,
+              "description": "Buffer distance value."
+            },
+            "unit": {
+              "required": false,
+              "default": "meters",
+              "description": "Buffer distance unit (meters, km)."
+            }
+          }
+        },
+        "endpoint": "https://www.geospatial-agentic-services.online/agents/vector_analysis_a/tasks",
+        "attempt": 1,
+        "invocation_id": null,
+        "status": "successful",
+        "started_at": "2026-08-21T18:27:18.858559Z",
+        "completed_at": "2026-08-21T18:27:18.880637Z",
+        "duration_seconds": 0.022090355996624567,
+        "output_artifact_ids": [
+          "3a7c37d8-3b29-4eee-97e7-60995804e91d"
+        ],
+        "messages": [
+          "Clipped vector dataset resulting in 3 features."
+        ],
+        "structured_error": null,
+        "created_at": "2026-08-21T18:27:18.854626Z"
+      },
+      "8c41d2dc-fe81-4826-bbad-b5501cbe722a": {
+        "binding_id": "8c41d2dc-fe81-4826-bbad-b5501cbe722a",
+        "task_id": "task_count_hospitals_by_tract",
+        "agent_id": "vector_analysis_b",
+        "operation": "point_count_by_polygon",
+        "instruction": "Count point features from the clipped hospital layer within each census tract polygon. Store the count in a new field named hospital_count and write the result as a GeoPackage vector layer.",
+        "input_bindings": [
+          {
+            "role": "centre_county_hospitals",
+            "artifact_id": "3a7c37d8-3b29-4eee-97e7-60995804e91d",
+            "source_task_id": "task_clip_hospitals_to_centre_county",
+            "binding_order": 0
+          },
+          {
+            "role": "input_2",
+            "artifact_id": "8123b104-03b3-4fb5-820d-bc786f3c94a4",
+            "source_task_id": null,
+            "binding_order": 1
+          }
+        ],
+        "agent_profile_snapshot": {
+          "agent_id": "vector_analysis_b",
+          "name": "Vector Analysis B",
+          "description": "Performs deterministic vector joins, dissolves, grouped aggregations, attribute joins, and buffering. Vector operations consume GeoPackage inputs. The service does not convert formats, repair invalid geometries, or reproject inputs automatically.",
+          "operations": [
+            "aggregate",
+            "attribute_join",
+            "buffer",
+            "dissolve",
+            "point_count_by_polygon",
+            "point_sum_by_polygon",
+            "spatial_join",
+            "vector_aggregation_and_joins"
+          ],
+          "skills": [
+            {
+              "skill_id": "vector_aggregation_and_joins",
+              "name": "Vector Aggregation and Joins",
+              "description": "Performs polygon dissolves, feature aggregations, spatial joins, attribute table joins, and spatial buffering on GeoPackage layers.",
+              "constraints": {
+                "spatial": "Requires matching coordinate reference systems for spatial joins. Requires projected CRS for metric buffer.",
+                "temporal": null,
+                "other": [
+                  "Accepts GeoPackage (.gpkg) vector format only. Rejects GeoJSON or Shapefiles.",
+                  "Accepts CSV tables for attribute join operations."
+                ]
+              }
+            }
+          ],
+          "inputs": {
+            "input_datasets": {
+              "required": true,
+              "description": "GeoPackage vector dataset(s) and optional CSV attribute table."
+            }
+          },
+          "outputs": [
+            {
+              "type": "vector",
+              "formats": [
+                "GPKG"
+              ],
+              "required": true,
+              "description": "Processed GeoPackage vector dataset."
+            }
+          ],
+          "parameters": {
+            "operation": {
+              "required": false,
+              "description": "Explicit operation name (dissolve, spatial_join, attribute_join, buffer, aggregate, point_count_by_polygon, point_sum_by_polygon)."
+            },
+            "count_field": {
+              "required": false,
+              "description": "Output field name for point_count_by_polygon."
+            },
+            "sum_field": {
+              "required": false,
+              "description": "Point-layer numeric field to sum for point_sum_by_polygon."
+            },
+            "output_field": {
+              "required": false,
+              "description": "Output field name for point_sum_by_polygon."
+            },
+            "vector_key": {
+              "required": false,
+              "description": "Field name in vector dataset for attribute join."
+            },
+            "table_key": {
+              "required": false,
+              "description": "Field name in tabular dataset for attribute join."
+            }
+          }
+        },
+        "endpoint": "https://www.geospatial-agentic-services.online/agents/vector_analysis_b/tasks",
+        "attempt": 1,
+        "invocation_id": null,
+        "status": "successful",
+        "started_at": "2026-08-21T18:27:25.887262Z",
+        "completed_at": "2026-08-21T18:27:25.916757Z",
+        "duration_seconds": 0.029506632999982685,
+        "output_artifact_ids": [
+          "09782ac1-1520-4509-bc53-32f7fdec720e"
+        ],
+        "messages": [
+          "Aggregated 3 point features into 16 polygon units using field hospital_count."
+        ],
+        "structured_error": null,
+        "created_at": "2026-08-21T18:27:25.878818Z"
+      },
+      "d0535760-10d7-4f04-b78f-89965e2ab729": {
+        "binding_id": "d0535760-10d7-4f04-b78f-89965e2ab729",
+        "task_id": "task_create_hospital_count_choropleth",
+        "agent_id": "mapping_agent",
+        "operation": "thematic_mapping",
+        "instruction": "Generate an interactive HTML choropleth map from the tract layer with hospital_count as the mapped field. Embed the source artifact and CRS verification metadata.",
+        "input_bindings": [
+          {
+            "role": "tracts_with_hospital_counts",
+            "artifact_id": "09782ac1-1520-4509-bc53-32f7fdec720e",
+            "source_task_id": "task_count_hospitals_by_tract",
+            "binding_order": 0
+          }
+        ],
+        "agent_profile_snapshot": {
+          "agent_id": "mapping_agent",
+          "name": "Mapping Agent",
+          "description": "Produces deterministic HTML maps from supplied vector, raster, or joined tabular-spatial artifacts. Visualizes the specified field and embeds verification metadata.",
+          "operations": [
+            "thematic_mapping"
+          ],
+          "skills": [
+            {
+              "skill_id": "thematic_mapping",
+              "name": "Thematic Mapping",
+              "description": "Generates interactive HTML choropleth and vector boundary maps from GeoPackage or GeoJSON layers.",
+              "constraints": {
+                "spatial": "Visualizes the specified spatial features and mapped attributes.",
+                "temporal": null,
+                "other": [
+                  "Embeds source artifact and CRS verification metadata in output HTML."
+                ]
+              }
+            }
+          ],
+          "inputs": {
+            "input_datasets": {
+              "required": true,
+              "description": "Input vector or raster layer in GeoPackage or GeoJSON format."
+            }
+          },
+          "outputs": [
+            {
+              "type": "map",
+              "formats": [
+                "HTML"
+              ],
+              "required": true,
+              "description": "Interactive HTML visualization map."
+            }
+          ],
+          "parameters": {
+            "field": {
+              "required": false,
+              "description": "Attribute column name to visualize/classify."
+            }
+          }
+        },
+        "endpoint": "https://www.geospatial-agentic-services.online/agents/mapping_agent/tasks",
+        "attempt": 1,
+        "invocation_id": null,
+        "status": "successful",
+        "started_at": "2026-08-21T18:27:34.014471Z",
+        "completed_at": "2026-08-21T18:27:34.024260Z",
+        "duration_seconds": 0.00979641500452999,
+        "output_artifact_ids": [
+          "ec46544b-868e-434b-84e9-2c6273983df6"
+        ],
+        "messages": [
+          "Rendered map with 16 features (mapped field: hospital_count)."
+        ],
+        "structured_error": null,
+        "created_at": "2026-08-21T18:27:33.998495Z"
+      }
+    },
+    "artifacts": {
+      "f6832412-0381-489b-aa23-35af73dd794c": {
+        "artifact_id": "f6832412-0381-489b-aa23-35af73dd794c",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_hospitals_utm.gpkg",
+        "content_hash": "b31e578710857accb5fec23b81ee3af6ebd120247d2b35a45e258f697d31b02d",
+        "format": "gpkg",
+        "media_type": null,
+        "data_model": "vector",
+        "producer_task_id": null,
+        "producer_binding_id": null,
+        "role": "input_1",
+        "evidence_ids": [
+          "29ad057b-e874-4810-bd33-d87b660cc08d"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T18:26:57.163675Z",
+        "metadata": {
+          "source": "user_input"
+        }
+      },
+      "8123b104-03b3-4fb5-820d-bc786f3c94a4": {
+        "artifact_id": "8123b104-03b3-4fb5-820d-bc786f3c94a4",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg",
+        "content_hash": "9818cdd69d3b26cbd238d60780f5a566bee625b857232a79ed5ca02595c100a8",
+        "format": "gpkg",
+        "media_type": null,
+        "data_model": "vector",
+        "producer_task_id": null,
+        "producer_binding_id": null,
+        "role": "input_2",
+        "evidence_ids": [
+          "6a711380-07f1-4d8d-861a-efd4640c6d52"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T18:26:57.164409Z",
+        "metadata": {
+          "source": "user_input"
+        }
+      },
+      "ede81c57-f921-4ae2-b63f-20407d706752": {
+        "artifact_id": "ede81c57-f921-4ae2-b63f-20407d706752",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_county_subdivisions_utm.gpkg",
+        "content_hash": "c451a2e150aa730d2eb5809e393e7c996516533f02c65eb688ef7d83792ba9e2",
+        "format": "gpkg",
+        "media_type": null,
+        "data_model": "vector",
+        "producer_task_id": null,
+        "producer_binding_id": null,
+        "role": "input_3",
+        "evidence_ids": [
+          "deefd8d1-cc00-420f-be62-567d87434469"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T18:26:57.165778Z",
+        "metadata": {
+          "source": "user_input"
+        }
+      },
+      "3a7c37d8-3b29-4eee-97e7-60995804e91d": {
+        "artifact_id": "3a7c37d8-3b29-4eee-97e7-60995804e91d",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_a/clipped_efd381a8.gpkg",
+        "content_hash": "8f896fe7ef414cd3be2a3b99b52f00bf84532131acdedcb754a9c72e3431ec67",
+        "format": "gpkg",
+        "media_type": null,
+        "data_model": "vector",
+        "producer_task_id": "task_clip_hospitals_to_centre_county",
+        "producer_binding_id": "ea47f20a-fe47-4737-b9a1-2b7c539722c5",
+        "role": "centre_county_hospitals",
+        "evidence_ids": [
+          "6400637c-1a6c-41e2-b473-6c36e10a17bb"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T18:27:18.884247Z",
+        "metadata": {}
+      },
+      "09782ac1-1520-4509-bc53-32f7fdec720e": {
+        "artifact_id": "09782ac1-1520-4509-bc53-32f7fdec720e",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/point_aggregate_b_e74556df.gpkg",
+        "content_hash": "7b99fd300f59a86dcd27539b65feb8d2d223eb317a218f59b526d932056561d5",
+        "format": "gpkg",
+        "media_type": null,
+        "data_model": "vector",
+        "producer_task_id": "task_count_hospitals_by_tract",
+        "producer_binding_id": "8c41d2dc-fe81-4826-bbad-b5501cbe722a",
+        "role": "tracts_with_hospital_counts",
+        "evidence_ids": [
+          "dedcfed3-4084-45ec-8ba7-8b7b3aa94d57"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T18:27:25.920990Z",
+        "metadata": {}
+      },
+      "ec46544b-868e-434b-84e9-2c6273983df6": {
+        "artifact_id": "ec46544b-868e-434b-84e9-2c6273983df6",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/mapping_agent/map_8bc9b9ca.html",
+        "content_hash": "6856e9f4e82556b4e1466b7e756563e7c0295deb69ec81497b26b2ca1ab34108",
+        "format": "html",
+        "media_type": null,
+        "data_model": "map",
+        "producer_task_id": "task_create_hospital_count_choropleth",
+        "producer_binding_id": "d0535760-10d7-4f04-b78f-89965e2ab729",
+        "role": "hospital_count_choropleth_map",
+        "evidence_ids": [
+          "9b3ec1d8-d34a-4a62-a8fe-4793a5b85a8d"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T18:27:34.027935Z",
+        "metadata": {}
+      }
+    },
+    "derivations": {
+      "cc7f22c4-279b-454a-8585-870c82286ee9": {
+        "derivation_id": "cc7f22c4-279b-454a-8585-870c82286ee9",
+        "output_artifact_id": "3a7c37d8-3b29-4eee-97e7-60995804e91d",
+        "source_artifact_ids": [
+          "f6832412-0381-489b-aa23-35af73dd794c",
+          "ede81c57-f921-4ae2-b63f-20407d706752"
+        ],
+        "producer_task_id": "task_clip_hospitals_to_centre_county",
+        "operation": "clip",
+        "parameters": {
+          "operation": "clip"
+        },
+        "semantic_effect": "Produced role 'centre_county_hospitals' using operation 'clip'.",
+        "evidence_snapshot_ids": [],
+        "created_at": "2026-08-21T18:27:18.884283Z"
+      },
+      "1df882a4-677c-4ec3-b63a-7858aed25cd3": {
+        "derivation_id": "1df882a4-677c-4ec3-b63a-7858aed25cd3",
+        "output_artifact_id": "09782ac1-1520-4509-bc53-32f7fdec720e",
+        "source_artifact_ids": [
+          "3a7c37d8-3b29-4eee-97e7-60995804e91d",
+          "8123b104-03b3-4fb5-820d-bc786f3c94a4"
+        ],
+        "producer_task_id": "task_count_hospitals_by_tract",
+        "operation": "point_count_by_polygon",
+        "parameters": {
+          "operation": "point_count_by_polygon",
+          "count_field": "hospital_count"
+        },
+        "semantic_effect": "Produced role 'tracts_with_hospital_counts' using operation 'point_count_by_polygon'.",
+        "evidence_snapshot_ids": [],
+        "created_at": "2026-08-21T18:27:25.921030Z"
+      },
+      "2e19a73c-f178-407e-a41e-118acd1199f3": {
+        "derivation_id": "2e19a73c-f178-407e-a41e-118acd1199f3",
+        "output_artifact_id": "ec46544b-868e-434b-84e9-2c6273983df6",
+        "source_artifact_ids": [
+          "09782ac1-1520-4509-bc53-32f7fdec720e"
+        ],
+        "producer_task_id": "task_create_hospital_count_choropleth",
+        "operation": "thematic_mapping",
+        "parameters": {
+          "field": "hospital_count"
+        },
+        "semantic_effect": "Produced role 'hospital_count_choropleth_map' using operation 'thematic_mapping'.",
+        "evidence_snapshot_ids": [],
+        "created_at": "2026-08-21T18:27:34.027965Z"
+      }
+    },
+    "requirements": {
+      "req_clip_compatible_crs": {
+        "requirement_id": "req_clip_compatible_crs",
+        "requirement_type": "compatible_crs",
+        "scope": "Binary spatial clip of hospital points by county-subdivision polygons.",
+        "task_id": "task_clip_hospitals_to_centre_county",
+        "artifact_roles": [
+          "input_1",
+          "input_3"
+        ],
+        "parameters": {
+          "required_relationship": "matching CRS"
+        },
+        "blocking": true,
+        "provenance": "WORKER_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_count_compatible_crs": {
+        "requirement_id": "req_count_compatible_crs",
+        "requirement_type": "compatible_crs",
+        "scope": "Point-in-polygon hospital count using clipped hospital points and census tract polygons.",
+        "task_id": "task_count_hospitals_by_tract",
+        "artifact_roles": [
+          "centre_county_hospitals",
+          "input_2"
+        ],
+        "parameters": {
+          "required_relationship": "matching CRS"
+        },
+        "blocking": true,
+        "provenance": "WORKER_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "a3c13382-5f4d-4454-9484-0bff6dd1b92a": {
+        "requirement_id": "a3c13382-5f4d-4454-9484-0bff6dd1b92a",
+        "requirement_type": "valid_geometry",
+        "scope": "task_transition",
+        "task_id": "task_clip_hospitals_to_centre_county",
+        "artifact_roles": [
+          "input_1",
+          "input_3"
+        ],
+        "parameters": {},
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "operation_contract_catalog",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      }
+    },
+    "commitments": {},
+    "schema_mappings": {
+      "09782ac1-1520-4509-bc53-32f7fdec720e:hospital_count": {
+        "task_id": "task_count_hospitals_by_tract",
+        "parameter": "count_field",
+        "artifact_id": "09782ac1-1520-4509-bc53-32f7fdec720e",
+        "semantic_name": "hospital_count",
+        "actual_field": "hospital_count",
+        "downstream_parameters": [
+          {
+            "task_id": "task_create_hospital_count_choropleth",
+            "parameter": "field",
+            "value": "hospital_count"
+          }
+        ]
+      }
+    },
+    "evidence": {
+      "29ad057b-e874-4810-bd33-d87b660cc08d": {
+        "evidence_id": "29ad057b-e874-4810-bd33-d87b660cc08d",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "f6832412-0381-489b-aa23-35af73dd794c"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_hospitals_utm.gpkg",
+          "format": "gpkg",
+          "size_bytes": 98304,
+          "complete": true,
+          "limitations": [],
+          "data_model": "vector",
+          "feature_count": 3,
+          "schema": {
+            "ID": "object",
+            "NAME": "object",
+            "LATITUDE": "float64",
+            "LONGITUDE": "float64",
+            "BEDS": "int64",
+            "TYPE": "object"
+          },
+          "schema_fields": [
+            "ID",
+            "NAME",
+            "LATITUDE",
+            "LONGITUDE",
+            "BEDS",
+            "TYPE"
+          ],
+          "geometry_type": [
+            "Point"
+          ],
+          "geometry_valid": true,
+          "invalid_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "null_geometry_count": 0,
+          "bounds": [
+            256818.2654212941,
+            4518887.443384948,
+            266294.9591627252,
+            4532696.270440303
+          ],
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true,
+          "crs": "EPSG:26918",
+          "crs_authority": "EPSG:26918",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T18:26:57.173083Z",
+        "complete": true,
+        "limitations": []
+      },
+      "6a711380-07f1-4d8d-861a-efd4640c6d52": {
+        "evidence_id": "6a711380-07f1-4d8d-861a-efd4640c6d52",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "8123b104-03b3-4fb5-820d-bc786f3c94a4"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg",
+          "format": "gpkg",
+          "size_bytes": 98304,
+          "complete": true,
+          "limitations": [],
+          "data_model": "vector",
+          "feature_count": 16,
+          "schema": {
+            "GEOID": "object",
+            "NAME": "object",
+            "COUNTYFP": "object",
+            "STATEFP": "object"
+          },
+          "schema_fields": [
+            "GEOID",
+            "NAME",
+            "COUNTYFP",
+            "STATEFP"
+          ],
+          "geometry_type": [
+            "Polygon"
+          ],
+          "geometry_valid": true,
+          "invalid_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "null_geometry_count": 0,
+          "bounds": [
+            238087.3824011362,
+            4508961.385028789,
+            272914.01066431846,
+            4543387.006183241
+          ],
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true,
+          "crs": "EPSG:26918",
+          "crs_authority": "EPSG:26918",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T18:26:57.178700Z",
+        "complete": true,
+        "limitations": []
+      },
+      "deefd8d1-cc00-420f-be62-567d87434469": {
+        "evidence_id": "deefd8d1-cc00-420f-be62-567d87434469",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "ede81c57-f921-4ae2-b63f-20407d706752"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_county_subdivisions_utm.gpkg",
+          "format": "gpkg",
+          "size_bytes": 98304,
+          "complete": true,
+          "limitations": [],
+          "data_model": "vector",
+          "feature_count": 4,
+          "schema": {
+            "COUSUBFP": "object",
+            "NAME": "object"
+          },
+          "schema_fields": [
+            "COUSUBFP",
+            "NAME"
+          ],
+          "geometry_type": [
+            "Polygon"
+          ],
+          "geometry_valid": true,
+          "invalid_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "null_geometry_count": 0,
+          "bounds": [
+            238087.3824011362,
+            4508961.385028789,
+            272914.01066431846,
+            4543387.006183241
+          ],
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true,
+          "crs": "EPSG:26918",
+          "crs_authority": "EPSG:26918",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T18:26:57.183979Z",
+        "complete": true,
+        "limitations": []
+      },
+      "6400637c-1a6c-41e2-b473-6c36e10a17bb": {
+        "evidence_id": "6400637c-1a6c-41e2-b473-6c36e10a17bb",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "3a7c37d8-3b29-4eee-97e7-60995804e91d"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_a/clipped_efd381a8.gpkg",
+          "format": "gpkg",
+          "size_bytes": 98304,
+          "complete": true,
+          "limitations": [],
+          "data_model": "vector",
+          "feature_count": 3,
+          "schema": {
+            "ID": "object",
+            "NAME": "object",
+            "LATITUDE": "float64",
+            "LONGITUDE": "float64",
+            "BEDS": "int64",
+            "TYPE": "object"
+          },
+          "schema_fields": [
+            "ID",
+            "NAME",
+            "LATITUDE",
+            "LONGITUDE",
+            "BEDS",
+            "TYPE"
+          ],
+          "geometry_type": [
+            "Point"
+          ],
+          "geometry_valid": true,
+          "invalid_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "null_geometry_count": 0,
+          "bounds": [
+            256818.2654212941,
+            4518887.443384948,
+            266294.9591627252,
+            4532696.270440303
+          ],
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true,
+          "crs": "EPSG:26918",
+          "crs_authority": "EPSG:26918",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T18:27:18.890696Z",
+        "complete": true,
+        "limitations": []
+      },
+      "dedcfed3-4084-45ec-8ba7-8b7b3aa94d57": {
+        "evidence_id": "dedcfed3-4084-45ec-8ba7-8b7b3aa94d57",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "09782ac1-1520-4509-bc53-32f7fdec720e"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/point_aggregate_b_e74556df.gpkg",
+          "format": "gpkg",
+          "size_bytes": 98304,
+          "complete": true,
+          "limitations": [],
+          "data_model": "vector",
+          "feature_count": 16,
+          "schema": {
+            "GEOID": "object",
+            "NAME": "object",
+            "COUNTYFP": "object",
+            "STATEFP": "object",
+            "hospital_count": "int64"
+          },
+          "schema_fields": [
+            "GEOID",
+            "NAME",
+            "COUNTYFP",
+            "STATEFP",
+            "hospital_count"
+          ],
+          "geometry_type": [
+            "Polygon"
+          ],
+          "geometry_valid": true,
+          "invalid_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "null_geometry_count": 0,
+          "bounds": [
+            238087.3824011362,
+            4508961.385028789,
+            272914.01066431846,
+            4543387.006183241
+          ],
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true,
+          "crs": "EPSG:26918",
+          "crs_authority": "EPSG:26918",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T18:27:25.928962Z",
+        "complete": true,
+        "limitations": []
+      },
+      "9b3ec1d8-d34a-4a62-a8fe-4793a5b85a8d": {
+        "evidence_id": "9b3ec1d8-d34a-4a62-a8fe-4793a5b85a8d",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "ec46544b-868e-434b-84e9-2c6273983df6"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/mapping_agent/map_8bc9b9ca.html",
+          "format": "html",
+          "size_bytes": 7010,
+          "complete": true,
+          "limitations": [],
+          "data_model": "map",
+          "embedded_metadata_present": true,
+          "embedded_metadata_keys": [
+            "bbox",
+            "crs",
+            "feature_count",
+            "mapped_field",
+            "source_artifact"
+          ],
+          "source_artifact": "point_aggregate_b_e74556df.gpkg",
+          "mapped_field": "hospital_count",
+          "crs": "EPSG:26918",
+          "feature_count": 16,
+          "bounds": [
+            -78.10000000000001,
+            40.7,
+            -77.7,
+            41.0
+          ],
+          "analytical_unit": null,
+          "disclosure": null
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T18:27:34.028631Z",
+        "complete": true,
+        "limitations": []
+      }
+    },
+    "violations": {},
+    "execution_history": [
+      {
+        "event_id": "3b5c9c39-f602-4ccc-91ba-44865d80b89f",
+        "event_type": "initial_plan_committed",
+        "actor": "planner_component",
+        "state_version": 0,
+        "plan_version": 1,
+        "task_id": null,
+        "reason": "Clip hospital points to the Centre County county-subdivision boundary, count hospitals within census tracts, and generate an HTML choropleth map using the resulting hospital-count field.",
+        "metadata": {
+          "task_ids": [
+            "task_clip_hospitals_to_centre_county",
+            "task_count_hospitals_by_tract",
+            "task_create_hospital_count_choropleth"
+          ]
+        },
+        "created_at": "2026-08-21T18:27:18.847731Z"
+      },
+      {
+        "event_id": "dad0ddee-bd9b-44f1-8665-d9ef2698ca7e",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 1,
+        "plan_version": 1,
+        "task_id": "task_clip_hospitals_to_centre_county",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "proposed",
+          "to": "ready"
+        },
+        "created_at": "2026-08-21T18:27:18.850951Z"
+      },
+      {
+        "event_id": "355c3f96-4286-47fe-9092-3388594c48c1",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 2,
+        "plan_version": 1,
+        "task_id": "task_clip_hospitals_to_centre_county",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-21T18:27:18.852762Z"
+      },
+      {
+        "event_id": "bd75d9d2-2d5d-4118-9384-8247ec2ac32e",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 3,
+        "plan_version": 1,
+        "task_id": "task_clip_hospitals_to_centre_county",
+        "reason": "Worker bound.",
+        "metadata": {
+          "from": "binding",
+          "to": "bound"
+        },
+        "created_at": "2026-08-21T18:27:18.854682Z"
+      },
+      {
+        "event_id": "5d3f03d3-44aa-4439-8661-1dbbb9a6b255",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 4,
+        "plan_version": 1,
+        "task_id": "task_clip_hospitals_to_centre_county",
+        "reason": "Worker started.",
+        "metadata": {
+          "from": "bound",
+          "to": "running"
+        },
+        "created_at": "2026-08-21T18:27:18.856660Z"
+      },
+      {
+        "event_id": "ee14132b-e5fe-4840-aafa-6c2ad0175574",
+        "event_type": "worker_execution_completed",
+        "actor": "worker_executor",
+        "state_version": 5,
+        "plan_version": 1,
+        "task_id": "task_clip_hospitals_to_centre_county",
+        "reason": "Worker returned successfully.",
+        "metadata": {
+          "binding_id": "ea47f20a-fe47-4737-b9a1-2b7c539722c5",
+          "agent_id": "vector_analysis_a",
+          "operation": "clip",
+          "attempt": 1,
+          "status": "successful",
+          "duration_seconds": 0.022090355996624567
+        },
+        "created_at": "2026-08-21T18:27:18.880727Z"
+      },
+      {
+        "event_id": "5c40bab6-7e12-4c4e-b608-448cc2b63087",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 5,
+        "plan_version": 1,
+        "task_id": "task_clip_hospitals_to_centre_county",
+        "reason": "Worker returned a provisional result.",
+        "metadata": {
+          "from": "running",
+          "to": "provisional_success"
+        },
+        "created_at": "2026-08-21T18:27:18.880796Z"
+      },
+      {
+        "event_id": "0a94174f-25a0-4aad-93b5-67cbc0760e09",
+        "event_type": "artifact_registered",
+        "actor": "artifact_registry",
+        "state_version": 6,
+        "plan_version": 1,
+        "task_id": "task_clip_hospitals_to_centre_county",
+        "reason": null,
+        "metadata": {
+          "artifact_id": "3a7c37d8-3b29-4eee-97e7-60995804e91d",
+          "role": "centre_county_hospitals",
+          "content_hash": "8f896fe7ef414cd3be2a3b99b52f00bf84532131acdedcb754a9c72e3431ec67"
+        },
+        "created_at": "2026-08-21T18:27:18.884309Z"
+      },
+      {
+        "event_id": "0189bea2-35b7-491a-bad0-489ff6c8fd79",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 7,
+        "plan_version": 1,
+        "task_id": "task_clip_hospitals_to_centre_county",
+        "reason": "Reviewing runtime evidence.",
+        "metadata": {
+          "from": "provisional_success",
+          "to": "validating"
+        },
+        "created_at": "2026-08-21T18:27:18.893007Z"
+      },
+      {
+        "event_id": "eafdf6cf-53dc-44df-923c-a7a0eca6f6bf",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 8,
+        "plan_version": 1,
+        "task_id": "task_clip_hospitals_to_centre_county",
+        "reason": "The clip task succeeded. The output artifact is a complete GeoPackage vector layer with three valid point features, preserved hospital attributes, valid geometries, and a metric CRS matching the supplied Centre County tract layer. No current-task deterministic violations or evidence-grounded defects are present. The downstream count_field schema issue is not a defect in this completed producer and must be resolved by the downstream task.",
+        "metadata": {
+          "from": "validating",
+          "to": "successful"
+        },
+        "created_at": "2026-08-21T18:27:25.870846Z"
+      },
+      {
+        "event_id": "89a5873b-808c-4afd-a35b-403d100414f8",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 9,
+        "plan_version": 1,
+        "task_id": "task_count_hospitals_by_tract",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "proposed",
+          "to": "ready"
+        },
+        "created_at": "2026-08-21T18:27:25.874126Z"
+      },
+      {
+        "event_id": "2c606d9e-544b-4dd9-b5f5-fd8cecf39e13",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 10,
+        "plan_version": 1,
+        "task_id": "task_count_hospitals_by_tract",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-21T18:27:25.876489Z"
+      },
+      {
+        "event_id": "30145c51-8fb6-46ba-8ffa-d32a430d6ba7",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 11,
+        "plan_version": 1,
+        "task_id": "task_count_hospitals_by_tract",
+        "reason": "Worker bound.",
+        "metadata": {
+          "from": "binding",
+          "to": "bound"
+        },
+        "created_at": "2026-08-21T18:27:25.878882Z"
+      },
+      {
+        "event_id": "b002ffcf-9234-468f-b5c9-40fd2cf0927b",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 12,
+        "plan_version": 1,
+        "task_id": "task_count_hospitals_by_tract",
+        "reason": "Worker started.",
+        "metadata": {
+          "from": "bound",
+          "to": "running"
+        },
+        "created_at": "2026-08-21T18:27:25.884648Z"
+      },
+      {
+        "event_id": "357aac45-5fc0-4dee-8f79-b8b55573c93f",
+        "event_type": "worker_execution_completed",
+        "actor": "worker_executor",
+        "state_version": 13,
+        "plan_version": 1,
+        "task_id": "task_count_hospitals_by_tract",
+        "reason": "Worker returned successfully.",
+        "metadata": {
+          "binding_id": "8c41d2dc-fe81-4826-bbad-b5501cbe722a",
+          "agent_id": "vector_analysis_b",
+          "operation": "point_count_by_polygon",
+          "attempt": 1,
+          "status": "successful",
+          "duration_seconds": 0.029506632999982685
+        },
+        "created_at": "2026-08-21T18:27:25.916843Z"
+      },
+      {
+        "event_id": "f2918f2f-901b-47f3-b458-238580a0948f",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 13,
+        "plan_version": 1,
+        "task_id": "task_count_hospitals_by_tract",
+        "reason": "Worker returned a provisional result.",
+        "metadata": {
+          "from": "running",
+          "to": "provisional_success"
+        },
+        "created_at": "2026-08-21T18:27:25.916915Z"
+      },
+      {
+        "event_id": "45977abd-6796-49c5-b55e-e7fbf9dfda53",
+        "event_type": "artifact_registered",
+        "actor": "artifact_registry",
+        "state_version": 14,
+        "plan_version": 1,
+        "task_id": "task_count_hospitals_by_tract",
+        "reason": null,
+        "metadata": {
+          "artifact_id": "09782ac1-1520-4509-bc53-32f7fdec720e",
+          "role": "tracts_with_hospital_counts",
+          "content_hash": "7b99fd300f59a86dcd27539b65feb8d2d223eb317a218f59b526d932056561d5"
+        },
+        "created_at": "2026-08-21T18:27:25.921053Z"
+      },
+      {
+        "event_id": "ce119c1b-a55d-4137-8f34-c2cb175980c5",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 15,
+        "plan_version": 1,
+        "task_id": "task_count_hospitals_by_tract",
+        "reason": "Reviewing runtime evidence.",
+        "metadata": {
+          "from": "provisional_success",
+          "to": "validating"
+        },
+        "created_at": "2026-08-21T18:27:25.931592Z"
+      },
+      {
+        "event_id": "46259650-0935-4597-8d19-21aed1820a45",
+        "event_type": "schema_mapping_grounded",
+        "actor": "loop_controller",
+        "state_version": 16,
+        "plan_version": 1,
+        "task_id": null,
+        "reason": "Mapped 'hospital_count' to runtime field 'hospital_count'.",
+        "metadata": {
+          "artifact_id": "09782ac1-1520-4509-bc53-32f7fdec720e",
+          "mapping_key": "09782ac1-1520-4509-bc53-32f7fdec720e:hospital_count"
+        },
+        "created_at": "2026-08-21T18:27:33.983523Z"
+      },
+      {
+        "event_id": "dd45b397-abde-4e4e-9acf-8ed3f13e6a08",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 16,
+        "plan_version": 1,
+        "task_id": "task_count_hospitals_by_tract",
+        "reason": "The worker succeeded and runtime evidence confirms a complete valid GeoPackage vector output with 16 polygon features, compatible projected metric CRS EPSG:26918, and the required hospital_count field. No deterministic violations or evidence-grounded defects are present. The downstream choropleth task remains a separate proposed task.",
+        "metadata": {
+          "from": "validating",
+          "to": "successful"
+        },
+        "created_at": "2026-08-21T18:27:33.983594Z"
+      },
+      {
+        "event_id": "7bdee500-68b7-4725-b6cd-53c3a56f4e49",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 17,
+        "plan_version": 1,
+        "task_id": "task_create_hospital_count_choropleth",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "proposed",
+          "to": "ready"
+        },
+        "created_at": "2026-08-21T18:27:33.988016Z"
+      },
+      {
+        "event_id": "45d6761d-fad7-48ff-b23a-eeb433885dd6",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 18,
+        "plan_version": 1,
+        "task_id": "task_create_hospital_count_choropleth",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-21T18:27:33.993192Z"
+      },
+      {
+        "event_id": "4d59dbbc-0a02-451a-9e09-1aeb632badcf",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 19,
+        "plan_version": 1,
+        "task_id": "task_create_hospital_count_choropleth",
+        "reason": "Worker bound.",
+        "metadata": {
+          "from": "binding",
+          "to": "bound"
+        },
+        "created_at": "2026-08-21T18:27:33.998589Z"
+      },
+      {
+        "event_id": "28c6f9b3-2d1e-4042-ae39-5e87a4c48db5",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 20,
+        "plan_version": 1,
+        "task_id": "task_create_hospital_count_choropleth",
+        "reason": "Worker started.",
+        "metadata": {
+          "from": "bound",
+          "to": "running"
+        },
+        "created_at": "2026-08-21T18:27:34.005202Z"
+      },
+      {
+        "event_id": "455e0fcf-a5a0-4d61-a43e-ea6e353deebf",
+        "event_type": "worker_execution_completed",
+        "actor": "worker_executor",
+        "state_version": 21,
+        "plan_version": 1,
+        "task_id": "task_create_hospital_count_choropleth",
+        "reason": "Worker returned successfully.",
+        "metadata": {
+          "binding_id": "d0535760-10d7-4f04-b78f-89965e2ab729",
+          "agent_id": "mapping_agent",
+          "operation": "thematic_mapping",
+          "attempt": 1,
+          "status": "successful",
+          "duration_seconds": 0.00979641500452999
+        },
+        "created_at": "2026-08-21T18:27:34.024334Z"
+      },
+      {
+        "event_id": "c1f844ad-d613-44a4-b4bb-7bb6bc6fa710",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 21,
+        "plan_version": 1,
+        "task_id": "task_create_hospital_count_choropleth",
+        "reason": "Worker returned a provisional result.",
+        "metadata": {
+          "from": "running",
+          "to": "provisional_success"
+        },
+        "created_at": "2026-08-21T18:27:34.024395Z"
+      },
+      {
+        "event_id": "fed35175-6dd0-496e-ae58-2d9ac451067e",
+        "event_type": "artifact_registered",
+        "actor": "artifact_registry",
+        "state_version": 22,
+        "plan_version": 1,
+        "task_id": "task_create_hospital_count_choropleth",
+        "reason": null,
+        "metadata": {
+          "artifact_id": "ec46544b-868e-434b-84e9-2c6273983df6",
+          "role": "hospital_count_choropleth_map",
+          "content_hash": "6856e9f4e82556b4e1466b7e756563e7c0295deb69ec81497b26b2ca1ab34108"
+        },
+        "created_at": "2026-08-21T18:27:34.027985Z"
+      },
+      {
+        "event_id": "a42e48c3-fa9a-4acd-beea-91873da33091",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 23,
+        "plan_version": 1,
+        "task_id": "task_create_hospital_count_choropleth",
+        "reason": "Reviewing runtime evidence.",
+        "metadata": {
+          "from": "provisional_success",
+          "to": "validating"
+        },
+        "created_at": "2026-08-21T18:27:34.032325Z"
+      },
+      {
+        "event_id": "ec47215b-c253-4258-8248-ded644853a2a",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 24,
+        "plan_version": 1,
+        "task_id": "task_create_hospital_count_choropleth",
+        "reason": "The worker succeeded and complete artifact inspection evidence confirms an HTML map with hospital_count mapped across 16 features, embedded source artifact and CRS metadata, and the required hospital_count_choropleth_map role. The original user goal is satisfied with no deterministic violations or evidence-grounded defects.",
+        "metadata": {
+          "from": "validating",
+          "to": "successful"
+        },
+        "created_at": "2026-08-21T18:27:37.264876Z"
+      },
+      {
+        "event_id": "86297992-8bde-4823-be95-3f854321c6ab",
+        "event_type": "workflow_completed",
+        "actor": "completion_policy",
+        "state_version": 25,
+        "plan_version": 1,
+        "task_id": null,
+        "reason": "All active tasks, blocking requirements, and terminal outputs are satisfied.",
+        "metadata": {
+          "final_artifact_ids": [
+            "ec46544b-868e-434b-84e9-2c6273983df6"
+          ]
+        },
+        "created_at": "2026-08-21T18:27:37.269634Z"
+      }
+    ],
+    "qc_history": [
+      {
+        "decision_id": "qc-decision-task_clip_hospitals_to_centre_county-20260821T182718Z",
+        "task_id": "task_clip_hospitals_to_centre_county",
+        "verdict": "PASS",
+        "proposed_verdict": "PASS",
+        "reason": "The clip task succeeded. The output artifact is a complete GeoPackage vector layer with three valid point features, preserved hospital attributes, valid geometries, and a metric CRS matching the supplied Centre County tract layer. No current-task deterministic violations or evidence-grounded defects are present. The downstream count_field schema issue is not a defect in this completed producer and must be resolved by the downstream task.",
+        "acknowledged_finding_ids": [],
+        "action_class": "NONE",
+        "effective_action": "NONE",
+        "effective_action_source": "qc_component",
+        "allowed_recovery_types": [],
+        "recovery_parameters": {},
+        "preserve_completed_work": true,
+        "forced_by_invariant": false,
+        "created_at": "2026-08-21T18:27:18Z"
+      },
+      {
+        "decision_id": "qc-taREDACTED_OPENAI_API_KEY",
+        "task_id": "task_count_hospitals_by_tract",
+        "verdict": "PASS",
+        "proposed_verdict": "PASS",
+        "reason": "The worker succeeded and runtime evidence confirms a complete valid GeoPackage vector output with 16 polygon features, compatible projected metric CRS EPSG:26918, and the required hospital_count field. No deterministic violations or evidence-grounded defects are present. The downstream choropleth task remains a separate proposed task.",
+        "acknowledged_finding_ids": [],
+        "action_class": "NONE",
+        "effective_action": "NONE",
+        "effective_action_source": "qc_component",
+        "allowed_recovery_types": [],
+        "recovery_parameters": {
+          "schema_mappings": [
+            {
+              "task_id": "task_count_hospitals_by_tract",
+              "parameter": "count_field",
+              "artifact_id": "09782ac1-1520-4509-bc53-32f7fdec720e",
+              "semantic_name": "hospital_count",
+              "actual_field": "hospital_count",
+              "downstream_parameters": [
+                {
+                  "task_id": "task_create_hospital_count_choropleth",
+                  "parameter": "field",
+                  "value": "hospital_count"
+                }
+              ]
+            }
+          ]
+        },
+        "preserve_completed_work": true,
+        "forced_by_invariant": false,
+        "created_at": "2026-08-21T18:27:25.928962Z"
+      },
+      {
+        "decision_id": "qc_task_create_hospital_count_choropleth_20260821",
+        "task_id": "task_create_hospital_count_choropleth",
+        "verdict": "PASS",
+        "proposed_verdict": "PASS",
+        "reason": "The worker succeeded and complete artifact inspection evidence confirms an HTML map with hospital_count mapped across 16 features, embedded source artifact and CRS metadata, and the required hospital_count_choropleth_map role. The original user goal is satisfied with no deterministic violations or evidence-grounded defects.",
+        "acknowledged_finding_ids": [],
+        "action_class": "NONE",
+        "effective_action": "NONE",
+        "effective_action_source": "qc_component",
+        "allowed_recovery_types": [],
+        "recovery_parameters": {},
+        "preserve_completed_work": true,
+        "forced_by_invariant": false,
+        "created_at": "2026-08-21T18:27:34.028631Z"
+      }
+    ],
+    "replan_history": [],
+    "component_calls": [
+      {
+        "call_id": "eb54a5ac-32fd-4d6d-ba96-7121d617ceb8",
+        "component": "planner",
+        "prompt_hash": "25bc965d75e7dbfce25f1035847c9d81e211af2735b635aa9598841b28be880d",
+        "tool_schema_hash": "441719facf91fd72ec7e126a4de0921e9629efd4cd39619a5dbe1be9fea2e3fe",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 5316,
+        "output_tokens": 2515,
+        "duration_seconds": 21.63789072498912,
+        "disposition": "successful",
+        "created_at": "2026-08-21T18:27:18.847683Z"
+      },
+      {
+        "call_id": "ae7fc852-2b86-4609-adeb-229caabe2a53",
+        "component": "qc",
+        "prompt_hash": "60de9a1b8f3087706aaba54af1aa4f0487c48e64792d72892d264badafbc1d2d",
+        "tool_schema_hash": "264376b66f6ac19b4d57965f2f5a135067cea57302b6779a763ae77f3e5ccb86",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 2946,
+        "output_tokens": 613,
+        "duration_seconds": 6.971574464987498,
+        "disposition": "successful",
+        "created_at": "2026-08-21T18:27:25.870729Z"
+      },
+      {
+        "call_id": "e1b66739-62e0-4c19-9893-49213d97b94f",
+        "component": "qc",
+        "prompt_hash": "60de9a1b8f3087706aaba54af1aa4f0487c48e64792d72892d264badafbc1d2d",
+        "tool_schema_hash": "264376b66f6ac19b4d57965f2f5a135067cea57302b6779a763ae77f3e5ccb86",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 2448,
+        "output_tokens": 823,
+        "duration_seconds": 8.045733981009107,
+        "disposition": "successful",
+        "created_at": "2026-08-21T18:27:33.983425Z"
+      },
+      {
+        "call_id": "f3a5a1f3-9e39-46e2-a912-a81d6d62b485",
+        "component": "qc",
+        "prompt_hash": "60de9a1b8f3087706aaba54af1aa4f0487c48e64792d72892d264badafbc1d2d",
+        "tool_schema_hash": "264376b66f6ac19b4d57965f2f5a135067cea57302b6779a763ae77f3e5ccb86",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 1836,
+        "output_tokens": 248,
+        "duration_seconds": 3.226036185005796,
+        "disposition": "successful",
+        "created_at": "2026-08-21T18:27:37.264751Z"
+      }
+    ],
+    "plan_versions": [
+      {
+        "version": 1,
+        "parent_version": null,
+        "reason": "Initial plan committed by independent Planner.",
+        "task_ids": [
+          "task_clip_hospitals_to_centre_county",
+          "task_count_hospitals_by_tract",
+          "task_create_hospital_count_choropleth"
+        ],
+        "edges": [
+          [
+            "task_clip_hospitals_to_centre_county",
+            "task_count_hospitals_by_tract"
+          ],
+          [
+            "task_count_hospitals_by_tract",
+            "task_create_hospital_count_choropleth"
+          ]
+        ],
+        "created_at": "2026-08-21T18:27:18.840147Z"
+      }
+    ],
+    "budgets": {
+      "max_total_model_calls": 24,
+      "max_total_tokens": 120000,
+      "max_worker_calls": 30,
+      "max_local_recoveries": 6,
+      "max_replans": 3,
+      "max_runtime_seconds": 900.0,
+      "planner_retry_limit": 2,
+      "qc_retry_limit": 1,
+      "replanner_retry_limit": 1,
+      "total_model_calls": 4,
+      "total_tokens": 16745,
+      "worker_calls": 3,
+      "local_recoveries": 0,
+      "replans": 0
+    },
+    "terminal_state": "completed",
+    "terminal_reason": "All active tasks, blocking requirements, and terminal outputs are satisfied.",
+    "human_clarification": null,
+    "final_artifact_ids": [
+      "ec46544b-868e-434b-84e9-2c6273983df6"
+    ],
+    "required_terminal_roles": [
+      "hospital_count_choropleth_map"
+    ],
+    "final_disclosure": "Workflow completed with accepted terminal artifacts.",
+    "created_at": "2026-08-21T18:26:57.162769Z",
+    "updated_at": "2026-08-21T18:27:37.271952Z"
+  },
+  "execution_steps": [
+    {
+      "step_index": 1,
+      "step_id": "task_clip_hospitals_to_centre_county",
+      "agent_id": "vector_analysis_a",
+      "title": "Clip hospitals to Centre County",
+      "instructions": "Clip the hospital point layer using the county-subdivision polygon layer as the clipping boundary. Preserve the hospital point attributes and write the result as a GeoPackage vector layer.",
+      "output_artifacts": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_a/clipped_efd381a8.gpkg"
+      ],
+      "status": "successful",
+      "error": null
+    },
+    {
+      "step_index": 2,
+      "step_id": "task_count_hospitals_by_tract",
+      "agent_id": "vector_analysis_b",
+      "title": "Count hospitals by census tract",
+      "instructions": "Count point features from the clipped hospital layer within each census tract polygon. Store the count in a new field named hospital_count and write the result as a GeoPackage vector layer.",
+      "output_artifacts": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/point_aggregate_b_e74556df.gpkg"
+      ],
+      "status": "successful",
+      "error": null
+    },
+    {
+      "step_index": 3,
+      "step_id": "task_create_hospital_count_choropleth",
+      "agent_id": "mapping_agent",
+      "title": "Create hospital-count choropleth",
+      "instructions": "Generate an interactive HTML choropleth map from the tract layer with hospital_count as the mapped field. Embed the source artifact and CRS verification metadata.",
+      "output_artifacts": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/mapping_agent/map_8bc9b9ca.html"
+      ],
+      "status": "successful",
+      "error": null
+    }
+  ],
+  "qc_evaluations": 3,
+  "qc_blocks": 0,
+  "qc_interventions": 0,
+  "effective_blocks": 0,
+  "effective_interventions": 0,
+  "qc_policy_overrides": 0,
+  "replanning_iterations": 0,
+  "error": null,
+  "ledger_events": [
+    {
+      "call_id": "ea47f20a-fe47-4737-b9a1-2b7c539722c5",
+      "trajectory_id": "traj_ISS_Q27_C1_run2",
+      "agent_id": "vector_analysis_a",
+      "operation": "clip",
+      "query": "Clip the hospital point layer using the county-subdivision polygon layer as the clipping boundary. Preserve the hospital point attributes and write the result as a GeoPackage vector layer.",
+      "timestamp_start": 1787336838.858559,
+      "timestamp_end": 1787336838.880637,
+      "duration_seconds": 0.022090355996624567,
+      "input_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_hospitals_utm.gpkg",
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_county_subdivisions_utm.gpkg"
+      ],
+      "input_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_hospitals_utm.gpkg": "b31e578710857accb5fec23b81ee3af6ebd120247d2b35a45e258f697d31b02d",
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_county_subdivisions_utm.gpkg": "c451a2e150aa730d2eb5809e393e7c996516533f02c65eb688ef7d83792ba9e2"
+      },
+      "parameters": {
+        "operation": "clip"
+      },
+      "status": "completed",
+      "error_code": null,
+      "error_message": null,
+      "output_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_a/clipped_efd381a8.gpkg"
+      ],
+      "output_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_a/clipped_efd381a8.gpkg": "8f896fe7ef414cd3be2a3b99b52f00bf84532131acdedcb754a9c72e3431ec67"
+      },
+      "summary": "Clipped vector dataset resulting in 3 features.",
+      "raw_response": {
+        "binding_id": "ea47f20a-fe47-4737-b9a1-2b7c539722c5",
+        "task_id": "task_clip_hospitals_to_centre_county",
+        "attempt": 1
+      }
+    },
+    {
+      "call_id": "8c41d2dc-fe81-4826-bbad-b5501cbe722a",
+      "trajectory_id": "traj_ISS_Q27_C1_run2",
+      "agent_id": "vector_analysis_b",
+      "operation": "point_count_by_polygon",
+      "query": "Count point features from the clipped hospital layer within each census tract polygon. Store the count in a new field named hospital_count and write the result as a GeoPackage vector layer.",
+      "timestamp_start": 1787336845.887262,
+      "timestamp_end": 1787336845.916757,
+      "duration_seconds": 0.029506632999982685,
+      "input_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_a/clipped_efd381a8.gpkg",
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg"
+      ],
+      "input_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_a/clipped_efd381a8.gpkg": "8f896fe7ef414cd3be2a3b99b52f00bf84532131acdedcb754a9c72e3431ec67",
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg": "9818cdd69d3b26cbd238d60780f5a566bee625b857232a79ed5ca02595c100a8"
+      },
+      "parameters": {
+        "operation": "point_count_by_polygon",
+        "count_field": "hospital_count"
+      },
+      "status": "completed",
+      "error_code": null,
+      "error_message": null,
+      "output_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/point_aggregate_b_e74556df.gpkg"
+      ],
+      "output_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/point_aggregate_b_e74556df.gpkg": "7b99fd300f59a86dcd27539b65feb8d2d223eb317a218f59b526d932056561d5"
+      },
+      "summary": "Aggregated 3 point features into 16 polygon units using field hospital_count.",
+      "raw_response": {
+        "binding_id": "8c41d2dc-fe81-4826-bbad-b5501cbe722a",
+        "task_id": "task_count_hospitals_by_tract",
+        "attempt": 1
+      }
+    },
+    {
+      "call_id": "d0535760-10d7-4f04-b78f-89965e2ab729",
+      "trajectory_id": "traj_ISS_Q27_C1_run2",
+      "agent_id": "mapping_agent",
+      "operation": "thematic_mapping",
+      "query": "Generate an interactive HTML choropleth map from the tract layer with hospital_count as the mapped field. Embed the source artifact and CRS verification metadata.",
+      "timestamp_start": 1787336854.014471,
+      "timestamp_end": 1787336854.02426,
+      "duration_seconds": 0.00979641500452999,
+      "input_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/point_aggregate_b_e74556df.gpkg"
+      ],
+      "input_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/point_aggregate_b_e74556df.gpkg": "7b99fd300f59a86dcd27539b65feb8d2d223eb317a218f59b526d932056561d5"
+      },
+      "parameters": {
+        "field": "hospital_count"
+      },
+      "status": "completed",
+      "error_code": null,
+      "error_message": null,
+      "output_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/mapping_agent/map_8bc9b9ca.html"
+      ],
+      "output_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/mapping_agent/map_8bc9b9ca.html": "6856e9f4e82556b4e1466b7e756563e7c0295deb69ec81497b26b2ca1ab34108"
+      },
+      "summary": "Rendered map with 16 features (mapped field: hospital_count).",
+      "raw_response": {
+        "binding_id": "d0535760-10d7-4f04-b78f-89965e2ab729",
+        "task_id": "task_create_hospital_count_choropleth",
+        "attempt": 1
+      }
+    }
+  ],
+  "created_at": "2026-08-21T18:27:37.275698+00:00",
+  "evaluation": {
+    "task_id": "ISS_Q27",
+    "bafo_success": false,
+    "all_challenges_resolved": false,
+    "evaluability_status": "EVALUABLE",
+    "challenge_activated": true,
+    "trajectory_classification": "valid_bafo_fail",
+    "production_terminal_state": "completed",
+    "terminal_state": "successful",
+    "constraint_results": {
+      "analytical_unit_commitment_disclosed": {
+        "constraint_key": "analytical_unit_commitment_disclosed",
+        "status": "FAIL",
+        "reason": "Final response did not disclose which spatial aggregation unit was chosen for the analysis.",
+        "details": {}
+      },
+      "spatial_aggregation_performed": {
+        "constraint_key": "spatial_aggregation_performed",
+        "status": "FAIL",
+        "reason": "Final response did not disclose which spatial aggregation unit was chosen for the analysis.",
+        "details": {}
+      },
+      "format": {
+        "constraint_key": "format",
+        "status": "PASS",
+        "reason": "Constraint 'format' satisfied by valid output artifact.",
+        "details": {}
+      }
+    },
+    "passed_constraints": [
+      "format"
+    ],
+    "failed_constraints": [
+      "analytical_unit_commitment_disclosed",
+      "spatial_aggregation_performed"
+    ],
+    "unevaluable_constraints": [],
+    "inspected_artifacts_count": 3,
+    "events_count": 3,
+    "diagnostic_summary": "BAFO: False | State: successful (Valid: True) | Constraints: 1 PASS, 2 FAIL, 0 UNEVALUABLE | Events Recorded: 3 | Artifacts Inspected: 3"
+  },
+  "bafo_success": false,
+  "all_challenges_resolved": false,
+  "trajectory_classification": "valid_bafo_fail"
+}

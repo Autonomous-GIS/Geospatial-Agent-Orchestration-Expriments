@@ -1,0 +1,1506 @@
+{
+  "trajectory_id": "traj_ISS_Q09_C5_run2",
+  "task_id": "ISS_Q09",
+  "condition": "C5",
+  "model": "gpt-5.6-luna",
+  "run_index": 2,
+  "suite": "isolated",
+  "user_question": "Create a map of hospital locations in Centre County.",
+  "input_artifact_paths": [
+    "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_hospitals_centre.csv"
+  ],
+  "status": "successful",
+  "total_wall_time": 29.884,
+  "rate_limit_wait_time": 0.0,
+  "provider_retry_wait_time": 0.0,
+  "orchestration_active_time": 29.853,
+  "worker_execution_time": 0.031,
+  "total_tokens": 13530,
+  "input_tokens": 10352,
+  "output_tokens": 3178,
+  "outputs": {
+    "summary": "Workflow completed with accepted terminal artifacts.",
+    "artifacts": [
+      "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/mapping_agent/map_41891739.html"
+    ],
+    "produced_artifacts": [
+      "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/conversion_agent/spatialized_points_b17a01cc.gpkg",
+      "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/mapping_agent/map_41891739.html"
+    ],
+    "workflow_plan": {
+      "workflow_id": "93d23962-a6d9-42e0-aa59-19f28d12aade",
+      "plan_version": 1,
+      "goal": "Create a map of hospital locations in Centre County.",
+      "workflow_steps": [
+        {
+          "step_id": "task_points_from_csv",
+          "title": "Create hospital point layer",
+          "purpose": "Spatialize the hospital coordinate table as point features in a GeoPackage.",
+          "agent_id": "conversion_agent",
+          "operation": "csv_to_points",
+          "instructions": "Convert the CSV table to point features using the observed longitude and latitude fields. Use an explicitly confirmed source CRS; do not infer or guess the CRS at runtime.",
+          "parameters": {
+            "operation": "csv_to_points",
+            "lat_col": "LATITUDE",
+            "lon_col": "LONGITUDE"
+          },
+          "depends_on": [],
+          "input_from_steps": [],
+          "status": "successful",
+          "output_artifact_ids": [
+            "efbdb848-3e9d-4430-964f-f88b7e9315ee"
+          ]
+        },
+        {
+          "step_id": "task_hospital_map",
+          "title": "Map hospital locations",
+          "purpose": "Generate the requested interactive HTML map from the hospital point layer.",
+          "agent_id": "mapping_agent",
+          "operation": "thematic_mapping",
+          "instructions": "Create an interactive HTML map showing the hospital point features. Do not require thematic classification unless a mapped attribute is explicitly selected during runtime QC.",
+          "parameters": {
+            "field": "ID"
+          },
+          "depends_on": [
+            "task_points_from_csv"
+          ],
+          "input_from_steps": [
+            "task_points_from_csv"
+          ],
+          "status": "successful",
+          "output_artifact_ids": [
+            "8378bccb-7b3a-48b4-8575-35e640551203"
+          ]
+        }
+      ],
+      "requirements": [
+        {
+          "requirement_id": "req_points_required_fields",
+          "requirement_type": "required_fields",
+          "scope": "Hospital coordinate conversion requires the observed LATITUDE and LONGITUDE fields in input_1.",
+          "task_id": "task_points_from_csv",
+          "artifact_roles": [
+            "input_1"
+          ],
+          "parameters": {
+            "fields": [
+              "LATITUDE",
+              "LONGITUDE"
+            ]
+          },
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [
+            "e0e8b94a-e47c-4b85-8351-a7e2c47e2112"
+          ],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_points_crs_present",
+          "requirement_type": "crs_present",
+          "scope": "The source CRS for coordinate values in input_1 must be explicitly confirmed before constructing hospital points.",
+          "task_id": "task_points_from_csv",
+          "artifact_roles": [
+            "input_1"
+          ],
+          "parameters": {},
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_points_valid_geometry",
+          "requirement_type": "valid_geometry",
+          "scope": "The generated hospital point layer must contain valid point geometries before mapping.",
+          "task_id": "task_points_from_csv",
+          "artifact_roles": [
+            "hospital_points"
+          ],
+          "parameters": {},
+          "blocking": true,
+          "provenance": "DOWNSTREAM_CONSUMER",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [
+            "cf3f9d44-507c-490f-b89c-c8579e2ebddb"
+          ],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_map_valid_geometry",
+          "requirement_type": "valid_geometry",
+          "scope": "The mapped hospital point layer must contain valid geometries.",
+          "task_id": "task_hospital_map",
+          "artifact_roles": [
+            "hospital_points"
+          ],
+          "parameters": {},
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [
+            "cf3f9d44-507c-490f-b89c-c8579e2ebddb"
+          ],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_map_format",
+          "requirement_type": "format_compatible",
+          "scope": "The hospital point input to the mapping task must be provided as a GeoPackage vector layer.",
+          "task_id": "task_hospital_map",
+          "artifact_roles": [
+            "hospital_points"
+          ],
+          "parameters": {
+            "accepted_formats": [
+              "GPKG",
+              "GeoJSON"
+            ]
+          },
+          "blocking": true,
+          "provenance": "WORKER_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [
+            "cf3f9d44-507c-490f-b89c-c8579e2ebddb"
+          ],
+          "superseded_by": null
+        }
+      ],
+      "commitments": []
+    }
+  },
+  "workflow_state": {
+    "schema_version": "1.0.0",
+    "workflow_id": "93d23962-a6d9-42e0-aa59-19f28d12aade",
+    "state_version": 20,
+    "user_goal": "Create a map of hospital locations in Centre County.",
+    "feature_profile": "C2",
+    "feature_config": {
+      "profile_name": "C2",
+      "planner_mode": "gis_aware",
+      "qc_mode": "gis_aware",
+      "replanner_mode": "gis_aware",
+      "technical_invariants": true,
+      "local_recovery": true,
+      "structural_patching": true,
+      "gis_finding_routing": true
+    },
+    "current_plan_version": 1,
+    "tasks": {
+      "task_points_from_csv": {
+        "task_id": "task_points_from_csv",
+        "title": "Create hospital point layer",
+        "purpose": "Spatialize the hospital coordinate table as point features in a GeoPackage.",
+        "operation": "csv_to_points",
+        "instructions": "Convert the CSV table to point features using the observed longitude and latitude fields. Use an explicitly confirmed source CRS; do not infer or guess the CRS at runtime.",
+        "parameters": {
+          "operation": "csv_to_points",
+          "lat_col": "LATITUDE",
+          "lon_col": "LONGITUDE"
+        },
+        "required_capabilities": [
+          "format_and_spatial_conversion"
+        ],
+        "depends_on": [],
+        "input_requirements": [
+          {
+            "role": "input_1",
+            "data_model": "table",
+            "formats": [
+              "CSV"
+            ],
+            "required": true
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "hospital_points",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_points_required_fields",
+          "req_points_crs_present",
+          "req_points_valid_geometry"
+        ],
+        "status": "successful",
+        "attempts": 1,
+        "active_binding_id": "4f45d0a6-0c35-4e85-af18-0b3d22279fd0",
+        "output_artifact_ids": [
+          "efbdb848-3e9d-4430-964f-f88b7e9315ee"
+        ],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      },
+      "task_hospital_map": {
+        "task_id": "task_hospital_map",
+        "title": "Map hospital locations",
+        "purpose": "Generate the requested interactive HTML map from the hospital point layer.",
+        "operation": "thematic_mapping",
+        "instructions": "Create an interactive HTML map showing the hospital point features. Do not require thematic classification unless a mapped attribute is explicitly selected during runtime QC.",
+        "parameters": {
+          "field": "ID"
+        },
+        "required_capabilities": [
+          "thematic_mapping"
+        ],
+        "depends_on": [
+          "task_points_from_csv"
+        ],
+        "input_requirements": [
+          {
+            "role": "hospital_points",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "hospital_locations_map",
+            "data_model": "map",
+            "formats": [
+              "HTML"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_map_valid_geometry",
+          "req_map_format"
+        ],
+        "status": "successful",
+        "attempts": 1,
+        "active_binding_id": "38505805-b84e-4cd3-bf36-3394b2eaba86",
+        "output_artifact_ids": [
+          "8378bccb-7b3a-48b4-8575-35e640551203"
+        ],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      }
+    },
+    "edges": [
+      [
+        "task_points_from_csv",
+        "task_hospital_map"
+      ]
+    ],
+    "bindings": {
+      "4f45d0a6-0c35-4e85-af18-0b3d22279fd0": {
+        "binding_id": "4f45d0a6-0c35-4e85-af18-0b3d22279fd0",
+        "task_id": "task_points_from_csv",
+        "agent_id": "conversion_agent",
+        "operation": "csv_to_points",
+        "instruction": "Convert the CSV table to point features using the observed longitude and latitude fields. Use an explicitly confirmed source CRS; do not infer or guess the CRS at runtime.",
+        "input_bindings": [
+          {
+            "role": "input_1",
+            "artifact_id": "d551155d-4d70-44e3-8a09-3dab5880affa",
+            "source_task_id": null,
+            "binding_order": 0
+          }
+        ],
+        "agent_profile_snapshot": {
+          "agent_id": "conversion_agent",
+          "name": "Conversion Agent",
+          "description": "Converts supported artifact representations without changing the analytical meaning of the data. CSV-to-points requires explicit coordinate-field names and a source CRS.",
+          "operations": [
+            "csv_to_points",
+            "format_and_spatial_conversion",
+            "geojson_to_gpkg",
+            "table_to_csv"
+          ],
+          "skills": [
+            {
+              "skill_id": "format_and_spatial_conversion",
+              "name": "Format and Spatial Conversion",
+              "description": "Converts data formats between GeoJSON and GeoPackage, spatializes coordinate tables into vector point layers, and exports tabular data.",
+              "constraints": {
+                "spatial": "CSV-to-points requires latitude and longitude fields and assigns a documented source CRS.",
+                "temporal": null,
+                "other": [
+                  "The service does not fabricate missing records or infer unknown CRS definitions."
+                ]
+              }
+            }
+          ],
+          "inputs": {
+            "input_datasets": {
+              "required": true,
+              "description": "Input dataset in CSV, GeoJSON, or GeoPackage format."
+            }
+          },
+          "outputs": [
+            {
+              "type": "vector",
+              "formats": [
+                "GPKG"
+              ],
+              "required": false,
+              "description": "Converted spatial layer."
+            },
+            {
+              "type": "table",
+              "formats": [
+                "CSV"
+              ],
+              "required": false,
+              "description": "Exported attribute table."
+            }
+          ],
+          "parameters": {
+            "operation": {
+              "required": false,
+              "description": "Explicit operation name (csv_to_points, geojson_to_gpkg, table_to_csv)."
+            },
+            "lat_col": {
+              "required": false,
+              "description": "Name of latitude column in CSV."
+            },
+            "lon_col": {
+              "required": false,
+              "description": "Name of longitude column in CSV."
+            },
+            "crs": {
+              "required": false,
+              "default": "EPSG:4326",
+              "description": "Coordinate reference system for constructed points."
+            }
+          }
+        },
+        "endpoint": "https://www.geospatial-agentic-services.online/agents/conversion_agent/tasks",
+        "attempt": 1,
+        "invocation_id": null,
+        "status": "successful",
+        "started_at": "2026-08-21T20:00:28.679648Z",
+        "completed_at": "2026-08-21T20:00:28.702984Z",
+        "duration_seconds": 0.02334067999618128,
+        "output_artifact_ids": [
+          "efbdb848-3e9d-4430-964f-f88b7e9315ee"
+        ],
+        "messages": [
+          "Constructed 3 point features from CSV coordinates with CRS EPSG:4326."
+        ],
+        "structured_error": null,
+        "created_at": "2026-08-21T20:00:28.674134Z"
+      },
+      "38505805-b84e-4cd3-bf36-3394b2eaba86": {
+        "binding_id": "38505805-b84e-4cd3-bf36-3394b2eaba86",
+        "task_id": "task_hospital_map",
+        "agent_id": "mapping_agent",
+        "operation": "thematic_mapping",
+        "instruction": "Create an interactive HTML map showing the hospital point features. Do not require thematic classification unless a mapped attribute is explicitly selected during runtime QC.",
+        "input_bindings": [
+          {
+            "role": "hospital_points",
+            "artifact_id": "efbdb848-3e9d-4430-964f-f88b7e9315ee",
+            "source_task_id": "task_points_from_csv",
+            "binding_order": 0
+          }
+        ],
+        "agent_profile_snapshot": {
+          "agent_id": "mapping_agent",
+          "name": "Mapping Agent",
+          "description": "Produces deterministic HTML maps from supplied vector, raster, or joined tabular-spatial artifacts. Visualizes the specified field and embeds verification metadata.",
+          "operations": [
+            "thematic_mapping"
+          ],
+          "skills": [
+            {
+              "skill_id": "thematic_mapping",
+              "name": "Thematic Mapping",
+              "description": "Generates interactive HTML choropleth and vector boundary maps from GeoPackage or GeoJSON layers.",
+              "constraints": {
+                "spatial": "Visualizes the specified spatial features and mapped attributes.",
+                "temporal": null,
+                "other": [
+                  "Embeds source artifact and CRS verification metadata in output HTML."
+                ]
+              }
+            }
+          ],
+          "inputs": {
+            "input_datasets": {
+              "required": true,
+              "description": "Input vector or raster layer in GeoPackage or GeoJSON format."
+            }
+          },
+          "outputs": [
+            {
+              "type": "map",
+              "formats": [
+                "HTML"
+              ],
+              "required": true,
+              "description": "Interactive HTML visualization map."
+            }
+          ],
+          "parameters": {
+            "field": {
+              "required": false,
+              "description": "Attribute column name to visualize/classify."
+            }
+          }
+        },
+        "endpoint": "https://www.geospatial-agentic-services.online/agents/mapping_agent/tasks",
+        "attempt": 1,
+        "invocation_id": null,
+        "status": "successful",
+        "started_at": "2026-08-21T20:00:34.833037Z",
+        "completed_at": "2026-08-21T20:00:34.840571Z",
+        "duration_seconds": 0.007538146004662849,
+        "output_artifact_ids": [
+          "8378bccb-7b3a-48b4-8575-35e640551203"
+        ],
+        "messages": [
+          "Rendered map with 3 features (mapped field: ID)."
+        ],
+        "structured_error": null,
+        "created_at": "2026-08-21T20:00:34.824394Z"
+      }
+    },
+    "artifacts": {
+      "d551155d-4d70-44e3-8a09-3dab5880affa": {
+        "artifact_id": "d551155d-4d70-44e3-8a09-3dab5880affa",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_hospitals_centre.csv",
+        "content_hash": "f38a413c7b10d5a847d0245fb3590d639894168815508a19601877afc017ca15",
+        "format": "csv",
+        "media_type": null,
+        "data_model": "table",
+        "producer_task_id": null,
+        "producer_binding_id": null,
+        "role": "input_1",
+        "evidence_ids": [
+          "e0e8b94a-e47c-4b85-8351-a7e2c47e2112"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T20:00:12.344096Z",
+        "metadata": {
+          "source": "user_input"
+        }
+      },
+      "efbdb848-3e9d-4430-964f-f88b7e9315ee": {
+        "artifact_id": "efbdb848-3e9d-4430-964f-f88b7e9315ee",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/conversion_agent/spatialized_points_b17a01cc.gpkg",
+        "content_hash": "acf7b92ac723bf6ce9f9e1f7120b16915120d63b42236e7c75f1d694ede46203",
+        "format": "gpkg",
+        "media_type": null,
+        "data_model": "vector",
+        "producer_task_id": "task_points_from_csv",
+        "producer_binding_id": "4f45d0a6-0c35-4e85-af18-0b3d22279fd0",
+        "role": "hospital_points",
+        "evidence_ids": [
+          "cf3f9d44-507c-490f-b89c-c8579e2ebddb"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T20:00:28.706964Z",
+        "metadata": {}
+      },
+      "8378bccb-7b3a-48b4-8575-35e640551203": {
+        "artifact_id": "8378bccb-7b3a-48b4-8575-35e640551203",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/mapping_agent/map_41891739.html",
+        "content_hash": "dbae6a4b29a074c6c55b48dc5cad8129c8d739dd7f0b006765da9ff609631695",
+        "format": "html",
+        "media_type": null,
+        "data_model": "map",
+        "producer_task_id": "task_hospital_map",
+        "producer_binding_id": "38505805-b84e-4cd3-bf36-3394b2eaba86",
+        "role": "hospital_locations_map",
+        "evidence_ids": [
+          "e1179bda-dd0c-4855-acdc-63b7b548293d"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T20:00:34.843163Z",
+        "metadata": {}
+      }
+    },
+    "derivations": {
+      "443bee6d-5a3b-4ece-b4eb-7abffd060300": {
+        "derivation_id": "443bee6d-5a3b-4ece-b4eb-7abffd060300",
+        "output_artifact_id": "efbdb848-3e9d-4430-964f-f88b7e9315ee",
+        "source_artifact_ids": [
+          "d551155d-4d70-44e3-8a09-3dab5880affa"
+        ],
+        "producer_task_id": "task_points_from_csv",
+        "operation": "csv_to_points",
+        "parameters": {
+          "operation": "csv_to_points",
+          "lat_col": "LATITUDE",
+          "lon_col": "LONGITUDE"
+        },
+        "semantic_effect": "Produced role 'hospital_points' using operation 'csv_to_points'.",
+        "evidence_snapshot_ids": [],
+        "created_at": "2026-08-21T20:00:28.707001Z"
+      },
+      "c4b1e846-725f-423d-8cce-7d5dc4707f36": {
+        "derivation_id": "c4b1e846-725f-423d-8cce-7d5dc4707f36",
+        "output_artifact_id": "8378bccb-7b3a-48b4-8575-35e640551203",
+        "source_artifact_ids": [
+          "efbdb848-3e9d-4430-964f-f88b7e9315ee"
+        ],
+        "producer_task_id": "task_hospital_map",
+        "operation": "thematic_mapping",
+        "parameters": {},
+        "semantic_effect": "Produced role 'hospital_locations_map' using operation 'thematic_mapping'.",
+        "evidence_snapshot_ids": [],
+        "created_at": "2026-08-21T20:00:34.843196Z"
+      }
+    },
+    "requirements": {
+      "req_points_required_fields": {
+        "requirement_id": "req_points_required_fields",
+        "requirement_type": "required_fields",
+        "scope": "Hospital coordinate conversion requires the observed LATITUDE and LONGITUDE fields in input_1.",
+        "task_id": "task_points_from_csv",
+        "artifact_roles": [
+          "input_1"
+        ],
+        "parameters": {
+          "fields": [
+            "LATITUDE",
+            "LONGITUDE"
+          ]
+        },
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [
+          "e0e8b94a-e47c-4b85-8351-a7e2c47e2112"
+        ],
+        "superseded_by": null
+      },
+      "req_points_crs_present": {
+        "requirement_id": "req_points_crs_present",
+        "requirement_type": "crs_present",
+        "scope": "The source CRS for coordinate values in input_1 must be explicitly confirmed before constructing hospital points.",
+        "task_id": "task_points_from_csv",
+        "artifact_roles": [
+          "input_1"
+        ],
+        "parameters": {},
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_points_valid_geometry": {
+        "requirement_id": "req_points_valid_geometry",
+        "requirement_type": "valid_geometry",
+        "scope": "The generated hospital point layer must contain valid point geometries before mapping.",
+        "task_id": "task_points_from_csv",
+        "artifact_roles": [
+          "hospital_points"
+        ],
+        "parameters": {},
+        "blocking": true,
+        "provenance": "DOWNSTREAM_CONSUMER",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [
+          "cf3f9d44-507c-490f-b89c-c8579e2ebddb"
+        ],
+        "superseded_by": null
+      },
+      "req_map_valid_geometry": {
+        "requirement_id": "req_map_valid_geometry",
+        "requirement_type": "valid_geometry",
+        "scope": "The mapped hospital point layer must contain valid geometries.",
+        "task_id": "task_hospital_map",
+        "artifact_roles": [
+          "hospital_points"
+        ],
+        "parameters": {},
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [
+          "cf3f9d44-507c-490f-b89c-c8579e2ebddb"
+        ],
+        "superseded_by": null
+      },
+      "req_map_format": {
+        "requirement_id": "req_map_format",
+        "requirement_type": "format_compatible",
+        "scope": "The hospital point input to the mapping task must be provided as a GeoPackage vector layer.",
+        "task_id": "task_hospital_map",
+        "artifact_roles": [
+          "hospital_points"
+        ],
+        "parameters": {
+          "accepted_formats": [
+            "GPKG",
+            "GeoJSON"
+          ]
+        },
+        "blocking": true,
+        "provenance": "WORKER_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [
+          "cf3f9d44-507c-490f-b89c-c8579e2ebddb"
+        ],
+        "superseded_by": null
+      }
+    },
+    "commitments": {},
+    "schema_mappings": {
+      "efbdb848-3e9d-4430-964f-f88b7e9315ee:hospital identifier": {
+        "task_id": "task_hospital_map",
+        "parameter": "field",
+        "artifact_id": "efbdb848-3e9d-4430-964f-f88b7e9315ee",
+        "semantic_name": "hospital identifier",
+        "actual_field": "ID",
+        "downstream_parameters": [
+          {
+            "task_id": "task_hospital_map",
+            "parameter": "field"
+          }
+        ]
+      }
+    },
+    "evidence": {
+      "e0e8b94a-e47c-4b85-8351-a7e2c47e2112": {
+        "evidence_id": "e0e8b94a-e47c-4b85-8351-a7e2c47e2112",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "d551155d-4d70-44e3-8a09-3dab5880affa"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_hospitals_centre.csv",
+          "format": "csv",
+          "size_bytes": 256,
+          "complete": true,
+          "limitations": [],
+          "data_model": "table",
+          "inspected_row_count": 3,
+          "row_sample_complete": true,
+          "schema": {
+            "ID": "object",
+            "NAME": "object",
+            "LATITUDE": "float64",
+            "LONGITUDE": "float64",
+            "BEDS": "int64",
+            "TYPE": "object"
+          },
+          "schema_fields": [
+            "ID",
+            "NAME",
+            "LATITUDE",
+            "LONGITUDE",
+            "BEDS",
+            "TYPE"
+          ],
+          "coordinate_candidates": [
+            {
+              "x_field": "LONGITUDE",
+              "y_field": "LATITUDE",
+              "x_min": -77.882,
+              "x_max": -77.775,
+              "y_min": 40.785,
+              "y_max": 40.912,
+              "range_compatible_with_lon_lat": true
+            }
+          ],
+          "spatializable_from_coordinates": true,
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T20:00:12.348730Z",
+        "complete": true,
+        "limitations": []
+      },
+      "cf3f9d44-507c-490f-b89c-c8579e2ebddb": {
+        "evidence_id": "cf3f9d44-507c-490f-b89c-c8579e2ebddb",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "efbdb848-3e9d-4430-964f-f88b7e9315ee"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/conversion_agent/spatialized_points_b17a01cc.gpkg",
+          "format": "gpkg",
+          "size_bytes": 98304,
+          "complete": true,
+          "limitations": [],
+          "data_model": "vector",
+          "feature_count": 3,
+          "schema": {
+            "ID": "object",
+            "NAME": "object",
+            "LATITUDE": "float64",
+            "LONGITUDE": "float64",
+            "BEDS": "int64",
+            "TYPE": "object"
+          },
+          "schema_fields": [
+            "ID",
+            "NAME",
+            "LATITUDE",
+            "LONGITUDE",
+            "BEDS",
+            "TYPE"
+          ],
+          "geometry_type": [
+            "Point"
+          ],
+          "geometry_valid": true,
+          "invalid_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "null_geometry_count": 0,
+          "bounds": [
+            -77.882,
+            40.785,
+            -77.775,
+            40.912
+          ],
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true,
+          "crs": "EPSG:4326",
+          "crs_authority": "EPSG:4326",
+          "is_projected": false,
+          "is_geographic": true,
+          "linear_unit": "degree",
+          "linear_unit_to_meter": 0.017453292519943295,
+          "is_metric_crs": false
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T20:00:28.713387Z",
+        "complete": true,
+        "limitations": []
+      },
+      "e1179bda-dd0c-4855-acdc-63b7b548293d": {
+        "evidence_id": "e1179bda-dd0c-4855-acdc-63b7b548293d",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "8378bccb-7b3a-48b4-8575-35e640551203"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/mapping_agent/map_41891739.html",
+          "format": "html",
+          "size_bytes": 2420,
+          "complete": true,
+          "limitations": [],
+          "data_model": "map",
+          "embedded_metadata_present": true,
+          "embedded_metadata_keys": [
+            "bbox",
+            "crs",
+            "feature_count",
+            "mapped_field",
+            "source_artifact"
+          ],
+          "source_artifact": "spatialized_points_b17a01cc.gpkg",
+          "mapped_field": "ID",
+          "crs": "EPSG:4326",
+          "feature_count": 3,
+          "bounds": [
+            -77.882,
+            40.785,
+            -77.775,
+            40.912
+          ],
+          "analytical_unit": null,
+          "disclosure": null
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T20:00:34.843535Z",
+        "complete": true,
+        "limitations": []
+      }
+    },
+    "violations": {},
+    "execution_history": [
+      {
+        "event_id": "2ee3d065-cea4-4b5f-8724-d0afdb3d5b52",
+        "event_type": "initial_plan_committed",
+        "actor": "planner_component",
+        "state_version": 0,
+        "plan_version": 1,
+        "task_id": null,
+        "reason": "Convert the inspected hospital coordinate table into a GeoPackage point layer, then generate an HTML map of the hospital locations. The source CRS remains an explicit blocking runtime requirement because it was not established by the available evidence.",
+        "metadata": {
+          "task_ids": [
+            "task_hospital_map",
+            "task_points_from_csv"
+          ]
+        },
+        "created_at": "2026-08-21T20:00:28.667625Z"
+      },
+      {
+        "event_id": "3248d830-2d5f-431a-9650-780b5a421416",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 1,
+        "plan_version": 1,
+        "task_id": "task_points_from_csv",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "proposed",
+          "to": "ready"
+        },
+        "created_at": "2026-08-21T20:00:28.670816Z"
+      },
+      {
+        "event_id": "30a3ffbf-aaa9-463f-aa69-ef9cd90dadb1",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 2,
+        "plan_version": 1,
+        "task_id": "task_points_from_csv",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-21T20:00:28.672556Z"
+      },
+      {
+        "event_id": "a83d4e4a-5b2a-4f12-9bdf-e94a2dccec8b",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 3,
+        "plan_version": 1,
+        "task_id": "task_points_from_csv",
+        "reason": "Worker bound.",
+        "metadata": {
+          "from": "binding",
+          "to": "bound"
+        },
+        "created_at": "2026-08-21T20:00:28.674192Z"
+      },
+      {
+        "event_id": "8e501ed1-ff4b-48ce-a0eb-b2df955f1a24",
+        "event_type": "pre_execution_requirements_evaluated",
+        "actor": "invariant_engine",
+        "state_version": 4,
+        "plan_version": 1,
+        "task_id": "task_points_from_csv",
+        "reason": "All currently evaluable preconditions are satisfied.",
+        "metadata": {
+          "evaluated_requirement_ids": [
+            "req_points_required_fields"
+          ],
+          "blocking_violation_ids": []
+        },
+        "created_at": "2026-08-21T20:00:28.676082Z"
+      },
+      {
+        "event_id": "b38a5e07-ec29-4aa2-9f2d-d698eb449ad2",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 5,
+        "plan_version": 1,
+        "task_id": "task_points_from_csv",
+        "reason": "Worker started.",
+        "metadata": {
+          "from": "bound",
+          "to": "running"
+        },
+        "created_at": "2026-08-21T20:00:28.677770Z"
+      },
+      {
+        "event_id": "4d1bf4bd-4073-4cb5-8332-56ccdfb1531a",
+        "event_type": "worker_execution_completed",
+        "actor": "worker_executor",
+        "state_version": 6,
+        "plan_version": 1,
+        "task_id": "task_points_from_csv",
+        "reason": "Worker returned successfully.",
+        "metadata": {
+          "binding_id": "4f45d0a6-0c35-4e85-af18-0b3d22279fd0",
+          "agent_id": "conversion_agent",
+          "operation": "csv_to_points",
+          "attempt": 1,
+          "status": "successful",
+          "duration_seconds": 0.02334067999618128
+        },
+        "created_at": "2026-08-21T20:00:28.703069Z"
+      },
+      {
+        "event_id": "2f6df1cc-fe45-49a0-8da8-2d792401a3ee",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 6,
+        "plan_version": 1,
+        "task_id": "task_points_from_csv",
+        "reason": "Worker returned a provisional result.",
+        "metadata": {
+          "from": "running",
+          "to": "provisional_success"
+        },
+        "created_at": "2026-08-21T20:00:28.703140Z"
+      },
+      {
+        "event_id": "978ef64d-e100-46f1-9508-f67b6b70fc43",
+        "event_type": "artifact_registered",
+        "actor": "artifact_registry",
+        "state_version": 7,
+        "plan_version": 1,
+        "task_id": "task_points_from_csv",
+        "reason": null,
+        "metadata": {
+          "artifact_id": "efbdb848-3e9d-4430-964f-f88b7e9315ee",
+          "role": "hospital_points",
+          "content_hash": "acf7b92ac723bf6ce9f9e1f7120b16915120d63b42236e7c75f1d694ede46203"
+        },
+        "created_at": "2026-08-21T20:00:28.707024Z"
+      },
+      {
+        "event_id": "26331b94-aa63-4bdf-94d1-e83976e8c378",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 8,
+        "plan_version": 1,
+        "task_id": "task_points_from_csv",
+        "reason": "Reviewing runtime evidence.",
+        "metadata": {
+          "from": "provisional_success",
+          "to": "validating"
+        },
+        "created_at": "2026-08-21T20:00:28.715758Z"
+      },
+      {
+        "event_id": "6ea52e0f-d939-4d3d-9be5-e37192ffdaae",
+        "event_type": "qc_unsupported_successful_transition_block_suppressed",
+        "actor": "qc_component",
+        "state_version": 9,
+        "plan_version": 1,
+        "task_id": "task_points_from_csv",
+        "reason": "The worker transition succeeded and no active deterministic current/downstream blocker supports pausing or replanning this task.",
+        "metadata": {
+          "qc_action": "HUMAN_CLARIFICATION",
+          "qc_reason": "The source CRS for the CSV coordinate values has not been explicitly confirmed. Although the produced artifact is labeled EPSG:4326, that runtime observation does not establish the source CRS required by the task contract, and the CRS must not be inferred or guessed."
+        },
+        "created_at": "2026-08-21T20:00:34.815761Z"
+      },
+      {
+        "event_id": "ddce390c-e0cf-4a47-bd8e-960ebbf5b883",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 9,
+        "plan_version": 1,
+        "task_id": "task_points_from_csv",
+        "reason": "The worker transition succeeded and no active deterministic current/downstream blocker supports pausing or replanning this task.",
+        "metadata": {
+          "from": "validating",
+          "to": "successful"
+        },
+        "created_at": "2026-08-21T20:00:34.817073Z"
+      },
+      {
+        "event_id": "1fa89c61-8bc8-4bc3-9898-54039d56448b",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 10,
+        "plan_version": 1,
+        "task_id": "task_hospital_map",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "proposed",
+          "to": "ready"
+        },
+        "created_at": "2026-08-21T20:00:34.819776Z"
+      },
+      {
+        "event_id": "5b7bdb9c-0113-4c1a-9259-13870d05ef0f",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 11,
+        "plan_version": 1,
+        "task_id": "task_hospital_map",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-21T20:00:34.822342Z"
+      },
+      {
+        "event_id": "8ec57a15-d827-4084-8d1e-dd34bdd64061",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 12,
+        "plan_version": 1,
+        "task_id": "task_hospital_map",
+        "reason": "Worker bound.",
+        "metadata": {
+          "from": "binding",
+          "to": "bound"
+        },
+        "created_at": "2026-08-21T20:00:34.824492Z"
+      },
+      {
+        "event_id": "974b94a7-1235-42ef-973e-938b14c98653",
+        "event_type": "pre_execution_requirements_evaluated",
+        "actor": "invariant_engine",
+        "state_version": 13,
+        "plan_version": 1,
+        "task_id": "task_hospital_map",
+        "reason": "All currently evaluable preconditions are satisfied.",
+        "metadata": {
+          "evaluated_requirement_ids": [
+            "req_map_valid_geometry",
+            "req_map_format"
+          ],
+          "blocking_violation_ids": []
+        },
+        "created_at": "2026-08-21T20:00:34.827570Z"
+      },
+      {
+        "event_id": "7394a247-283a-4295-8e99-02062c1bd7ac",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 14,
+        "plan_version": 1,
+        "task_id": "task_hospital_map",
+        "reason": "Worker started.",
+        "metadata": {
+          "from": "bound",
+          "to": "running"
+        },
+        "created_at": "2026-08-21T20:00:34.830563Z"
+      },
+      {
+        "event_id": "59cf1db2-72a6-48d4-aeb1-30b6c781643f",
+        "event_type": "worker_execution_completed",
+        "actor": "worker_executor",
+        "state_version": 15,
+        "plan_version": 1,
+        "task_id": "task_hospital_map",
+        "reason": "Worker returned successfully.",
+        "metadata": {
+          "binding_id": "38505805-b84e-4cd3-bf36-3394b2eaba86",
+          "agent_id": "mapping_agent",
+          "operation": "thematic_mapping",
+          "attempt": 1,
+          "status": "successful",
+          "duration_seconds": 0.007538146004662849
+        },
+        "created_at": "2026-08-21T20:00:34.840645Z"
+      },
+      {
+        "event_id": "76cb05c8-39d2-4807-a26f-5331b371a199",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 15,
+        "plan_version": 1,
+        "task_id": "task_hospital_map",
+        "reason": "Worker returned a provisional result.",
+        "metadata": {
+          "from": "running",
+          "to": "provisional_success"
+        },
+        "created_at": "2026-08-21T20:00:34.840706Z"
+      },
+      {
+        "event_id": "0fdf3beb-3abc-484b-b805-affcfc25536c",
+        "event_type": "artifact_registered",
+        "actor": "artifact_registry",
+        "state_version": 16,
+        "plan_version": 1,
+        "task_id": "task_hospital_map",
+        "reason": null,
+        "metadata": {
+          "artifact_id": "8378bccb-7b3a-48b4-8575-35e640551203",
+          "role": "hospital_locations_map",
+          "content_hash": "dbae6a4b29a074c6c55b48dc5cad8129c8d739dd7f0b006765da9ff609631695"
+        },
+        "created_at": "2026-08-21T20:00:34.843220Z"
+      },
+      {
+        "event_id": "906f9c08-1861-40c6-bd7e-6f2db45caee3",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 17,
+        "plan_version": 1,
+        "task_id": "task_hospital_map",
+        "reason": "Reviewing runtime evidence.",
+        "metadata": {
+          "from": "provisional_success",
+          "to": "validating"
+        },
+        "created_at": "2026-08-21T20:00:34.848700Z"
+      },
+      {
+        "event_id": "5435cd6a-d240-4a4c-8290-eaa6da56bc9d",
+        "event_type": "schema_mapping_grounded",
+        "actor": "loop_controller",
+        "state_version": 18,
+        "plan_version": 1,
+        "task_id": null,
+        "reason": "Mapped 'hospital identifier' to runtime field 'ID'.",
+        "metadata": {
+          "artifact_id": "efbdb848-3e9d-4430-964f-f88b7e9315ee",
+          "mapping_key": "efbdb848-3e9d-4430-964f-f88b7e9315ee:hospital identifier"
+        },
+        "created_at": "2026-08-21T20:00:42.190135Z"
+      },
+      {
+        "event_id": "3055685a-a889-4cc4-9f06-ba318cc0506a",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 18,
+        "plan_version": 1,
+        "task_id": "task_hospital_map",
+        "reason": "The worker succeeded, the HTML map artifact is complete and valid, required current-task requirements are satisfied, and no deterministic violations or evidence-grounded defects are present. The artifact directly fulfills the original request for a map of hospital locations in Centre County.",
+        "metadata": {
+          "from": "validating",
+          "to": "successful"
+        },
+        "created_at": "2026-08-21T20:00:42.190272Z"
+      },
+      {
+        "event_id": "751baf7e-eeb3-4bb8-a0c4-8ba405f331c7",
+        "event_type": "workflow_completed",
+        "actor": "completion_policy",
+        "state_version": 19,
+        "plan_version": 1,
+        "task_id": null,
+        "reason": "All active tasks, blocking requirements, and terminal outputs are satisfied.",
+        "metadata": {
+          "final_artifact_ids": [
+            "8378bccb-7b3a-48b4-8575-35e640551203"
+          ]
+        },
+        "created_at": "2026-08-21T20:00:42.193948Z"
+      }
+    ],
+    "qc_history": [
+      {
+        "decision_id": "8e006f97-b279-45e3-a32d-8f76e5252a9d",
+        "task_id": "task_points_from_csv",
+        "verdict": "PASS",
+        "proposed_verdict": "BLOCK",
+        "reason": "The worker transition succeeded and no active deterministic current/downstream blocker supports pausing or replanning this task.",
+        "acknowledged_finding_ids": [],
+        "action_class": "NONE",
+        "effective_action": "NONE",
+        "effective_action_source": "deterministic_recovery_policy",
+        "allowed_recovery_types": [],
+        "recovery_parameters": {},
+        "preserve_completed_work": true,
+        "forced_by_invariant": true,
+        "created_at": "2026-08-21T20:00:34.815733Z"
+      },
+      {
+        "decision_id": "qc_task_hospital_map_20260821",
+        "task_id": "task_hospital_map",
+        "verdict": "PASS",
+        "proposed_verdict": "PASS",
+        "reason": "The worker succeeded, the HTML map artifact is complete and valid, required current-task requirements are satisfied, and no deterministic violations or evidence-grounded defects are present. The artifact directly fulfills the original request for a map of hospital locations in Centre County.",
+        "acknowledged_finding_ids": [],
+        "action_class": "NONE",
+        "effective_action": "NONE",
+        "effective_action_source": "qc_component",
+        "allowed_recovery_types": [],
+        "recovery_parameters": {
+          "schema_mappings": [
+            {
+              "task_id": "task_hospital_map",
+              "parameter": "field",
+              "artifact_id": "efbdb848-3e9d-4430-964f-f88b7e9315ee",
+              "semantic_name": "hospital identifier",
+              "actual_field": "ID",
+              "downstream_parameters": [
+                {
+                  "task_id": "task_hospital_map",
+                  "parameter": "field"
+                }
+              ]
+            }
+          ]
+        },
+        "preserve_completed_work": true,
+        "forced_by_invariant": false,
+        "created_at": "2026-08-21T20:01:00Z"
+      }
+    ],
+    "replan_history": [],
+    "component_calls": [
+      {
+        "call_id": "80bd82cb-95af-41f6-b3aa-4daecf2df8eb",
+        "component": "planner",
+        "prompt_hash": "879bbf4688237108aa73bcb12bca3ec0b568a6ec20b463cefe3a9dddb652d8de",
+        "tool_schema_hash": "441719facf91fd72ec7e126a4de0921e9629efd4cd39619a5dbe1be9fea2e3fe",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 5213,
+        "output_tokens": 2079,
+        "duration_seconds": 16.29203200401389,
+        "disposition": "successful",
+        "created_at": "2026-08-21T20:00:28.667579Z"
+      },
+      {
+        "call_id": "b04e60ea-d2aa-4fdc-909e-5c84c84d3c79",
+        "component": "qc",
+        "prompt_hash": "f32e58c2015bc65d1615821b0bf588e3118841b8fd13c0f66435ff64db6bc238",
+        "tool_schema_hash": "264376b66f6ac19b4d57965f2f5a135067cea57302b6779a763ae77f3e5ccb86",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 2816,
+        "output_tokens": 482,
+        "duration_seconds": 6.096610085995053,
+        "disposition": "successful",
+        "created_at": "2026-08-21T20:00:34.816973Z"
+      },
+      {
+        "call_id": "b032c8f0-4da3-4e08-90df-e3aac53f5f39",
+        "component": "qc",
+        "prompt_hash": "f32e58c2015bc65d1615821b0bf588e3118841b8fd13c0f66435ff64db6bc238",
+        "tool_schema_hash": "264376b66f6ac19b4d57965f2f5a135067cea57302b6779a763ae77f3e5ccb86",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 2323,
+        "output_tokens": 617,
+        "duration_seconds": 7.3358371289941715,
+        "disposition": "successful",
+        "created_at": "2026-08-21T20:00:42.190026Z"
+      }
+    ],
+    "plan_versions": [
+      {
+        "version": 1,
+        "parent_version": null,
+        "reason": "Initial plan committed by independent Planner.",
+        "task_ids": [
+          "task_hospital_map",
+          "task_points_from_csv"
+        ],
+        "edges": [
+          [
+            "task_points_from_csv",
+            "task_hospital_map"
+          ]
+        ],
+        "created_at": "2026-08-21T20:00:28.660120Z"
+      }
+    ],
+    "budgets": {
+      "max_total_model_calls": 24,
+      "max_total_tokens": 120000,
+      "max_worker_calls": 30,
+      "max_local_recoveries": 6,
+      "max_replans": 3,
+      "max_runtime_seconds": 900.0,
+      "planner_retry_limit": 2,
+      "qc_retry_limit": 1,
+      "replanner_retry_limit": 1,
+      "total_model_calls": 3,
+      "total_tokens": 13530,
+      "worker_calls": 2,
+      "local_recoveries": 0,
+      "replans": 0
+    },
+    "terminal_state": "completed",
+    "terminal_reason": "All active tasks, blocking requirements, and terminal outputs are satisfied.",
+    "human_clarification": null,
+    "final_artifact_ids": [
+      "8378bccb-7b3a-48b4-8575-35e640551203"
+    ],
+    "required_terminal_roles": [
+      "hospital_locations_map"
+    ],
+    "final_disclosure": "Workflow completed with accepted terminal artifacts.",
+    "created_at": "2026-08-21T20:00:12.343198Z",
+    "updated_at": "2026-08-21T20:00:42.195617Z"
+  },
+  "execution_steps": [
+    {
+      "step_index": 1,
+      "step_id": "task_points_from_csv",
+      "agent_id": "conversion_agent",
+      "title": "Create hospital point layer",
+      "instructions": "Convert the CSV table to point features using the observed longitude and latitude fields. Use an explicitly confirmed source CRS; do not infer or guess the CRS at runtime.",
+      "output_artifacts": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/conversion_agent/spatialized_points_b17a01cc.gpkg"
+      ],
+      "status": "successful",
+      "error": null
+    },
+    {
+      "step_index": 2,
+      "step_id": "task_hospital_map",
+      "agent_id": "mapping_agent",
+      "title": "Map hospital locations",
+      "instructions": "Create an interactive HTML map showing the hospital point features. Do not require thematic classification unless a mapped attribute is explicitly selected during runtime QC.",
+      "output_artifacts": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/mapping_agent/map_41891739.html"
+      ],
+      "status": "successful",
+      "error": null
+    }
+  ],
+  "qc_evaluations": 2,
+  "qc_blocks": 1,
+  "qc_interventions": 0,
+  "effective_blocks": 0,
+  "effective_interventions": 0,
+  "qc_policy_overrides": 0,
+  "replanning_iterations": 0,
+  "error": null,
+  "ledger_events": [
+    {
+      "call_id": "4f45d0a6-0c35-4e85-af18-0b3d22279fd0",
+      "trajectory_id": "traj_ISS_Q09_C2_run2",
+      "agent_id": "conversion_agent",
+      "operation": "csv_to_points",
+      "query": "Convert the CSV table to point features using the observed longitude and latitude fields. Use an explicitly confirmed source CRS; do not infer or guess the CRS at runtime.",
+      "timestamp_start": 1787342428.679648,
+      "timestamp_end": 1787342428.702984,
+      "duration_seconds": 0.02334067999618128,
+      "input_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_hospitals_centre.csv"
+      ],
+      "input_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_hospitals_centre.csv": "f38a413c7b10d5a847d0245fb3590d639894168815508a19601877afc017ca15"
+      },
+      "parameters": {
+        "operation": "csv_to_points",
+        "lat_col": "LATITUDE",
+        "lon_col": "LONGITUDE"
+      },
+      "status": "completed",
+      "error_code": null,
+      "error_message": null,
+      "output_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/conversion_agent/spatialized_points_b17a01cc.gpkg"
+      ],
+      "output_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/conversion_agent/spatialized_points_b17a01cc.gpkg": "acf7b92ac723bf6ce9f9e1f7120b16915120d63b42236e7c75f1d694ede46203"
+      },
+      "summary": "Constructed 3 point features from CSV coordinates with CRS EPSG:4326.",
+      "raw_response": {
+        "binding_id": "4f45d0a6-0c35-4e85-af18-0b3d22279fd0",
+        "task_id": "task_points_from_csv",
+        "attempt": 1
+      }
+    },
+    {
+      "call_id": "38505805-b84e-4cd3-bf36-3394b2eaba86",
+      "trajectory_id": "traj_ISS_Q09_C2_run2",
+      "agent_id": "mapping_agent",
+      "operation": "thematic_mapping",
+      "query": "Create an interactive HTML map showing the hospital point features. Do not require thematic classification unless a mapped attribute is explicitly selected during runtime QC.",
+      "timestamp_start": 1787342434.833037,
+      "timestamp_end": 1787342434.840571,
+      "duration_seconds": 0.007538146004662849,
+      "input_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/conversion_agent/spatialized_points_b17a01cc.gpkg"
+      ],
+      "input_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/conversion_agent/spatialized_points_b17a01cc.gpkg": "acf7b92ac723bf6ce9f9e1f7120b16915120d63b42236e7c75f1d694ede46203"
+      },
+      "parameters": {
+        "field": "ID"
+      },
+      "status": "completed",
+      "error_code": null,
+      "error_message": null,
+      "output_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/mapping_agent/map_41891739.html"
+      ],
+      "output_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/mapping_agent/map_41891739.html": "dbae6a4b29a074c6c55b48dc5cad8129c8d739dd7f0b006765da9ff609631695"
+      },
+      "summary": "Rendered map with 3 features (mapped field: ID).",
+      "raw_response": {
+        "binding_id": "38505805-b84e-4cd3-bf36-3394b2eaba86",
+        "task_id": "task_hospital_map",
+        "attempt": 1
+      }
+    }
+  ],
+  "created_at": "2026-08-21T20:00:42.200379+00:00",
+  "evaluation": {
+    "task_id": "ISS_Q09",
+    "bafo_success": true,
+    "all_challenges_resolved": true,
+    "evaluability_status": "EVALUABLE",
+    "challenge_activated": true,
+    "trajectory_classification": "valid_bafo_pass",
+    "production_terminal_state": "completed",
+    "terminal_state": "successful",
+    "constraint_results": {
+      "csv_to_points_spatialization": {
+        "constraint_key": "csv_to_points_spatialization",
+        "status": "PASS",
+        "reason": "CSV table successfully spatialized into 3 vector point features.",
+        "details": {
+          "feature_count": 3,
+          "crs": "EPSG:4326"
+        }
+      },
+      "lat_col": {
+        "constraint_key": "lat_col",
+        "status": "PASS",
+        "reason": "Constraint 'lat_col' satisfied by valid output artifact.",
+        "details": {}
+      },
+      "lon_col": {
+        "constraint_key": "lon_col",
+        "status": "PASS",
+        "reason": "Constraint 'lon_col' satisfied by valid output artifact.",
+        "details": {}
+      },
+      "format": {
+        "constraint_key": "format",
+        "status": "PASS",
+        "reason": "Constraint 'format' satisfied by valid output artifact.",
+        "details": {}
+      }
+    },
+    "passed_constraints": [
+      "csv_to_points_spatialization",
+      "lat_col",
+      "lon_col",
+      "format"
+    ],
+    "failed_constraints": [],
+    "unevaluable_constraints": [],
+    "inspected_artifacts_count": 2,
+    "events_count": 2,
+    "diagnostic_summary": "BAFO: True | State: successful (Valid: True) | Constraints: 4 PASS, 0 FAIL, 0 UNEVALUABLE | Events Recorded: 2 | Artifacts Inspected: 2"
+  },
+  "bafo_success": true,
+  "all_challenges_resolved": true,
+  "trajectory_classification": "valid_bafo_pass"
+}

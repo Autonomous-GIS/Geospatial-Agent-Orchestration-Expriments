@@ -1,0 +1,2001 @@
+{
+  "trajectory_id": "traj_ISS_Q04_C5_run1",
+  "task_id": "ISS_Q04",
+  "condition": "C5",
+  "model": "gpt-5.6-luna",
+  "run_index": 1,
+  "suite": "isolated",
+  "user_question": "Assign each Centre County hospital to the census tract that contains it and return the tract identifier with each hospital.",
+  "input_artifact_paths": [
+    "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_hospitals_wgs84.gpkg",
+    "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg"
+  ],
+  "status": "failed",
+  "total_wall_time": 35.715,
+  "rate_limit_wait_time": 0.0,
+  "provider_retry_wait_time": 0.0,
+  "orchestration_active_time": 35.683,
+  "worker_execution_time": 0.032,
+  "total_tokens": 16759,
+  "input_tokens": 12498,
+  "output_tokens": 4261,
+  "outputs": {
+    "summary": "Role 'census_tracts_candidate' requires one of ['GPKG'].",
+    "artifacts": [],
+    "produced_artifacts": [
+      "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/projection_agent/reprojected_23d889dd.gpkg",
+      "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_e85ab87b_fx_tracts_centre.geojson"
+    ],
+    "workflow_plan": {
+      "workflow_id": "a7074c47-b661-4dcc-b46b-e8f9473dba5f",
+      "plan_version": 1,
+      "goal": "Assign each Centre County hospital to the census tract that contains it and return the tract identifier with each hospital.",
+      "workflow_steps": [
+        {
+          "step_id": "retrieve_centre_county_tracts",
+          "title": "Retrieve Centre County census tracts",
+          "purpose": "Obtain a census-tract dataset covering Centre County for the containment join.",
+          "agent_id": "data_retrieval_agent",
+          "operation": "dataset_retrieval",
+          "instructions": "Retrieve the highest-ranked available census-tract dataset covering Centre County. Treat the result as a candidate and retain its returned metadata for runtime suitability inspection.",
+          "parameters": {
+            "spatial_coverage": "Centre County"
+          },
+          "depends_on": [],
+          "input_from_steps": [],
+          "status": "successful",
+          "output_artifact_ids": [
+            "2c6fae53-6e49-4232-ba17-46a783ba26c2"
+          ]
+        },
+        {
+          "step_id": "reproject_hospitals_to_utm18n",
+          "title": "Reproject hospitals to EPSG:26918",
+          "purpose": "Transform the hospital points from EPSG:4326 to the census-tract CRS so the spatial join has compatible coordinate reference systems.",
+          "agent_id": "projection_agent",
+          "operation": "reproject",
+          "instructions": "Reproject the hospital vector dataset from its observed CRS to EPSG:26918. Preserve all hospital attributes and point geometries.",
+          "parameters": {
+            "operation": "reproject",
+            "target_crs": "EPSG:26918"
+          },
+          "depends_on": [],
+          "input_from_steps": [],
+          "status": "successful",
+          "output_artifact_ids": [
+            "d814bfb3-cf74-4a29-9839-ec5741a7b475"
+          ]
+        },
+        {
+          "step_id": "reproject_tracts_to_utm18n",
+          "title": "Normalize census-tract CRS to EPSG:26918",
+          "purpose": "Ensure the retrieved census-tract candidate uses the same CRS as the reprojected hospitals before the spatial join.",
+          "agent_id": null,
+          "operation": "reproject",
+          "instructions": "Reproject the retrieved census-tract candidate to EPSG:26918 after runtime verification of its source CRS. Preserve the tract identifier attributes and polygon geometries.",
+          "parameters": {
+            "operation": "reproject",
+            "target_crs": "EPSG:26918"
+          },
+          "depends_on": [
+            "retrieve_centre_county_tracts"
+          ],
+          "input_from_steps": [
+            "retrieve_centre_county_tracts"
+          ],
+          "status": "failed",
+          "output_artifact_ids": []
+        },
+        {
+          "step_id": "join_hospitals_to_containing_tracts",
+          "title": "Assign hospitals to containing census tracts",
+          "purpose": "Perform a point-in-polygon spatial join and attach the containing tract identifier to each hospital.",
+          "agent_id": null,
+          "operation": "spatial_join",
+          "instructions": "Spatially join the hospital points to the census-tract polygons using containment. Preserve each hospital feature and its attributes, and attach the tract identifier field selected from the observed census-tract schema at runtime. Do not guess field names; runtime QC must ground the hospital identity and tract identifier fields from the actual schemas.",
+          "parameters": {
+            "operation": "spatial_join"
+          },
+          "depends_on": [
+            "reproject_hospitals_to_utm18n",
+            "reproject_tracts_to_utm18n"
+          ],
+          "input_from_steps": [
+            "reproject_hospitals_to_utm18n",
+            "reproject_tracts_to_utm18n"
+          ],
+          "status": "proposed",
+          "output_artifact_ids": []
+        }
+      ],
+      "requirements": [
+        {
+          "requirement_id": "req_tract_coverage",
+          "requirement_type": "spatial_coverage",
+          "scope": "Retrieved census-tract candidate must cover Centre County.",
+          "task_id": "retrieve_centre_county_tracts",
+          "artifact_roles": [
+            "census_tracts_candidate"
+          ],
+          "parameters": {
+            "place": "Centre County"
+          },
+          "blocking": true,
+          "provenance": "USER_EXPLICIT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [
+            "839b9364-7d27-4371-8ea6-f7a1e46ad3aa"
+          ],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_tract_crs",
+          "requirement_type": "crs_present",
+          "scope": "The retrieved census-tract candidate must have a known source CRS before reprojection.",
+          "task_id": "reproject_tracts_to_utm18n",
+          "artifact_roles": [
+            "census_tracts_candidate"
+          ],
+          "parameters": {},
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [
+            "839b9364-7d27-4371-8ea6-f7a1e46ad3aa"
+          ],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_tract_format",
+          "requirement_type": "format_compatible",
+          "scope": "The census-tract candidate must be available in a format accepted by the reprojection worker.",
+          "task_id": "reproject_tracts_to_utm18n",
+          "artifact_roles": [
+            "census_tracts_candidate"
+          ],
+          "parameters": {
+            "formats": [
+              "GPKG"
+            ]
+          },
+          "blocking": true,
+          "provenance": "WORKER_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "violated",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_join_crs",
+          "requirement_type": "compatible_crs",
+          "scope": "Hospital points and census-tract polygons must use compatible CRS metadata for the binary spatial join.",
+          "task_id": "join_hospitals_to_containing_tracts",
+          "artifact_roles": [
+            "hospitals_epsg26918",
+            "census_tracts_epsg26918"
+          ],
+          "parameters": {
+            "target_crs": "EPSG:26918"
+          },
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_join_geometry",
+          "requirement_type": "valid_geometry",
+          "scope": "Both spatial-join inputs must contain valid, non-empty geometries.",
+          "task_id": "join_hospitals_to_containing_tracts",
+          "artifact_roles": [
+            "hospitals_epsg26918",
+            "census_tracts_epsg26918"
+          ],
+          "parameters": {},
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_join_fields",
+          "requirement_type": "required_fields",
+          "scope": "The joined output must retain each hospital record and include the census-tract identifier grounded from the retrieved tract schema.",
+          "task_id": "join_hospitals_to_containing_tracts",
+          "artifact_roles": [
+            "hospitals_epsg26918",
+            "census_tracts_epsg26918"
+          ],
+          "parameters": {
+            "required_semantics": [
+              "hospital record identity",
+              "containing census tract identifier"
+            ]
+          },
+          "blocking": true,
+          "provenance": "DOWNSTREAM_CONSUMER",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "2c5aa157-636a-41bb-a8fe-ef7232eb986e",
+          "requirement_type": "compatible_crs",
+          "scope": "task_transition",
+          "task_id": "join_hospitals_to_containing_tracts",
+          "artifact_roles": [
+            "hospitals_epsg26918",
+            "census_tracts_epsg26918"
+          ],
+          "parameters": {},
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "operation_contract_catalog",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "00189f64-7103-42b3-9f90-c1ae89f27366",
+          "requirement_type": "valid_geometry",
+          "scope": "task_transition",
+          "task_id": "join_hospitals_to_containing_tracts",
+          "artifact_roles": [
+            "hospitals_epsg26918",
+            "census_tracts_epsg26918"
+          ],
+          "parameters": {},
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "operation_contract_catalog",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        }
+      ],
+      "commitments": []
+    }
+  },
+  "workflow_state": {
+    "schema_version": "1.0.0",
+    "workflow_id": "a7074c47-b661-4dcc-b46b-e8f9473dba5f",
+    "state_version": 23,
+    "user_goal": "Assign each Centre County hospital to the census tract that contains it and return the tract identifier with each hospital.",
+    "feature_profile": "C2",
+    "feature_config": {
+      "profile_name": "C2",
+      "planner_mode": "gis_aware",
+      "qc_mode": "gis_aware",
+      "replanner_mode": "gis_aware",
+      "technical_invariants": true,
+      "local_recovery": true,
+      "structural_patching": true,
+      "gis_finding_routing": true
+    },
+    "current_plan_version": 1,
+    "tasks": {
+      "retrieve_centre_county_tracts": {
+        "task_id": "retrieve_centre_county_tracts",
+        "title": "Retrieve Centre County census tracts",
+        "purpose": "Obtain a census-tract dataset covering Centre County for the containment join.",
+        "operation": "dataset_retrieval",
+        "instructions": "Retrieve the highest-ranked available census-tract dataset covering Centre County. Treat the result as a candidate and retain its returned metadata for runtime suitability inspection.",
+        "parameters": {
+          "spatial_coverage": "Centre County"
+        },
+        "required_capabilities": [
+          "dataset_retrieval"
+        ],
+        "depends_on": [],
+        "input_requirements": [],
+        "expected_outputs": [
+          {
+            "role": "census_tracts_candidate",
+            "data_model": null,
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_tract_coverage"
+        ],
+        "status": "successful",
+        "attempts": 1,
+        "active_binding_id": "1fd4025a-833e-40c3-8460-c1c8a73c0339",
+        "output_artifact_ids": [
+          "2c6fae53-6e49-4232-ba17-46a783ba26c2"
+        ],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      },
+      "reproject_hospitals_to_utm18n": {
+        "task_id": "reproject_hospitals_to_utm18n",
+        "title": "Reproject hospitals to EPSG:26918",
+        "purpose": "Transform the hospital points from EPSG:4326 to the census-tract CRS so the spatial join has compatible coordinate reference systems.",
+        "operation": "reproject",
+        "instructions": "Reproject the hospital vector dataset from its observed CRS to EPSG:26918. Preserve all hospital attributes and point geometries.",
+        "parameters": {
+          "operation": "reproject",
+          "target_crs": "EPSG:26918"
+        },
+        "required_capabilities": [
+          "reproject",
+          "coordinate_transformation"
+        ],
+        "depends_on": [],
+        "input_requirements": [
+          {
+            "role": "input_1",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "hospitals_epsg26918",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [],
+        "status": "successful",
+        "attempts": 1,
+        "active_binding_id": "9e14a97f-f960-4468-9bfe-c7b8a5a5641d",
+        "output_artifact_ids": [
+          "d814bfb3-cf74-4a29-9839-ec5741a7b475"
+        ],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      },
+      "reproject_tracts_to_utm18n": {
+        "task_id": "reproject_tracts_to_utm18n",
+        "title": "Normalize census-tract CRS to EPSG:26918",
+        "purpose": "Ensure the retrieved census-tract candidate uses the same CRS as the reprojected hospitals before the spatial join.",
+        "operation": "reproject",
+        "instructions": "Reproject the retrieved census-tract candidate to EPSG:26918 after runtime verification of its source CRS. Preserve the tract identifier attributes and polygon geometries.",
+        "parameters": {
+          "operation": "reproject",
+          "target_crs": "EPSG:26918"
+        },
+        "required_capabilities": [
+          "reproject",
+          "coordinate_transformation"
+        ],
+        "depends_on": [
+          "retrieve_centre_county_tracts"
+        ],
+        "input_requirements": [
+          {
+            "role": "census_tracts_candidate",
+            "data_model": null,
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "census_tracts_epsg26918",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_tract_crs",
+          "req_tract_format"
+        ],
+        "status": "failed",
+        "attempts": 0,
+        "active_binding_id": null,
+        "output_artifact_ids": [],
+        "last_error": {
+          "code": "E_BINDING",
+          "message": "Role 'census_tracts_candidate' requires one of ['GPKG'].",
+          "retryable": false,
+          "details": {}
+        },
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      },
+      "join_hospitals_to_containing_tracts": {
+        "task_id": "join_hospitals_to_containing_tracts",
+        "title": "Assign hospitals to containing census tracts",
+        "purpose": "Perform a point-in-polygon spatial join and attach the containing tract identifier to each hospital.",
+        "operation": "spatial_join",
+        "instructions": "Spatially join the hospital points to the census-tract polygons using containment. Preserve each hospital feature and its attributes, and attach the tract identifier field selected from the observed census-tract schema at runtime. Do not guess field names; runtime QC must ground the hospital identity and tract identifier fields from the actual schemas.",
+        "parameters": {
+          "operation": "spatial_join"
+        },
+        "required_capabilities": [
+          "spatial_join",
+          "vector_aggregation_and_joins"
+        ],
+        "depends_on": [
+          "reproject_hospitals_to_utm18n",
+          "reproject_tracts_to_utm18n"
+        ],
+        "input_requirements": [
+          {
+            "role": "hospitals_epsg26918",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          },
+          {
+            "role": "census_tracts_epsg26918",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "hospitals_with_tract_identifier",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_join_crs",
+          "req_join_geometry",
+          "req_join_fields",
+          "2c5aa157-636a-41bb-a8fe-ef7232eb986e",
+          "00189f64-7103-42b3-9f90-c1ae89f27366"
+        ],
+        "status": "proposed",
+        "attempts": 0,
+        "active_binding_id": null,
+        "output_artifact_ids": [],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      }
+    },
+    "edges": [
+      [
+        "reproject_hospitals_to_utm18n",
+        "join_hospitals_to_containing_tracts"
+      ],
+      [
+        "reproject_tracts_to_utm18n",
+        "join_hospitals_to_containing_tracts"
+      ],
+      [
+        "retrieve_centre_county_tracts",
+        "reproject_tracts_to_utm18n"
+      ]
+    ],
+    "bindings": {
+      "9e14a97f-f960-4468-9bfe-c7b8a5a5641d": {
+        "binding_id": "9e14a97f-f960-4468-9bfe-c7b8a5a5641d",
+        "task_id": "reproject_hospitals_to_utm18n",
+        "agent_id": "projection_agent",
+        "operation": "reproject",
+        "instruction": "Reproject the hospital vector dataset from its observed CRS to EPSG:26918. Preserve all hospital attributes and point geometries.",
+        "input_bindings": [
+          {
+            "role": "input_1",
+            "artifact_id": "0f747f6a-9c4c-4c76-a718-541c087d0243",
+            "source_task_id": null,
+            "binding_order": 0
+          }
+        ],
+        "agent_profile_snapshot": {
+          "agent_id": "projection_agent",
+          "name": "Projection Agent",
+          "description": "Reprojects vector artifacts between explicitly identified coordinate reference systems and assigns a CRS when explicitly supplied. The service never guesses an unknown CRS.",
+          "operations": [
+            "assign_crs",
+            "coordinate_transformation",
+            "reproject"
+          ],
+          "skills": [
+            {
+              "skill_id": "coordinate_transformation",
+              "name": "Coordinate Transformation",
+              "description": "Transforms vector geometry coordinates to a target CRS or defines an explicit CRS on datasets with missing metadata.",
+              "constraints": {
+                "spatial": "Reprojection requires a known source CRS and an explicit target CRS. assign_crs requires an explicit CRS to assign.",
+                "temporal": null,
+                "other": [
+                  "The service does not infer or guess unknown coordinate reference systems."
+                ]
+              }
+            }
+          ],
+          "inputs": {
+            "input_datasets": {
+              "required": true,
+              "description": "Vector dataset in GeoPackage or GeoJSON format."
+            }
+          },
+          "outputs": [
+            {
+              "type": "vector",
+              "formats": [
+                "GPKG"
+              ],
+              "required": true,
+              "description": "Reprojected or CRS-assigned vector dataset."
+            }
+          ],
+          "parameters": {
+            "operation": {
+              "required": false,
+              "description": "Explicit operation name (reproject, assign_crs)."
+            },
+            "target_crs": {
+              "required": false,
+              "description": "Explicit target EPSG/CRS identifier."
+            }
+          }
+        },
+        "endpoint": "https://www.geospatial-agentic-services.online/agents/projection_agent/tasks",
+        "attempt": 1,
+        "invocation_id": null,
+        "status": "successful",
+        "started_at": "2026-08-23T04:03:47.315122Z",
+        "completed_at": "2026-08-23T04:03:47.343314Z",
+        "duration_seconds": 0.028198537998832762,
+        "output_artifact_ids": [
+          "d814bfb3-cf74-4a29-9839-ec5741a7b475"
+        ],
+        "messages": [
+          "Reprojected 3 features to EPSG:26918."
+        ],
+        "structured_error": null,
+        "created_at": "2026-08-23T04:03:47.308289Z"
+      },
+      "1fd4025a-833e-40c3-8460-c1c8a73c0339": {
+        "binding_id": "1fd4025a-833e-40c3-8460-c1c8a73c0339",
+        "task_id": "retrieve_centre_county_tracts",
+        "agent_id": "data_retrieval_agent",
+        "operation": "dataset_retrieval",
+        "instruction": "Retrieve the highest-ranked available census-tract dataset covering Centre County. Treat the result as a candidate and retain its returned metadata for runtime suitability inspection.",
+        "input_bindings": [],
+        "agent_profile_snapshot": {
+          "agent_id": "data_retrieval_agent",
+          "name": "Data Retrieval Agent",
+          "description": "Searches the available catalog and returns the highest-ranked available dataset candidate. Query criteria influence retrieval but are not guarantees of task-level suitability. Returned metadata describe the retrieved artifact. Clients should inspect returned metadata before downstream use.",
+          "operations": [
+            "dataset_retrieval"
+          ],
+          "skills": [
+            {
+              "skill_id": "dataset_retrieval",
+              "name": "Dataset Retrieval",
+              "description": "Retrieves registered benchmark datasets matching requested criteria from the catalog.",
+              "constraints": {
+                "spatial": "Returns datasets covering registered spatial boundaries.",
+                "temporal": "Returns datasets with metadata indicating time/year of acquisition.",
+                "other": [
+                  "The service does not determine downstream analytical fitness.",
+                  "Supports candidate exclusion via exclude_artifact_ids."
+                ]
+              }
+            }
+          ],
+          "inputs": {
+            "input_datasets": {
+              "required": false,
+              "description": "Not required for data retrieval."
+            }
+          },
+          "outputs": [
+            {
+              "type": "dataset",
+              "formats": [
+                "GPKG",
+                "GeoJSON",
+                "GeoTIFF",
+                "CSV"
+              ],
+              "required": true,
+              "description": "Retrieved dataset artifact."
+            }
+          ],
+          "parameters": {
+            "exclude_artifact_ids": {
+              "required": false,
+              "description": "Optional list of artifact IDs to exclude from candidate ranking."
+            }
+          }
+        },
+        "endpoint": "https://www.geospatial-agentic-services.online/agents/data_retrieval_agent/tasks",
+        "attempt": 1,
+        "invocation_id": null,
+        "status": "successful",
+        "started_at": "2026-08-23T04:03:49.944540Z",
+        "completed_at": "2026-08-23T04:03:49.948618Z",
+        "duration_seconds": 0.004080011014593765,
+        "output_artifact_ids": [
+          "2c6fae53-6e49-4232-ba17-46a783ba26c2"
+        ],
+        "messages": [
+          "Successfully retrieved dataset: fx_tracts_centre.geojson"
+        ],
+        "structured_error": null,
+        "created_at": "2026-08-23T04:03:49.935524Z"
+      }
+    },
+    "artifacts": {
+      "0f747f6a-9c4c-4c76-a718-541c087d0243": {
+        "artifact_id": "0f747f6a-9c4c-4c76-a718-541c087d0243",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_hospitals_wgs84.gpkg",
+        "content_hash": "01efdcc53ac8c9e81f3f6ddce74ffc81240a3661e3535f85a2fdc3573f75f53a",
+        "format": "gpkg",
+        "media_type": null,
+        "data_model": "vector",
+        "producer_task_id": null,
+        "producer_binding_id": null,
+        "role": "input_1",
+        "evidence_ids": [
+          "118213c4-6b55-4b89-8f72-f26bb5784ec0"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-23T04:03:18.017741Z",
+        "metadata": {
+          "source": "user_input"
+        }
+      },
+      "3fa918d7-3983-4f39-9f8f-cab3e67411be": {
+        "artifact_id": "3fa918d7-3983-4f39-9f8f-cab3e67411be",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg",
+        "content_hash": "9818cdd69d3b26cbd238d60780f5a566bee625b857232a79ed5ca02595c100a8",
+        "format": "gpkg",
+        "media_type": null,
+        "data_model": "vector",
+        "producer_task_id": null,
+        "producer_binding_id": null,
+        "role": "input_2",
+        "evidence_ids": [
+          "7551ce22-2a61-4f4d-9dc3-e2fd50258c0e"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-23T04:03:18.018343Z",
+        "metadata": {
+          "source": "user_input"
+        }
+      },
+      "d814bfb3-cf74-4a29-9839-ec5741a7b475": {
+        "artifact_id": "d814bfb3-cf74-4a29-9839-ec5741a7b475",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/projection_agent/reprojected_23d889dd.gpkg",
+        "content_hash": "82803e467103b01f23116a8054fb257c00bdadbee04530d09f4698a575e2c817",
+        "format": "gpkg",
+        "media_type": null,
+        "data_model": "vector",
+        "producer_task_id": "reproject_hospitals_to_utm18n",
+        "producer_binding_id": "9e14a97f-f960-4468-9bfe-c7b8a5a5641d",
+        "role": "hospitals_epsg26918",
+        "evidence_ids": [
+          "cb4ef8c2-f2db-4bee-8660-743b48548d8c"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-23T04:03:47.346314Z",
+        "metadata": {}
+      },
+      "2c6fae53-6e49-4232-ba17-46a783ba26c2": {
+        "artifact_id": "2c6fae53-6e49-4232-ba17-46a783ba26c2",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_e85ab87b_fx_tracts_centre.geojson",
+        "content_hash": "b8a88718d2672c77d63b742c526636e5834641d3b2a2f10bf84ba708110eb1a9",
+        "format": "geojson",
+        "media_type": null,
+        "data_model": "vector",
+        "producer_task_id": "retrieve_centre_county_tracts",
+        "producer_binding_id": "1fd4025a-833e-40c3-8460-c1c8a73c0339",
+        "role": "census_tracts_candidate",
+        "evidence_ids": [
+          "839b9364-7d27-4371-8ea6-f7a1e46ad3aa"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-23T04:03:49.951862Z",
+        "metadata": {}
+      }
+    },
+    "derivations": {
+      "12fb9b35-1f5d-4d1e-b242-1ae200cc6142": {
+        "derivation_id": "12fb9b35-1f5d-4d1e-b242-1ae200cc6142",
+        "output_artifact_id": "d814bfb3-cf74-4a29-9839-ec5741a7b475",
+        "source_artifact_ids": [
+          "0f747f6a-9c4c-4c76-a718-541c087d0243"
+        ],
+        "producer_task_id": "reproject_hospitals_to_utm18n",
+        "operation": "reproject",
+        "parameters": {
+          "operation": "reproject",
+          "target_crs": "EPSG:26918"
+        },
+        "semantic_effect": "Produced role 'hospitals_epsg26918' using operation 'reproject'.",
+        "evidence_snapshot_ids": [],
+        "created_at": "2026-08-23T04:03:47.346348Z"
+      },
+      "c882c28a-2032-4056-8d9c-cc87f9fad0d9": {
+        "derivation_id": "c882c28a-2032-4056-8d9c-cc87f9fad0d9",
+        "output_artifact_id": "2c6fae53-6e49-4232-ba17-46a783ba26c2",
+        "source_artifact_ids": [],
+        "producer_task_id": "retrieve_centre_county_tracts",
+        "operation": "dataset_retrieval",
+        "parameters": {
+          "spatial_coverage": "Centre County"
+        },
+        "semantic_effect": "Produced role 'census_tracts_candidate' using operation 'dataset_retrieval'.",
+        "evidence_snapshot_ids": [],
+        "created_at": "2026-08-23T04:03:49.951897Z"
+      }
+    },
+    "requirements": {
+      "req_tract_coverage": {
+        "requirement_id": "req_tract_coverage",
+        "requirement_type": "spatial_coverage",
+        "scope": "Retrieved census-tract candidate must cover Centre County.",
+        "task_id": "retrieve_centre_county_tracts",
+        "artifact_roles": [
+          "census_tracts_candidate"
+        ],
+        "parameters": {
+          "place": "Centre County"
+        },
+        "blocking": true,
+        "provenance": "USER_EXPLICIT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [
+          "839b9364-7d27-4371-8ea6-f7a1e46ad3aa"
+        ],
+        "superseded_by": null
+      },
+      "req_tract_crs": {
+        "requirement_id": "req_tract_crs",
+        "requirement_type": "crs_present",
+        "scope": "The retrieved census-tract candidate must have a known source CRS before reprojection.",
+        "task_id": "reproject_tracts_to_utm18n",
+        "artifact_roles": [
+          "census_tracts_candidate"
+        ],
+        "parameters": {},
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [
+          "839b9364-7d27-4371-8ea6-f7a1e46ad3aa"
+        ],
+        "superseded_by": null
+      },
+      "req_tract_format": {
+        "requirement_id": "req_tract_format",
+        "requirement_type": "format_compatible",
+        "scope": "The census-tract candidate must be available in a format accepted by the reprojection worker.",
+        "task_id": "reproject_tracts_to_utm18n",
+        "artifact_roles": [
+          "census_tracts_candidate"
+        ],
+        "parameters": {
+          "formats": [
+            "GPKG"
+          ]
+        },
+        "blocking": true,
+        "provenance": "WORKER_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "violated",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_join_crs": {
+        "requirement_id": "req_join_crs",
+        "requirement_type": "compatible_crs",
+        "scope": "Hospital points and census-tract polygons must use compatible CRS metadata for the binary spatial join.",
+        "task_id": "join_hospitals_to_containing_tracts",
+        "artifact_roles": [
+          "hospitals_epsg26918",
+          "census_tracts_epsg26918"
+        ],
+        "parameters": {
+          "target_crs": "EPSG:26918"
+        },
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_join_geometry": {
+        "requirement_id": "req_join_geometry",
+        "requirement_type": "valid_geometry",
+        "scope": "Both spatial-join inputs must contain valid, non-empty geometries.",
+        "task_id": "join_hospitals_to_containing_tracts",
+        "artifact_roles": [
+          "hospitals_epsg26918",
+          "census_tracts_epsg26918"
+        ],
+        "parameters": {},
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_join_fields": {
+        "requirement_id": "req_join_fields",
+        "requirement_type": "required_fields",
+        "scope": "The joined output must retain each hospital record and include the census-tract identifier grounded from the retrieved tract schema.",
+        "task_id": "join_hospitals_to_containing_tracts",
+        "artifact_roles": [
+          "hospitals_epsg26918",
+          "census_tracts_epsg26918"
+        ],
+        "parameters": {
+          "required_semantics": [
+            "hospital record identity",
+            "containing census tract identifier"
+          ]
+        },
+        "blocking": true,
+        "provenance": "DOWNSTREAM_CONSUMER",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "2c5aa157-636a-41bb-a8fe-ef7232eb986e": {
+        "requirement_id": "2c5aa157-636a-41bb-a8fe-ef7232eb986e",
+        "requirement_type": "compatible_crs",
+        "scope": "task_transition",
+        "task_id": "join_hospitals_to_containing_tracts",
+        "artifact_roles": [
+          "hospitals_epsg26918",
+          "census_tracts_epsg26918"
+        ],
+        "parameters": {},
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "operation_contract_catalog",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "00189f64-7103-42b3-9f90-c1ae89f27366": {
+        "requirement_id": "00189f64-7103-42b3-9f90-c1ae89f27366",
+        "requirement_type": "valid_geometry",
+        "scope": "task_transition",
+        "task_id": "join_hospitals_to_containing_tracts",
+        "artifact_roles": [
+          "hospitals_epsg26918",
+          "census_tracts_epsg26918"
+        ],
+        "parameters": {},
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "operation_contract_catalog",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      }
+    },
+    "commitments": {},
+    "schema_mappings": {},
+    "evidence": {
+      "118213c4-6b55-4b89-8f72-f26bb5784ec0": {
+        "evidence_id": "118213c4-6b55-4b89-8f72-f26bb5784ec0",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "0f747f6a-9c4c-4c76-a718-541c087d0243"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_hospitals_wgs84.gpkg",
+          "format": "gpkg",
+          "size_bytes": 98304,
+          "complete": true,
+          "limitations": [],
+          "data_model": "vector",
+          "feature_count": 3,
+          "schema": {
+            "ID": "object",
+            "NAME": "object",
+            "LATITUDE": "float64",
+            "LONGITUDE": "float64",
+            "BEDS": "int64",
+            "TYPE": "object"
+          },
+          "schema_fields": [
+            "ID",
+            "NAME",
+            "LATITUDE",
+            "LONGITUDE",
+            "BEDS",
+            "TYPE"
+          ],
+          "geometry_type": [
+            "Point"
+          ],
+          "geometry_valid": true,
+          "invalid_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "null_geometry_count": 0,
+          "bounds": [
+            -77.882,
+            40.785,
+            -77.775,
+            40.912
+          ],
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true,
+          "crs": "EPSG:4326",
+          "crs_authority": "EPSG:4326",
+          "is_projected": false,
+          "is_geographic": true,
+          "linear_unit": "degree",
+          "linear_unit_to_meter": 0.017453292519943295,
+          "is_metric_crs": false
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-23T04:03:18.025847Z",
+        "complete": true,
+        "limitations": []
+      },
+      "7551ce22-2a61-4f4d-9dc3-e2fd50258c0e": {
+        "evidence_id": "7551ce22-2a61-4f4d-9dc3-e2fd50258c0e",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "3fa918d7-3983-4f39-9f8f-cab3e67411be"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg",
+          "format": "gpkg",
+          "size_bytes": 98304,
+          "complete": true,
+          "limitations": [],
+          "data_model": "vector",
+          "feature_count": 16,
+          "schema": {
+            "GEOID": "object",
+            "NAME": "object",
+            "COUNTYFP": "object",
+            "STATEFP": "object"
+          },
+          "schema_fields": [
+            "GEOID",
+            "NAME",
+            "COUNTYFP",
+            "STATEFP"
+          ],
+          "geometry_type": [
+            "Polygon"
+          ],
+          "geometry_valid": true,
+          "invalid_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "null_geometry_count": 0,
+          "bounds": [
+            238087.3824011362,
+            4508961.385028789,
+            272914.01066431846,
+            4543387.006183241
+          ],
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true,
+          "crs": "EPSG:26918",
+          "crs_authority": "EPSG:26918",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-23T04:03:18.032016Z",
+        "complete": true,
+        "limitations": []
+      },
+      "cb4ef8c2-f2db-4bee-8660-743b48548d8c": {
+        "evidence_id": "cb4ef8c2-f2db-4bee-8660-743b48548d8c",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "d814bfb3-cf74-4a29-9839-ec5741a7b475"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/projection_agent/reprojected_23d889dd.gpkg",
+          "format": "gpkg",
+          "size_bytes": 98304,
+          "complete": true,
+          "limitations": [],
+          "data_model": "vector",
+          "feature_count": 3,
+          "schema": {
+            "ID": "object",
+            "NAME": "object",
+            "LATITUDE": "float64",
+            "LONGITUDE": "float64",
+            "BEDS": "int64",
+            "TYPE": "object"
+          },
+          "schema_fields": [
+            "ID",
+            "NAME",
+            "LATITUDE",
+            "LONGITUDE",
+            "BEDS",
+            "TYPE"
+          ],
+          "geometry_type": [
+            "Point"
+          ],
+          "geometry_valid": true,
+          "invalid_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "null_geometry_count": 0,
+          "bounds": [
+            256818.2654212941,
+            4518887.443384948,
+            266294.9591627252,
+            4532696.270440303
+          ],
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true,
+          "crs": "EPSG:26918",
+          "crs_authority": "EPSG:26918",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-23T04:03:47.352747Z",
+        "complete": true,
+        "limitations": []
+      },
+      "839b9364-7d27-4371-8ea6-f7a1e46ad3aa": {
+        "evidence_id": "839b9364-7d27-4371-8ea6-f7a1e46ad3aa",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "2c6fae53-6e49-4232-ba17-46a783ba26c2"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_e85ab87b_fx_tracts_centre.geojson",
+          "format": "geojson",
+          "size_bytes": 7336,
+          "complete": true,
+          "limitations": [],
+          "data_model": "vector",
+          "feature_count": 16,
+          "schema": {
+            "GEOID": "object",
+            "NAME": "object",
+            "COUNTYFP": "object",
+            "STATEFP": "object"
+          },
+          "schema_fields": [
+            "GEOID",
+            "NAME",
+            "COUNTYFP",
+            "STATEFP"
+          ],
+          "geometry_type": [
+            "Polygon"
+          ],
+          "geometry_valid": true,
+          "invalid_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "null_geometry_count": 0,
+          "bounds": [
+            238087.3824011362,
+            4508961.385028789,
+            272914.01066431846,
+            4543387.006183241
+          ],
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true,
+          "crs": "EPSG:26918",
+          "crs_authority": "EPSG:26918",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-23T04:03:49.963320Z",
+        "complete": true,
+        "limitations": []
+      }
+    },
+    "violations": {
+      "3d96e2fd-c5c3-48fd-9efd-66ea28003c5a": {
+        "violation_id": "3d96e2fd-c5c3-48fd-9efd-66ea28003c5a",
+        "code": "CRS_INCOMPATIBLE",
+        "layer": "deterministic_task_contract",
+        "task_id": "join_hospitals_to_containing_tracts",
+        "artifact_ids": [
+          "0f747f6a-9c4c-4c76-a718-541c087d0243",
+          "3fa918d7-3983-4f39-9f8f-cab3e67411be",
+          "d814bfb3-cf74-4a29-9839-ec5741a7b475"
+        ],
+        "requirement_ids": [],
+        "evidence_ids": [
+          "118213c4-6b55-4b89-8f72-f26bb5784ec0",
+          "7551ce22-2a61-4f4d-9dc3-e2fd50258c0e",
+          "cb4ef8c2-f2db-4bee-8660-743b48548d8c"
+        ],
+        "blocking": true,
+        "deterministic": true,
+        "computationally_resolvable": true,
+        "status": "active",
+        "created_in_plan_version": 1,
+        "resolved_by_evidence_ids": [],
+        "resolved_in_plan_version": null,
+        "created_at": "2026-08-23T04:03:47.353086Z",
+        "resolved_at": null
+      },
+      "b1263afc-3d6a-47c9-9c40-fd274f101471": {
+        "violation_id": "b1263afc-3d6a-47c9-9c40-fd274f101471",
+        "code": "FORMAT_UNSUPPORTED",
+        "layer": "deterministic_task_contract",
+        "task_id": "reproject_tracts_to_utm18n",
+        "artifact_ids": [
+          "2c6fae53-6e49-4232-ba17-46a783ba26c2"
+        ],
+        "requirement_ids": [],
+        "evidence_ids": [
+          "839b9364-7d27-4371-8ea6-f7a1e46ad3aa"
+        ],
+        "blocking": true,
+        "deterministic": true,
+        "computationally_resolvable": true,
+        "status": "active",
+        "created_in_plan_version": 1,
+        "resolved_by_evidence_ids": [],
+        "resolved_in_plan_version": null,
+        "created_at": "2026-08-23T04:03:49.963630Z",
+        "resolved_at": null
+      },
+      "d96d2239-92f6-4d7a-80e2-b98a9b0fbf31": {
+        "violation_id": "d96d2239-92f6-4d7a-80e2-b98a9b0fbf31",
+        "code": "FORMAT_UNSUPPORTED",
+        "layer": "deterministic_requirement",
+        "task_id": "reproject_tracts_to_utm18n",
+        "artifact_ids": [
+          "2c6fae53-6e49-4232-ba17-46a783ba26c2"
+        ],
+        "requirement_ids": [
+          "req_tract_format"
+        ],
+        "evidence_ids": [
+          "839b9364-7d27-4371-8ea6-f7a1e46ad3aa"
+        ],
+        "blocking": true,
+        "deterministic": true,
+        "computationally_resolvable": true,
+        "status": "active",
+        "created_in_plan_version": 1,
+        "resolved_by_evidence_ids": [],
+        "resolved_in_plan_version": null,
+        "created_at": "2026-08-23T04:03:49.963771Z",
+        "resolved_at": null
+      }
+    },
+    "execution_history": [
+      {
+        "event_id": "3490ac97-8bad-47e2-b2de-9617cffa49ea",
+        "event_type": "initial_plan_committed",
+        "actor": "planner_component",
+        "state_version": 0,
+        "plan_version": 1,
+        "task_id": null,
+        "reason": "Retrieve a Centre County census-tract candidate, transform both datasets to EPSG:26918, and spatially join each hospital point to the containing tract while preserving the hospital attributes and attaching the tract identifier.",
+        "metadata": {
+          "task_ids": [
+            "join_hospitals_to_containing_tracts",
+            "reproject_hospitals_to_utm18n",
+            "reproject_tracts_to_utm18n",
+            "retrieve_centre_county_tracts"
+          ]
+        },
+        "created_at": "2026-08-23T04:03:47.301380Z"
+      },
+      {
+        "event_id": "4f7dbeb7-5fe3-4dd7-a03f-c3e7b0fb90cf",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 1,
+        "plan_version": 1,
+        "task_id": "reproject_hospitals_to_utm18n",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "proposed",
+          "to": "ready"
+        },
+        "created_at": "2026-08-23T04:03:47.304519Z"
+      },
+      {
+        "event_id": "02e778eb-56fd-4a24-88a4-2f5c96ee004f",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 2,
+        "plan_version": 1,
+        "task_id": "reproject_hospitals_to_utm18n",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-23T04:03:47.306395Z"
+      },
+      {
+        "event_id": "53d39f63-77da-4ea6-a132-14a6ac869cfc",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 3,
+        "plan_version": 1,
+        "task_id": "reproject_hospitals_to_utm18n",
+        "reason": "Worker bound.",
+        "metadata": {
+          "from": "binding",
+          "to": "bound"
+        },
+        "created_at": "2026-08-23T04:03:47.308343Z"
+      },
+      {
+        "event_id": "91c2837e-0b60-4fc8-97dd-7be90cba57f2",
+        "event_type": "pre_execution_requirements_evaluated",
+        "actor": "invariant_engine",
+        "state_version": 4,
+        "plan_version": 1,
+        "task_id": "reproject_hospitals_to_utm18n",
+        "reason": "All currently evaluable preconditions are satisfied.",
+        "metadata": {
+          "evaluated_requirement_ids": [],
+          "blocking_violation_ids": []
+        },
+        "created_at": "2026-08-23T04:03:47.310544Z"
+      },
+      {
+        "event_id": "15ffa6c8-be46-4a21-a28f-ac0b0259b42c",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 5,
+        "plan_version": 1,
+        "task_id": "reproject_hospitals_to_utm18n",
+        "reason": "Worker started.",
+        "metadata": {
+          "from": "bound",
+          "to": "running"
+        },
+        "created_at": "2026-08-23T04:03:47.312596Z"
+      },
+      {
+        "event_id": "08ba01f3-be2e-40c1-a9fa-4f0ebddb0cfc",
+        "event_type": "worker_execution_completed",
+        "actor": "worker_executor",
+        "state_version": 6,
+        "plan_version": 1,
+        "task_id": "reproject_hospitals_to_utm18n",
+        "reason": "Worker returned successfully.",
+        "metadata": {
+          "binding_id": "9e14a97f-f960-4468-9bfe-c7b8a5a5641d",
+          "agent_id": "projection_agent",
+          "operation": "reproject",
+          "attempt": 1,
+          "status": "successful",
+          "duration_seconds": 0.028198537998832762
+        },
+        "created_at": "2026-08-23T04:03:47.343390Z"
+      },
+      {
+        "event_id": "f5e90f0d-7c85-4d60-9989-19b8ace8ba9f",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 6,
+        "plan_version": 1,
+        "task_id": "reproject_hospitals_to_utm18n",
+        "reason": "Worker returned a provisional result.",
+        "metadata": {
+          "from": "running",
+          "to": "provisional_success"
+        },
+        "created_at": "2026-08-23T04:03:47.343454Z"
+      },
+      {
+        "event_id": "ff42a002-566a-450e-aae1-7713c158e95f",
+        "event_type": "artifact_registered",
+        "actor": "artifact_registry",
+        "state_version": 7,
+        "plan_version": 1,
+        "task_id": "reproject_hospitals_to_utm18n",
+        "reason": null,
+        "metadata": {
+          "artifact_id": "d814bfb3-cf74-4a29-9839-ec5741a7b475",
+          "role": "hospitals_epsg26918",
+          "content_hash": "82803e467103b01f23116a8054fb257c00bdadbee04530d09f4698a575e2c817"
+        },
+        "created_at": "2026-08-23T04:03:47.346374Z"
+      },
+      {
+        "event_id": "6f7f1f19-5045-479e-8f8a-3c310d8e0443",
+        "event_type": "deterministic_contract_violation_detected",
+        "actor": "invariant_engine",
+        "state_version": 7,
+        "plan_version": 1,
+        "task_id": "join_hospitals_to_containing_tracts",
+        "reason": "Detected task-contract violation: CRS_INCOMPATIBLE.",
+        "metadata": {
+          "violation_id": "3d96e2fd-c5c3-48fd-9efd-66ea28003c5a",
+          "code": "CRS_INCOMPATIBLE",
+          "artifact_ids": [
+            "0f747f6a-9c4c-4c76-a718-541c087d0243",
+            "3fa918d7-3983-4f39-9f8f-cab3e67411be",
+            "d814bfb3-cf74-4a29-9839-ec5741a7b475"
+          ],
+          "computationally_resolvable": true,
+          "details": {
+            "operation": "spatial_join",
+            "crs_values": [
+              "EPSG:4326",
+              "EPSG:26918",
+              "EPSG:26918"
+            ]
+          }
+        },
+        "created_at": "2026-08-23T04:03:47.353117Z"
+      },
+      {
+        "event_id": "c1508ffe-d853-4d3c-8326-4c22fab13db5",
+        "event_type": "downstream_requirement_pre_evaluated",
+        "actor": "invariant_engine",
+        "state_version": 7,
+        "plan_version": 1,
+        "task_id": "join_hospitals_to_containing_tracts",
+        "reason": "New producer evidence established a downstream task precondition violation.",
+        "metadata": {
+          "producer_task_id": "reproject_hospitals_to_utm18n",
+          "violation_ids": [
+            "3d96e2fd-c5c3-48fd-9efd-66ea28003c5a"
+          ]
+        },
+        "created_at": "2026-08-23T04:03:47.353180Z"
+      },
+      {
+        "event_id": "237fad85-d130-4c44-b1c3-a5a13c7782f5",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 8,
+        "plan_version": 1,
+        "task_id": "reproject_hospitals_to_utm18n",
+        "reason": "Reviewing runtime evidence.",
+        "metadata": {
+          "from": "provisional_success",
+          "to": "validating"
+        },
+        "created_at": "2026-08-23T04:03:47.355520Z"
+      },
+      {
+        "event_id": "8b1cc592-ae8e-4253-a280-a7c963bdaa1c",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 9,
+        "plan_version": 1,
+        "task_id": "reproject_hospitals_to_utm18n",
+        "reason": "The reproject operation succeeded. Complete runtime evidence confirms a valid GPKG vector with point geometries, preserved hospital attributes, and CRS EPSG:26918. The downstream CRS incompatibility is not a defect in this completed producer task.",
+        "metadata": {
+          "from": "validating",
+          "to": "successful"
+        },
+        "created_at": "2026-08-23T04:03:49.926328Z"
+      },
+      {
+        "event_id": "7eb9efad-dc55-4f51-90ff-798b2f191048",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 10,
+        "plan_version": 1,
+        "task_id": "retrieve_centre_county_tracts",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "proposed",
+          "to": "ready"
+        },
+        "created_at": "2026-08-23T04:03:49.930182Z"
+      },
+      {
+        "event_id": "058bb9d9-7a4d-40dc-9df7-ae1abb1dc8bc",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 11,
+        "plan_version": 1,
+        "task_id": "retrieve_centre_county_tracts",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-23T04:03:49.932895Z"
+      },
+      {
+        "event_id": "9d709b20-826a-4e18-b2fd-02f56485fd59",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 12,
+        "plan_version": 1,
+        "task_id": "retrieve_centre_county_tracts",
+        "reason": "Worker bound.",
+        "metadata": {
+          "from": "binding",
+          "to": "bound"
+        },
+        "created_at": "2026-08-23T04:03:49.935588Z"
+      },
+      {
+        "event_id": "ec280219-34d9-4e5e-ba2d-782c012c8037",
+        "event_type": "pre_execution_requirements_evaluated",
+        "actor": "invariant_engine",
+        "state_version": 13,
+        "plan_version": 1,
+        "task_id": "retrieve_centre_county_tracts",
+        "reason": "All currently evaluable preconditions are satisfied.",
+        "metadata": {
+          "evaluated_requirement_ids": [],
+          "blocking_violation_ids": []
+        },
+        "created_at": "2026-08-23T04:03:49.938430Z"
+      },
+      {
+        "event_id": "ceb56b78-4d2c-4749-b9c7-79e735826308",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 14,
+        "plan_version": 1,
+        "task_id": "retrieve_centre_county_tracts",
+        "reason": "Worker started.",
+        "metadata": {
+          "from": "bound",
+          "to": "running"
+        },
+        "created_at": "2026-08-23T04:03:49.941213Z"
+      },
+      {
+        "event_id": "5bf3a6fc-dca6-4ffa-b76c-3d8e548aa82e",
+        "event_type": "worker_execution_completed",
+        "actor": "worker_executor",
+        "state_version": 15,
+        "plan_version": 1,
+        "task_id": "retrieve_centre_county_tracts",
+        "reason": "Worker returned successfully.",
+        "metadata": {
+          "binding_id": "1fd4025a-833e-40c3-8460-c1c8a73c0339",
+          "agent_id": "data_retrieval_agent",
+          "operation": "dataset_retrieval",
+          "attempt": 1,
+          "status": "successful",
+          "duration_seconds": 0.004080011014593765
+        },
+        "created_at": "2026-08-23T04:03:49.948689Z"
+      },
+      {
+        "event_id": "9e5d63d0-a382-4847-a10d-56ea2c3619d5",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 15,
+        "plan_version": 1,
+        "task_id": "retrieve_centre_county_tracts",
+        "reason": "Worker returned a provisional result.",
+        "metadata": {
+          "from": "running",
+          "to": "provisional_success"
+        },
+        "created_at": "2026-08-23T04:03:49.948758Z"
+      },
+      {
+        "event_id": "ef1a21ce-9c9d-4af9-b7d7-5939bdec609f",
+        "event_type": "artifact_registered",
+        "actor": "artifact_registry",
+        "state_version": 16,
+        "plan_version": 1,
+        "task_id": "retrieve_centre_county_tracts",
+        "reason": null,
+        "metadata": {
+          "artifact_id": "2c6fae53-6e49-4232-ba17-46a783ba26c2",
+          "role": "census_tracts_candidate",
+          "content_hash": "b8a88718d2672c77d63b742c526636e5834641d3b2a2f10bf84ba708110eb1a9"
+        },
+        "created_at": "2026-08-23T04:03:49.951922Z"
+      },
+      {
+        "event_id": "ce06ddf2-8691-4f60-bfd3-c1c9519d55f5",
+        "event_type": "deterministic_contract_violation_detected",
+        "actor": "invariant_engine",
+        "state_version": 16,
+        "plan_version": 1,
+        "task_id": "reproject_tracts_to_utm18n",
+        "reason": "Detected task-contract violation: FORMAT_UNSUPPORTED.",
+        "metadata": {
+          "violation_id": "b1263afc-3d6a-47c9-9c40-fd274f101471",
+          "code": "FORMAT_UNSUPPORTED",
+          "artifact_ids": [
+            "2c6fae53-6e49-4232-ba17-46a783ba26c2"
+          ],
+          "computationally_resolvable": true,
+          "details": {
+            "role": "census_tracts_candidate",
+            "actual_format": "geojson",
+            "allowed_formats": [
+              "gpkg"
+            ]
+          }
+        },
+        "created_at": "2026-08-23T04:03:49.963661Z"
+      },
+      {
+        "event_id": "be3045fa-fb75-4944-b26c-957c5ac86822",
+        "event_type": "deterministic_violation_detected",
+        "actor": "invariant_engine",
+        "state_version": 16,
+        "plan_version": 1,
+        "task_id": "reproject_tracts_to_utm18n",
+        "reason": "Detected blocking requirement violation: FORMAT_UNSUPPORTED.",
+        "metadata": {
+          "violation_id": "d96d2239-92f6-4d7a-80e2-b98a9b0fbf31",
+          "requirement_id": "req_tract_format",
+          "code": "FORMAT_UNSUPPORTED",
+          "artifact_ids": [
+            "2c6fae53-6e49-4232-ba17-46a783ba26c2"
+          ],
+          "computationally_resolvable": true
+        },
+        "created_at": "2026-08-23T04:03:49.963797Z"
+      },
+      {
+        "event_id": "edb9b5b4-e174-4b33-ac1e-5515edc797cc",
+        "event_type": "downstream_requirement_pre_evaluated",
+        "actor": "invariant_engine",
+        "state_version": 16,
+        "plan_version": 1,
+        "task_id": "reproject_tracts_to_utm18n",
+        "reason": "New producer evidence established a downstream task precondition violation.",
+        "metadata": {
+          "producer_task_id": "retrieve_centre_county_tracts",
+          "violation_ids": [
+            "b1263afc-3d6a-47c9-9c40-fd274f101471",
+            "d96d2239-92f6-4d7a-80e2-b98a9b0fbf31"
+          ]
+        },
+        "created_at": "2026-08-23T04:03:49.963838Z"
+      },
+      {
+        "event_id": "e07ae6e6-3342-4db5-89ba-34130beb6044",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 17,
+        "plan_version": 1,
+        "task_id": "retrieve_centre_county_tracts",
+        "reason": "Reviewing runtime evidence.",
+        "metadata": {
+          "from": "provisional_success",
+          "to": "validating"
+        },
+        "created_at": "2026-08-23T04:03:49.966766Z"
+      },
+      {
+        "event_id": "b4a5bf3e-3a44-4135-9122-5a90c8b51dcf",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 18,
+        "plan_version": 1,
+        "task_id": "retrieve_centre_county_tracts",
+        "reason": "Worker succeeded; the Centre County tract artifact is complete, has valid polygon geometry, and its coverage requirement is satisfied. The downstream format incompatibility is a repairable precondition for the reprojection task and does not invalidate this successful retrieval.",
+        "metadata": {
+          "from": "validating",
+          "to": "successful"
+        },
+        "created_at": "2026-08-23T04:03:53.678549Z"
+      },
+      {
+        "event_id": "78a7bf1a-f276-4553-bd4a-6f4fcd1ba0d3",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 19,
+        "plan_version": 1,
+        "task_id": "reproject_tracts_to_utm18n",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "proposed",
+          "to": "ready"
+        },
+        "created_at": "2026-08-23T04:03:53.687652Z"
+      },
+      {
+        "event_id": "6ffbf984-2f39-4d4c-bb34-64ecbc9480b6",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 20,
+        "plan_version": 1,
+        "task_id": "reproject_tracts_to_utm18n",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-23T04:03:53.690900Z"
+      },
+      {
+        "event_id": "7c83e9f6-b73a-4d91-9f2a-2e48f6f1d8a8",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 21,
+        "plan_version": 1,
+        "task_id": "reproject_tracts_to_utm18n",
+        "reason": "Worker binding failed.",
+        "metadata": {
+          "from": "binding",
+          "to": "failed"
+        },
+        "created_at": "2026-08-23T04:03:53.694442Z"
+      }
+    ],
+    "qc_history": [
+      {
+        "decision_id": "qc-reproject-hospitals-20260823",
+        "task_id": "reproject_hospitals_to_utm18n",
+        "verdict": "PASS",
+        "proposed_verdict": "PASS",
+        "reason": "The reproject operation succeeded. Complete runtime evidence confirms a valid GPKG vector with point geometries, preserved hospital attributes, and CRS EPSG:26918. The downstream CRS incompatibility is not a defect in this completed producer task.",
+        "acknowledged_finding_ids": [],
+        "action_class": "NONE",
+        "effective_action": "NONE",
+        "effective_action_source": "qc_component",
+        "allowed_recovery_types": [],
+        "recovery_parameters": {},
+        "preserve_completed_work": true,
+        "forced_by_invariant": false,
+        "created_at": "2026-08-23T04:03:47Z"
+      },
+      {
+        "decision_id": "153fe5b8-ecf8-4d18-a753-2336918db7a5",
+        "task_id": "retrieve_centre_county_tracts",
+        "verdict": "PASS",
+        "proposed_verdict": "PASS",
+        "reason": "Worker succeeded; the Centre County tract artifact is complete, has valid polygon geometry, and its coverage requirement is satisfied. The downstream format incompatibility is a repairable precondition for the reprojection task and does not invalidate this successful retrieval.",
+        "acknowledged_finding_ids": [],
+        "action_class": "NONE",
+        "effective_action": "NONE",
+        "effective_action_source": "qc_component",
+        "allowed_recovery_types": [],
+        "recovery_parameters": {},
+        "preserve_completed_work": true,
+        "forced_by_invariant": false,
+        "created_at": "2026-08-23T04:03:49.963630Z"
+      }
+    ],
+    "replan_history": [],
+    "component_calls": [
+      {
+        "call_id": "ef4e7a1a-7547-4221-bd77-b2c2fce0bf7e",
+        "component": "planner",
+        "prompt_hash": "879bbf4688237108aa73bcb12bca3ec0b568a6ec20b463cefe3a9dddb652d8de",
+        "tool_schema_hash": "441719facf91fd72ec7e126a4de0921e9629efd4cd39619a5dbe1be9fea2e3fe",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 5677,
+        "output_tokens": 3713,
+        "duration_seconds": 29.245613340026466,
+        "disposition": "successful",
+        "created_at": "2026-08-23T04:03:47.301342Z"
+      },
+      {
+        "call_id": "04ea9740-8956-428e-bc21-b2561cdbbc94",
+        "component": "qc",
+        "prompt_hash": "f32e58c2015bc65d1615821b0bf588e3118841b8fd13c0f66435ff64db6bc238",
+        "tool_schema_hash": "264376b66f6ac19b4d57965f2f5a135067cea57302b6779a763ae77f3e5ccb86",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 3405,
+        "output_tokens": 257,
+        "duration_seconds": 2.559041200001957,
+        "disposition": "successful",
+        "created_at": "2026-08-23T04:03:49.926186Z"
+      },
+      {
+        "call_id": "d3b49173-2136-4281-979e-d64c32274a9b",
+        "component": "qc",
+        "prompt_hash": "f32e58c2015bc65d1615821b0bf588e3118841b8fd13c0f66435ff64db6bc238",
+        "tool_schema_hash": "264376b66f6ac19b4d57965f2f5a135067cea57302b6779a763ae77f3e5ccb86",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 3416,
+        "output_tokens": 291,
+        "duration_seconds": 3.7055920010025147,
+        "disposition": "successful",
+        "created_at": "2026-08-23T04:03:53.678424Z"
+      }
+    ],
+    "plan_versions": [
+      {
+        "version": 1,
+        "parent_version": null,
+        "reason": "Initial plan committed by independent Planner.",
+        "task_ids": [
+          "join_hospitals_to_containing_tracts",
+          "reproject_hospitals_to_utm18n",
+          "reproject_tracts_to_utm18n",
+          "retrieve_centre_county_tracts"
+        ],
+        "edges": [
+          [
+            "reproject_hospitals_to_utm18n",
+            "join_hospitals_to_containing_tracts"
+          ],
+          [
+            "reproject_tracts_to_utm18n",
+            "join_hospitals_to_containing_tracts"
+          ],
+          [
+            "retrieve_centre_county_tracts",
+            "reproject_tracts_to_utm18n"
+          ]
+        ],
+        "created_at": "2026-08-23T04:03:47.293793Z"
+      }
+    ],
+    "budgets": {
+      "max_total_model_calls": 24,
+      "max_total_tokens": 120000,
+      "max_worker_calls": 30,
+      "max_local_recoveries": 6,
+      "max_replans": 3,
+      "max_runtime_seconds": 900.0,
+      "planner_retry_limit": 2,
+      "qc_retry_limit": 1,
+      "replanner_retry_limit": 1,
+      "total_model_calls": 3,
+      "total_tokens": 16759,
+      "worker_calls": 2,
+      "local_recoveries": 0,
+      "replans": 0
+    },
+    "terminal_state": "failed_unrecoverable",
+    "terminal_reason": "Role 'census_tracts_candidate' requires one of ['GPKG'].",
+    "human_clarification": null,
+    "final_artifact_ids": [],
+    "required_terminal_roles": [
+      "hospitals_with_tract_identifier"
+    ],
+    "final_disclosure": null,
+    "created_at": "2026-08-23T04:03:18.016707Z",
+    "updated_at": "2026-08-23T04:03:53.702460Z"
+  },
+  "execution_steps": [
+    {
+      "step_index": 1,
+      "step_id": "retrieve_centre_county_tracts",
+      "agent_id": "data_retrieval_agent",
+      "title": "Retrieve Centre County census tracts",
+      "instructions": "Retrieve the highest-ranked available census-tract dataset covering Centre County. Treat the result as a candidate and retain its returned metadata for runtime suitability inspection.",
+      "output_artifacts": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_e85ab87b_fx_tracts_centre.geojson"
+      ],
+      "status": "successful",
+      "error": null
+    },
+    {
+      "step_index": 2,
+      "step_id": "reproject_hospitals_to_utm18n",
+      "agent_id": "projection_agent",
+      "title": "Reproject hospitals to EPSG:26918",
+      "instructions": "Reproject the hospital vector dataset from its observed CRS to EPSG:26918. Preserve all hospital attributes and point geometries.",
+      "output_artifacts": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/projection_agent/reprojected_23d889dd.gpkg"
+      ],
+      "status": "successful",
+      "error": null
+    },
+    {
+      "step_index": 3,
+      "step_id": "reproject_tracts_to_utm18n",
+      "agent_id": null,
+      "title": "Normalize census-tract CRS to EPSG:26918",
+      "instructions": "Reproject the retrieved census-tract candidate to EPSG:26918 after runtime verification of its source CRS. Preserve the tract identifier attributes and polygon geometries.",
+      "output_artifacts": [],
+      "status": "failed",
+      "error": {
+        "code": "E_BINDING",
+        "message": "Role 'census_tracts_candidate' requires one of ['GPKG'].",
+        "retryable": false,
+        "details": {}
+      }
+    },
+    {
+      "step_index": 4,
+      "step_id": "join_hospitals_to_containing_tracts",
+      "agent_id": null,
+      "title": "Assign hospitals to containing census tracts",
+      "instructions": "Spatially join the hospital points to the census-tract polygons using containment. Preserve each hospital feature and its attributes, and attach the tract identifier field selected from the observed census-tract schema at runtime. Do not guess field names; runtime QC must ground the hospital identity and tract identifier fields from the actual schemas.",
+      "output_artifacts": [],
+      "status": "proposed",
+      "error": null
+    }
+  ],
+  "qc_evaluations": 2,
+  "qc_blocks": 0,
+  "qc_interventions": 0,
+  "effective_blocks": 0,
+  "effective_interventions": 0,
+  "qc_policy_overrides": 0,
+  "replanning_iterations": 0,
+  "error": "Role 'census_tracts_candidate' requires one of ['GPKG'].",
+  "ledger_events": [
+    {
+      "call_id": "9e14a97f-f960-4468-9bfe-c7b8a5a5641d",
+      "trajectory_id": "traj_ISS_Q04_C2_run1",
+      "agent_id": "projection_agent",
+      "operation": "reproject",
+      "query": "Reproject the hospital vector dataset from its observed CRS to EPSG:26918. Preserve all hospital attributes and point geometries.",
+      "timestamp_start": 1787457827.315122,
+      "timestamp_end": 1787457827.343314,
+      "duration_seconds": 0.028198537998832762,
+      "input_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_hospitals_wgs84.gpkg"
+      ],
+      "input_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_hospitals_wgs84.gpkg": "01efdcc53ac8c9e81f3f6ddce74ffc81240a3661e3535f85a2fdc3573f75f53a"
+      },
+      "parameters": {
+        "operation": "reproject",
+        "target_crs": "EPSG:26918"
+      },
+      "status": "completed",
+      "error_code": null,
+      "error_message": null,
+      "output_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/projection_agent/reprojected_23d889dd.gpkg"
+      ],
+      "output_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/projection_agent/reprojected_23d889dd.gpkg": "82803e467103b01f23116a8054fb257c00bdadbee04530d09f4698a575e2c817"
+      },
+      "summary": "Reprojected 3 features to EPSG:26918.",
+      "raw_response": {
+        "binding_id": "9e14a97f-f960-4468-9bfe-c7b8a5a5641d",
+        "task_id": "reproject_hospitals_to_utm18n",
+        "attempt": 1
+      }
+    },
+    {
+      "call_id": "1fd4025a-833e-40c3-8460-c1c8a73c0339",
+      "trajectory_id": "traj_ISS_Q04_C2_run1",
+      "agent_id": "data_retrieval_agent",
+      "operation": "dataset_retrieval",
+      "query": "Retrieve the highest-ranked available census-tract dataset covering Centre County. Treat the result as a candidate and retain its returned metadata for runtime suitability inspection.",
+      "timestamp_start": 1787457829.94454,
+      "timestamp_end": 1787457829.948618,
+      "duration_seconds": 0.004080011014593765,
+      "input_artifact_paths": [],
+      "input_artifact_hashes": {},
+      "parameters": {
+        "spatial_coverage": "Centre County"
+      },
+      "status": "completed",
+      "error_code": null,
+      "error_message": null,
+      "output_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_e85ab87b_fx_tracts_centre.geojson"
+      ],
+      "output_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_e85ab87b_fx_tracts_centre.geojson": "b8a88718d2672c77d63b742c526636e5834641d3b2a2f10bf84ba708110eb1a9"
+      },
+      "summary": "Successfully retrieved dataset: fx_tracts_centre.geojson",
+      "raw_response": {
+        "binding_id": "1fd4025a-833e-40c3-8460-c1c8a73c0339",
+        "task_id": "retrieve_centre_county_tracts",
+        "attempt": 1
+      }
+    }
+  ],
+  "created_at": "2026-08-23T04:03:53.706423+00:00",
+  "evaluation": {
+    "task_id": "ISS_Q04",
+    "bafo_success": false,
+    "all_challenges_resolved": false,
+    "evaluability_status": "EVALUABLE",
+    "challenge_activated": true,
+    "trajectory_classification": "valid_bafo_fail",
+    "production_terminal_state": "failed_unrecoverable",
+    "terminal_state": "failed",
+    "constraint_results": {
+      "harmonized_crs": {
+        "constraint_key": "harmonized_crs",
+        "status": "PASS",
+        "reason": "Binary spatial operation completed successfully with compatible spatial reference systems.",
+        "details": {
+          "output_crs": "EPSG:26918",
+          "features": 3
+        }
+      },
+      "retained_attributes": {
+        "constraint_key": "retained_attributes",
+        "status": "PASS",
+        "reason": "Schema attributes grounded across 7 column fields.",
+        "details": {
+          "columns": [
+            "ID",
+            "NAME",
+            "LATITUDE",
+            "LONGITUDE",
+            "BEDS"
+          ]
+        }
+      }
+    },
+    "passed_constraints": [
+      "harmonized_crs",
+      "retained_attributes"
+    ],
+    "failed_constraints": [],
+    "unevaluable_constraints": [],
+    "inspected_artifacts_count": 2,
+    "events_count": 2,
+    "diagnostic_summary": "BAFO: False | State: failed (Valid: False) | Constraints: 2 PASS, 0 FAIL, 0 UNEVALUABLE | Events Recorded: 2 | Artifacts Inspected: 2"
+  },
+  "bafo_success": false,
+  "all_challenges_resolved": false,
+  "trajectory_classification": "valid_bafo_fail"
+}

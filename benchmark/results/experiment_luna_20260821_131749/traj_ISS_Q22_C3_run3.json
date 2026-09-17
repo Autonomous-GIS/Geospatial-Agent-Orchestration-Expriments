@@ -1,0 +1,998 @@
+{
+  "trajectory_id": "traj_ISS_Q22_C3_run3",
+  "task_id": "ISS_Q22",
+  "condition": "C3",
+  "model": "gpt-5.6-luna",
+  "run_index": 3,
+  "suite": "isolated",
+  "user_question": "Calculate the mean absolute elevation difference between the two elevation surfaces available for Bellefonte.",
+  "input_artifact_paths": [
+    "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_dem_centre_30m_utm.tif",
+    "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_dem_misaligned_grid_utm.tif"
+  ],
+  "status": "failed",
+  "total_wall_time": 36.919,
+  "rate_limit_wait_time": 0.0,
+  "provider_retry_wait_time": 0.0,
+  "orchestration_active_time": 36.919,
+  "worker_execution_time": 0,
+  "total_tokens": 13545,
+  "input_tokens": 9523,
+  "output_tokens": 4022,
+  "outputs": {
+    "summary": "No authorized recovery satisfied the known precondition: The bound rasters have incompatible grids: input_1 is 30 m with origin [238087.3824011362, 4543387.006183241], while input_2 is 25 m with origin [238102.3824011362, 4543372.006183241]. Resolving this requires a structural alignment operation before resampling can complete.",
+    "artifacts": [],
+    "produced_artifacts": [],
+    "workflow_plan": {
+      "workflow_id": "00c3fbdb-3887-4569-83a3-464bf807f963",
+      "plan_version": 1,
+      "goal": "Calculate the mean absolute elevation difference between the two elevation surfaces available for Bellefonte.",
+      "workflow_steps": [
+        {
+          "step_id": "task_resample_input_2_to_input_1_grid",
+          "title": "Align second elevation surface to first raster grid",
+          "purpose": "Create a grid-compatible version of input_2 for raster arithmetic with input_1.",
+          "agent_id": "raster_analysis_agent",
+          "operation": "resample",
+          "instructions": "Resample input_2 to the grid definition of input_1, using 30 m resolution and preserving the spatial overlap required for cell-wise comparison. Do not alter the CRS.",
+          "parameters": {
+            "operation": "resample",
+            "resolution": 30
+          },
+          "depends_on": [],
+          "input_from_steps": [],
+          "status": "rejected",
+          "output_artifact_ids": []
+        },
+        {
+          "step_id": "task_calculate_mean_absolute_elevation_difference",
+          "title": "Calculate mean absolute elevation difference",
+          "purpose": "Compute the absolute elevation difference between the two aligned surfaces and reduce it to the global mean.",
+          "agent_id": null,
+          "operation": "raster_calculator",
+          "instructions": "Using input_1 and aligned_input_2, calculate the absolute cell-wise elevation difference and return the mean of those differences over valid cells in the common spatial coverage. Encode the resulting scalar summary as a GeoTIFF output.",
+          "parameters": {
+            "operation": "raster_calculator"
+          },
+          "depends_on": [
+            "task_resample_input_2_to_input_1_grid"
+          ],
+          "input_from_steps": [
+            "task_resample_input_2_to_input_1_grid"
+          ],
+          "status": "proposed",
+          "output_artifact_ids": []
+        }
+      ],
+      "requirements": [
+        {
+          "requirement_id": "req_resample_compatible_crs",
+          "requirement_type": "compatible_crs",
+          "scope": "input_1 and input_2 must have compatible CRSs before resampling and comparison.",
+          "task_id": "task_resample_input_2_to_input_1_grid",
+          "artifact_roles": [
+            "input_1",
+            "input_2"
+          ],
+          "parameters": {},
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [
+            "b8f76e6c-6d08-455a-b3bb-af1e84628812",
+            "6aaa31d9-3f16-41a0-951d-211334edb826"
+          ],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_resample_aligned_grid",
+          "requirement_type": "aligned_raster_grid",
+          "scope": "aligned_input_2 must use the same grid definition as input_1, including compatible resolution, origin, extent, and cell alignment.",
+          "task_id": "task_resample_input_2_to_input_1_grid",
+          "artifact_roles": [
+            "input_1",
+            "input_2"
+          ],
+          "parameters": {},
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "violated",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_calculator_compatible_crs",
+          "requirement_type": "compatible_crs",
+          "scope": "input_1 and aligned_input_2 must have compatible CRSs for raster calculation.",
+          "task_id": "task_calculate_mean_absolute_elevation_difference",
+          "artifact_roles": [
+            "input_1",
+            "aligned_input_2"
+          ],
+          "parameters": {},
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_calculator_aligned_grid",
+          "requirement_type": "aligned_raster_grid",
+          "scope": "input_1 and aligned_input_2 must have identical compatible raster grids for cell-wise subtraction.",
+          "task_id": "task_calculate_mean_absolute_elevation_difference",
+          "artifact_roles": [
+            "input_1",
+            "aligned_input_2"
+          ],
+          "parameters": {},
+          "blocking": true,
+          "provenance": "DOWNSTREAM_CONSUMER",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "64172fd6-0cd9-4b22-a4eb-48c1ccfb9010",
+          "requirement_type": "aligned_raster_grid",
+          "scope": "task_transition",
+          "task_id": "task_calculate_mean_absolute_elevation_difference",
+          "artifact_roles": [
+            "input_1",
+            "aligned_input_2"
+          ],
+          "parameters": {},
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "operation_contract_catalog",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        }
+      ],
+      "commitments": []
+    }
+  },
+  "workflow_state": {
+    "schema_version": "1.0.0",
+    "workflow_id": "00c3fbdb-3887-4569-83a3-464bf807f963",
+    "state_version": 8,
+    "user_goal": "Calculate the mean absolute elevation difference between the two elevation surfaces available for Bellefonte.",
+    "feature_profile": "C5",
+    "feature_config": {
+      "profile_name": "C5",
+      "planner_mode": "gis_aware",
+      "qc_mode": "gis_aware",
+      "replanner_mode": "none",
+      "technical_invariants": true,
+      "local_recovery": true,
+      "structural_patching": false,
+      "gis_finding_routing": true
+    },
+    "current_plan_version": 1,
+    "tasks": {
+      "task_resample_input_2_to_input_1_grid": {
+        "task_id": "task_resample_input_2_to_input_1_grid",
+        "title": "Align second elevation surface to first raster grid",
+        "purpose": "Create a grid-compatible version of input_2 for raster arithmetic with input_1.",
+        "operation": "resample",
+        "instructions": "Resample input_2 to the grid definition of input_1, using 30 m resolution and preserving the spatial overlap required for cell-wise comparison. Do not alter the CRS.",
+        "parameters": {
+          "operation": "resample",
+          "resolution": 30
+        },
+        "required_capabilities": [
+          "resample"
+        ],
+        "depends_on": [],
+        "input_requirements": [
+          {
+            "role": "input_1",
+            "data_model": "raster",
+            "formats": [
+              "GeoTIFF"
+            ],
+            "required": true
+          },
+          {
+            "role": "input_2",
+            "data_model": "raster",
+            "formats": [
+              "GeoTIFF"
+            ],
+            "required": true
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "aligned_input_2",
+            "data_model": "raster",
+            "formats": [
+              "GeoTIFF"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_resample_compatible_crs",
+          "req_resample_aligned_grid"
+        ],
+        "status": "rejected",
+        "attempts": 0,
+        "active_binding_id": "f61efabe-4d5c-4c9e-9471-b0be6ab5581f",
+        "output_artifact_ids": [],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      },
+      "task_calculate_mean_absolute_elevation_difference": {
+        "task_id": "task_calculate_mean_absolute_elevation_difference",
+        "title": "Calculate mean absolute elevation difference",
+        "purpose": "Compute the absolute elevation difference between the two aligned surfaces and reduce it to the global mean.",
+        "operation": "raster_calculator",
+        "instructions": "Using input_1 and aligned_input_2, calculate the absolute cell-wise elevation difference and return the mean of those differences over valid cells in the common spatial coverage. Encode the resulting scalar summary as a GeoTIFF output.",
+        "parameters": {
+          "operation": "raster_calculator"
+        },
+        "required_capabilities": [
+          "raster_calculator"
+        ],
+        "depends_on": [
+          "task_resample_input_2_to_input_1_grid"
+        ],
+        "input_requirements": [
+          {
+            "role": "input_1",
+            "data_model": "raster",
+            "formats": [
+              "GeoTIFF"
+            ],
+            "required": true
+          },
+          {
+            "role": "aligned_input_2",
+            "data_model": "raster",
+            "formats": [
+              "GeoTIFF"
+            ],
+            "required": true
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "mean_absolute_elevation_difference",
+            "data_model": "raster",
+            "formats": [
+              "GeoTIFF"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_calculator_compatible_crs",
+          "req_calculator_aligned_grid",
+          "64172fd6-0cd9-4b22-a4eb-48c1ccfb9010"
+        ],
+        "status": "proposed",
+        "attempts": 0,
+        "active_binding_id": null,
+        "output_artifact_ids": [],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      }
+    },
+    "edges": [
+      [
+        "task_resample_input_2_to_input_1_grid",
+        "task_calculate_mean_absolute_elevation_difference"
+      ]
+    ],
+    "bindings": {
+      "f61efabe-4d5c-4c9e-9471-b0be6ab5581f": {
+        "binding_id": "f61efabe-4d5c-4c9e-9471-b0be6ab5581f",
+        "task_id": "task_resample_input_2_to_input_1_grid",
+        "agent_id": "raster_analysis_agent",
+        "operation": "resample",
+        "instruction": "Resample input_2 to the grid definition of input_1, using 30 m resolution and preserving the spatial overlap required for cell-wise comparison. Do not alter the CRS.",
+        "input_bindings": [
+          {
+            "role": "input_1",
+            "artifact_id": "deaa0bc0-1623-41cf-8ca8-72f4de68c924",
+            "source_task_id": null,
+            "binding_order": 0
+          },
+          {
+            "role": "input_2",
+            "artifact_id": "400c79a9-7038-47d9-b296-cf59526ff6a4",
+            "source_task_id": null,
+            "binding_order": 1
+          }
+        ],
+        "agent_profile_snapshot": {
+          "agent_id": "raster_analysis_agent",
+          "name": "Raster Analysis Agent",
+          "description": "Performs deterministic raster reprojection, resampling, clipping, raster calculation, and zonal statistics. Consumes GeoTIFF rasters and GeoPackage polygon zones.",
+          "operations": [
+            "clip",
+            "raster_calculator",
+            "raster_geoprocessing",
+            "reproject_raster",
+            "resample",
+            "zonal_statistics"
+          ],
+          "skills": [
+            {
+              "skill_id": "raster_geoprocessing",
+              "name": "Raster Geoprocessing",
+              "description": "Executes raster calculations, reprojections, grid resampling, spatial masking, and zonal aggregations.",
+              "constraints": {
+                "spatial": "Raster calculation requires compatible grid definitions and CRS. Zonal statistics require matching CRS between raster and GeoPackage zones.",
+                "temporal": null,
+                "other": [
+                  "Accepts GeoTIFF (.tif) rasters and GeoPackage (.gpkg) polygon zones.",
+                  "Does not accept GeoJSON zones for zonal statistics."
+                ]
+              }
+            }
+          ],
+          "inputs": {
+            "input_datasets": {
+              "required": true,
+              "description": "GeoTIFF raster file(s) and optional GeoPackage polygon zone layer."
+            }
+          },
+          "outputs": [
+            {
+              "type": "raster",
+              "formats": [
+                "GeoTIFF"
+              ],
+              "required": false,
+              "description": "Processed raster dataset."
+            },
+            {
+              "type": "table",
+              "formats": [
+                "CSV"
+              ],
+              "required": false,
+              "description": "Zonal statistics summary table."
+            }
+          ],
+          "parameters": {
+            "operation": {
+              "required": false,
+              "description": "Explicit operation (zonal_statistics, raster_calculator, resample, clip, reproject_raster)."
+            },
+            "resolution": {
+              "required": false,
+              "description": "Target pixel resolution in meters for resampling."
+            },
+            "target_crs": {
+              "required": false,
+              "description": "Target coordinate reference system for raster reprojection."
+            }
+          }
+        },
+        "endpoint": "https://www.geospatial-agentic-services.online/agents/raster_analysis_agent/tasks",
+        "attempt": 1,
+        "invocation_id": null,
+        "status": "precondition_blocked",
+        "started_at": null,
+        "completed_at": null,
+        "duration_seconds": 0.0,
+        "output_artifact_ids": [],
+        "messages": [],
+        "structured_error": {
+          "code": "E_PRECONDITION_BLOCKED",
+          "message": "One or more deterministic task preconditions are not satisfied by the bound inputs.",
+          "retryable": false,
+          "details": {
+            "violation_ids": [
+              "4f6989b1-8a94-4b82-9508-714a1c3004c6"
+            ]
+          }
+        },
+        "created_at": "2026-08-21T18:26:52.837273Z"
+      }
+    },
+    "artifacts": {
+      "deaa0bc0-1623-41cf-8ca8-72f4de68c924": {
+        "artifact_id": "deaa0bc0-1623-41cf-8ca8-72f4de68c924",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_dem_centre_30m_utm.tif",
+        "content_hash": "1426addcdb0dea68e59a3b63a33a5efbf17fd56a0b1fd066a4bbf52595accdcb",
+        "format": "tif",
+        "media_type": null,
+        "data_model": "raster",
+        "producer_task_id": null,
+        "producer_binding_id": null,
+        "role": "input_1",
+        "evidence_ids": [
+          "b8f76e6c-6d08-455a-b3bb-af1e84628812"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T18:26:20.251914Z",
+        "metadata": {
+          "source": "user_input"
+        }
+      },
+      "400c79a9-7038-47d9-b296-cf59526ff6a4": {
+        "artifact_id": "400c79a9-7038-47d9-b296-cf59526ff6a4",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_dem_misaligned_grid_utm.tif",
+        "content_hash": "d52036217cde13719377b6dfbd069bee0b62395b9cc883b3e3cc80d0e7102d1d",
+        "format": "tif",
+        "media_type": null,
+        "data_model": "raster",
+        "producer_task_id": null,
+        "producer_binding_id": null,
+        "role": "input_2",
+        "evidence_ids": [
+          "6aaa31d9-3f16-41a0-951d-211334edb826"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T18:26:20.272781Z",
+        "metadata": {
+          "source": "user_input"
+        }
+      }
+    },
+    "derivations": {},
+    "requirements": {
+      "req_resample_compatible_crs": {
+        "requirement_id": "req_resample_compatible_crs",
+        "requirement_type": "compatible_crs",
+        "scope": "input_1 and input_2 must have compatible CRSs before resampling and comparison.",
+        "task_id": "task_resample_input_2_to_input_1_grid",
+        "artifact_roles": [
+          "input_1",
+          "input_2"
+        ],
+        "parameters": {},
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [
+          "b8f76e6c-6d08-455a-b3bb-af1e84628812",
+          "6aaa31d9-3f16-41a0-951d-211334edb826"
+        ],
+        "superseded_by": null
+      },
+      "req_resample_aligned_grid": {
+        "requirement_id": "req_resample_aligned_grid",
+        "requirement_type": "aligned_raster_grid",
+        "scope": "aligned_input_2 must use the same grid definition as input_1, including compatible resolution, origin, extent, and cell alignment.",
+        "task_id": "task_resample_input_2_to_input_1_grid",
+        "artifact_roles": [
+          "input_1",
+          "input_2"
+        ],
+        "parameters": {},
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "violated",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_calculator_compatible_crs": {
+        "requirement_id": "req_calculator_compatible_crs",
+        "requirement_type": "compatible_crs",
+        "scope": "input_1 and aligned_input_2 must have compatible CRSs for raster calculation.",
+        "task_id": "task_calculate_mean_absolute_elevation_difference",
+        "artifact_roles": [
+          "input_1",
+          "aligned_input_2"
+        ],
+        "parameters": {},
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_calculator_aligned_grid": {
+        "requirement_id": "req_calculator_aligned_grid",
+        "requirement_type": "aligned_raster_grid",
+        "scope": "input_1 and aligned_input_2 must have identical compatible raster grids for cell-wise subtraction.",
+        "task_id": "task_calculate_mean_absolute_elevation_difference",
+        "artifact_roles": [
+          "input_1",
+          "aligned_input_2"
+        ],
+        "parameters": {},
+        "blocking": true,
+        "provenance": "DOWNSTREAM_CONSUMER",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "64172fd6-0cd9-4b22-a4eb-48c1ccfb9010": {
+        "requirement_id": "64172fd6-0cd9-4b22-a4eb-48c1ccfb9010",
+        "requirement_type": "aligned_raster_grid",
+        "scope": "task_transition",
+        "task_id": "task_calculate_mean_absolute_elevation_difference",
+        "artifact_roles": [
+          "input_1",
+          "aligned_input_2"
+        ],
+        "parameters": {},
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "operation_contract_catalog",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      }
+    },
+    "commitments": {},
+    "schema_mappings": {},
+    "evidence": {
+      "b8f76e6c-6d08-455a-b3bb-af1e84628812": {
+        "evidence_id": "b8f76e6c-6d08-455a-b3bb-af1e84628812",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "deaa0bc0-1623-41cf-8ca8-72f4de68c924"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_dem_centre_30m_utm.tif",
+          "format": "tif",
+          "size_bytes": 5338558,
+          "complete": true,
+          "limitations": [],
+          "data_model": "raster",
+          "width": 1161,
+          "height": 1148,
+          "band_count": 1,
+          "resolution": [
+            30.0,
+            30.0
+          ],
+          "transform": [
+            30.0,
+            0.0,
+            238087.3824011362,
+            0.0,
+            -30.0,
+            4543387.006183241,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "grid_origin": [
+            238087.3824011362,
+            4543387.006183241
+          ],
+          "bounds": [
+            238087.3824011362,
+            4508947.006183241,
+            272917.3824011362,
+            4543387.006183241
+          ],
+          "nodata": null,
+          "dtype": "float32",
+          "driver": "GTiff",
+          "crs": "EPSG:26918",
+          "crs_authority": "EPSG:26918",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T18:26:20.275335Z",
+        "complete": true,
+        "limitations": []
+      },
+      "6aaa31d9-3f16-41a0-951d-211334edb826": {
+        "evidence_id": "6aaa31d9-3f16-41a0-951d-211334edb826",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "400c79a9-7038-47d9-b296-cf59526ff6a4"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_dem_misaligned_grid_utm.tif",
+          "format": "tif",
+          "size_bytes": 7681264,
+          "complete": true,
+          "limitations": [],
+          "data_model": "raster",
+          "width": 1393,
+          "height": 1377,
+          "band_count": 1,
+          "resolution": [
+            25.0,
+            25.0
+          ],
+          "transform": [
+            25.0,
+            0.0,
+            238102.3824011362,
+            0.0,
+            -25.0,
+            4543372.006183241,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "grid_origin": [
+            238102.3824011362,
+            4543372.006183241
+          ],
+          "bounds": [
+            238102.3824011362,
+            4508947.006183241,
+            272927.3824011362,
+            4543372.006183241
+          ],
+          "nodata": null,
+          "dtype": "float32",
+          "driver": "GTiff",
+          "crs": "EPSG:26918",
+          "crs_authority": "EPSG:26918",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T18:26:20.277503Z",
+        "complete": true,
+        "limitations": []
+      }
+    },
+    "violations": {
+      "4f6989b1-8a94-4b82-9508-714a1c3004c6": {
+        "violation_id": "4f6989b1-8a94-4b82-9508-714a1c3004c6",
+        "code": "RASTER_GRID_INCOMPATIBLE",
+        "layer": "deterministic_requirement",
+        "task_id": "task_resample_input_2_to_input_1_grid",
+        "artifact_ids": [
+          "deaa0bc0-1623-41cf-8ca8-72f4de68c924",
+          "400c79a9-7038-47d9-b296-cf59526ff6a4"
+        ],
+        "requirement_ids": [
+          "req_resample_aligned_grid"
+        ],
+        "evidence_ids": [
+          "b8f76e6c-6d08-455a-b3bb-af1e84628812",
+          "6aaa31d9-3f16-41a0-951d-211334edb826"
+        ],
+        "blocking": true,
+        "deterministic": true,
+        "computationally_resolvable": true,
+        "status": "active",
+        "created_in_plan_version": 1,
+        "resolved_by_evidence_ids": [],
+        "resolved_in_plan_version": null,
+        "created_at": "2026-08-21T18:26:52.839557Z",
+        "resolved_at": null
+      }
+    },
+    "execution_history": [
+      {
+        "event_id": "8e7c718c-580e-4e67-bb0c-ee8c1b18e9b5",
+        "event_type": "initial_plan_committed",
+        "actor": "planner_component",
+        "state_version": 0,
+        "plan_version": 1,
+        "task_id": null,
+        "reason": "Resample the misaligned second elevation raster onto the first raster's 30 m grid, then calculate the global mean absolute cell-wise elevation difference over the valid overlapping cells.",
+        "metadata": {
+          "task_ids": [
+            "task_calculate_mean_absolute_elevation_difference",
+            "task_resample_input_2_to_input_1_grid"
+          ]
+        },
+        "created_at": "2026-08-21T18:26:52.830954Z"
+      },
+      {
+        "event_id": "43aedb51-b769-44bb-b67d-962db1718a4b",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 1,
+        "plan_version": 1,
+        "task_id": "task_resample_input_2_to_input_1_grid",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "proposed",
+          "to": "ready"
+        },
+        "created_at": "2026-08-21T18:26:52.833815Z"
+      },
+      {
+        "event_id": "2cdf2ddc-5855-451d-9a2d-29affa76b436",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 2,
+        "plan_version": 1,
+        "task_id": "task_resample_input_2_to_input_1_grid",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-21T18:26:52.835530Z"
+      },
+      {
+        "event_id": "eda75de0-e68c-4135-84df-f802cada684b",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 3,
+        "plan_version": 1,
+        "task_id": "task_resample_input_2_to_input_1_grid",
+        "reason": "Worker bound.",
+        "metadata": {
+          "from": "binding",
+          "to": "bound"
+        },
+        "created_at": "2026-08-21T18:26:52.837334Z"
+      },
+      {
+        "event_id": "ac6e92ec-2ae9-40db-9010-a87cf7cf7577",
+        "event_type": "deterministic_violation_detected",
+        "actor": "invariant_engine",
+        "state_version": 4,
+        "plan_version": 1,
+        "task_id": "task_resample_input_2_to_input_1_grid",
+        "reason": "Detected blocking requirement violation: RASTER_GRID_INCOMPATIBLE.",
+        "metadata": {
+          "violation_id": "4f6989b1-8a94-4b82-9508-714a1c3004c6",
+          "requirement_id": "req_resample_aligned_grid",
+          "code": "RASTER_GRID_INCOMPATIBLE",
+          "artifact_ids": [
+            "deaa0bc0-1623-41cf-8ca8-72f4de68c924",
+            "400c79a9-7038-47d9-b296-cf59526ff6a4"
+          ],
+          "computationally_resolvable": true
+        },
+        "created_at": "2026-08-21T18:26:52.839592Z"
+      },
+      {
+        "event_id": "1d47f008-fd15-4317-9a8b-92b70030ded3",
+        "event_type": "pre_execution_requirements_evaluated",
+        "actor": "invariant_engine",
+        "state_version": 4,
+        "plan_version": 1,
+        "task_id": "task_resample_input_2_to_input_1_grid",
+        "reason": "Known blocking preconditions failed.",
+        "metadata": {
+          "evaluated_requirement_ids": [
+            "req_resample_compatible_crs",
+            "req_resample_aligned_grid"
+          ],
+          "blocking_violation_ids": [
+            "4f6989b1-8a94-4b82-9508-714a1c3004c6"
+          ]
+        },
+        "created_at": "2026-08-21T18:26:52.839640Z"
+      },
+      {
+        "event_id": "987ca671-a1f0-41dc-ac42-4841c5308498",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 5,
+        "plan_version": 1,
+        "task_id": "task_resample_input_2_to_input_1_grid",
+        "reason": "Reviewing known blocking preconditions before execution.",
+        "metadata": {
+          "from": "bound",
+          "to": "validating"
+        },
+        "created_at": "2026-08-21T18:26:52.841536Z"
+      },
+      {
+        "event_id": "0445364f-5460-48ad-8d9e-15648b0289cf",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 6,
+        "plan_version": 1,
+        "task_id": "task_resample_input_2_to_input_1_grid",
+        "reason": "The bound rasters have incompatible grids: input_1 is 30 m with origin [238087.3824011362, 4543387.006183241], while input_2 is 25 m with origin [238102.3824011362, 4543372.006183241]. Resolving this requires a structural alignment operation before resampling can complete.",
+        "metadata": {
+          "from": "validating",
+          "to": "rejected"
+        },
+        "created_at": "2026-08-21T18:26:57.124859Z"
+      }
+    ],
+    "qc_history": [
+      {
+        "decision_id": "qc-task_resample_input_2_to_input_1_grid-20260821T182700Z",
+        "task_id": "task_resample_input_2_to_input_1_grid",
+        "verdict": "BLOCK",
+        "proposed_verdict": "BLOCK",
+        "reason": "The bound rasters have incompatible grids: input_1 is 30 m with origin [238087.3824011362, 4543387.006183241], while input_2 is 25 m with origin [238102.3824011362, 4543372.006183241]. Resolving this requires a structural alignment operation before resampling can complete.",
+        "acknowledged_finding_ids": [
+          "4f6989b1-8a94-4b82-9508-714a1c3004c6"
+        ],
+        "action_class": "STRUCTURAL_REPLAN",
+        "effective_action": "STRUCTURAL_REPLAN",
+        "effective_action_source": "deterministic_invariant_guardrail",
+        "allowed_recovery_types": [
+          "reproject_artifact",
+          "align_raster_grid"
+        ],
+        "recovery_parameters": {
+          "blocking_codes": [
+            "RASTER_GRID_INCOMPATIBLE"
+          ],
+          "blocking_artifact_ids": [
+            "400c79a9-7038-47d9-b296-cf59526ff6a4",
+            "deaa0bc0-1623-41cf-8ca8-72f4de68c924"
+          ],
+          "recovery_goal": "Apply the smallest structural/task patch that resolves every current deterministic blocker while preserving accepted work."
+        },
+        "preserve_completed_work": true,
+        "forced_by_invariant": true,
+        "created_at": "2026-08-21T18:27:00Z"
+      }
+    ],
+    "replan_history": [],
+    "component_calls": [
+      {
+        "call_id": "3797f0e5-f2ef-4a0e-bdef-06248fbc8da3",
+        "component": "planner",
+        "prompt_hash": "879bbf4688237108aa73bcb12bca3ec0b568a6ec20b463cefe3a9dddb652d8de",
+        "tool_schema_hash": "441719facf91fd72ec7e126a4de0921e9629efd4cd39619a5dbe1be9fea2e3fe",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 5689,
+        "output_tokens": 3553,
+        "duration_seconds": 32.52024586198968,
+        "disposition": "successful",
+        "created_at": "2026-08-21T18:26:52.830914Z"
+      },
+      {
+        "call_id": "36f0ef07-148b-4976-8f64-698463fa6e63",
+        "component": "qc",
+        "prompt_hash": "f32e58c2015bc65d1615821b0bf588e3118841b8fd13c0f66435ff64db6bc238",
+        "tool_schema_hash": "264376b66f6ac19b4d57965f2f5a135067cea57302b6779a763ae77f3e5ccb86",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 3834,
+        "output_tokens": 469,
+        "duration_seconds": 4.275287169002695,
+        "disposition": "successful",
+        "created_at": "2026-08-21T18:26:57.124738Z"
+      }
+    ],
+    "plan_versions": [
+      {
+        "version": 1,
+        "parent_version": null,
+        "reason": "Initial plan committed by independent Planner.",
+        "task_ids": [
+          "task_calculate_mean_absolute_elevation_difference",
+          "task_resample_input_2_to_input_1_grid"
+        ],
+        "edges": [
+          [
+            "task_resample_input_2_to_input_1_grid",
+            "task_calculate_mean_absolute_elevation_difference"
+          ]
+        ],
+        "created_at": "2026-08-21T18:26:52.823172Z"
+      }
+    ],
+    "budgets": {
+      "max_total_model_calls": 24,
+      "max_total_tokens": 120000,
+      "max_worker_calls": 30,
+      "max_local_recoveries": 6,
+      "max_replans": 3,
+      "max_runtime_seconds": 900.0,
+      "planner_retry_limit": 2,
+      "qc_retry_limit": 1,
+      "replanner_retry_limit": 1,
+      "total_model_calls": 2,
+      "total_tokens": 13545,
+      "worker_calls": 0,
+      "local_recoveries": 0,
+      "replans": 0
+    },
+    "terminal_state": "failed_unrecoverable",
+    "terminal_reason": "No authorized recovery satisfied the known precondition: The bound rasters have incompatible grids: input_1 is 30 m with origin [238087.3824011362, 4543387.006183241], while input_2 is 25 m with origin [238102.3824011362, 4543372.006183241]. Resolving this requires a structural alignment operation before resampling can complete.",
+    "human_clarification": null,
+    "final_artifact_ids": [],
+    "required_terminal_roles": [
+      "mean_absolute_elevation_difference"
+    ],
+    "final_disclosure": null,
+    "created_at": "2026-08-21T18:26:20.238981Z",
+    "updated_at": "2026-08-21T18:26:57.129147Z"
+  },
+  "execution_steps": [
+    {
+      "step_index": 1,
+      "step_id": "task_resample_input_2_to_input_1_grid",
+      "agent_id": "raster_analysis_agent",
+      "title": "Align second elevation surface to first raster grid",
+      "instructions": "Resample input_2 to the grid definition of input_1, using 30 m resolution and preserving the spatial overlap required for cell-wise comparison. Do not alter the CRS.",
+      "output_artifacts": [],
+      "status": "rejected",
+      "error": null
+    },
+    {
+      "step_index": 2,
+      "step_id": "task_calculate_mean_absolute_elevation_difference",
+      "agent_id": null,
+      "title": "Calculate mean absolute elevation difference",
+      "instructions": "Using input_1 and aligned_input_2, calculate the absolute cell-wise elevation difference and return the mean of those differences over valid cells in the common spatial coverage. Encode the resulting scalar summary as a GeoTIFF output.",
+      "output_artifacts": [],
+      "status": "proposed",
+      "error": null
+    }
+  ],
+  "qc_evaluations": 1,
+  "qc_blocks": 1,
+  "qc_interventions": 1,
+  "effective_blocks": 1,
+  "effective_interventions": 1,
+  "qc_policy_overrides": 0,
+  "replanning_iterations": 0,
+  "error": "No authorized recovery satisfied the known precondition: The bound rasters have incompatible grids: input_1 is 30 m with origin [238087.3824011362, 4543387.006183241], while input_2 is 25 m with origin [238102.3824011362, 4543372.006183241]. Resolving this requires a structural alignment operation before resampling can complete.",
+  "ledger_events": [],
+  "created_at": "2026-08-21T18:26:57.132176+00:00",
+  "evaluation": {
+    "task_id": "ISS_Q22",
+    "bafo_success": false,
+    "all_challenges_resolved": false,
+    "evaluability_status": "EVALUABLE",
+    "challenge_activated": true,
+    "trajectory_classification": "valid_bafo_fail",
+    "production_terminal_state": "failed_unrecoverable",
+    "terminal_state": "failed",
+    "constraint_results": {
+      "grid_resampled_before_subtraction": {
+        "constraint_key": "grid_resampled_before_subtraction",
+        "status": "UNEVALUABLE",
+        "reason": "No differenced raster produced to verify grid alignment.",
+        "details": {}
+      },
+      "absolute_difference": {
+        "constraint_key": "absolute_difference",
+        "status": "UNEVALUABLE",
+        "reason": "No differenced raster produced to verify grid alignment.",
+        "details": {}
+      }
+    },
+    "passed_constraints": [],
+    "failed_constraints": [],
+    "unevaluable_constraints": [
+      "grid_resampled_before_subtraction",
+      "absolute_difference"
+    ],
+    "inspected_artifacts_count": 0,
+    "events_count": 0,
+    "diagnostic_summary": "BAFO: False | State: failed (Valid: False) | Constraints: 0 PASS, 0 FAIL, 2 UNEVALUABLE | Events Recorded: 0 | Artifacts Inspected: 0"
+  },
+  "bafo_success": false,
+  "all_challenges_resolved": false,
+  "trajectory_classification": "valid_bafo_fail"
+}

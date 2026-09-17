@@ -1,0 +1,1530 @@
+{
+  "trajectory_id": "traj_ISS_Q29_C4_run3",
+  "task_id": "ISS_Q29",
+  "condition": "C4",
+  "model": "gpt-5.6-luna",
+  "run_index": 3,
+  "suite": "isolated",
+  "user_question": "Calculate total population and land area by census tract across Centre County.",
+  "input_artifact_paths": [
+    "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg",
+    "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_acs_centre_2024.csv"
+  ],
+  "status": "successful",
+  "total_wall_time": 21.875,
+  "rate_limit_wait_time": 0.0,
+  "provider_retry_wait_time": 0.0,
+  "orchestration_active_time": 21.818,
+  "worker_execution_time": 0.057,
+  "total_tokens": 7858,
+  "input_tokens": 5591,
+  "output_tokens": 2267,
+  "outputs": {
+    "summary": "Workflow completed with accepted terminal artifacts.",
+    "artifacts": [
+      "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/polygon_aggregate_b_e61fd777.gpkg"
+    ],
+    "produced_artifacts": [
+      "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/attr_joined_51e330c1.gpkg",
+      "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/polygon_aggregate_b_e61fd777.gpkg"
+    ],
+    "workflow_plan": {
+      "workflow_id": "82a42abc-395b-45c9-8fa3-3ab1898754e0",
+      "plan_version": 1,
+      "goal": "Calculate total population and land area by census tract across Centre County.",
+      "workflow_steps": [
+        {
+          "step_id": "task_attribute_join_population_to_tracts",
+          "title": "Join population attributes to census tracts",
+          "purpose": "Attach the ACS total population attributes to the census tract polygons using runtime-grounded schema keys.",
+          "agent_id": "vector_analysis_b",
+          "operation": "attribute_join",
+          "instructions": "Join the known census tract vector with the known ACS attribute table. Ground the vector and table join keys from runtime schema evidence; do not assume or rename field names. Preserve one output feature per census tract.",
+          "parameters": {
+            "operation": "attribute_join",
+            "vector_key": null,
+            "table_key": null
+          },
+          "depends_on": [],
+          "input_from_steps": [],
+          "status": "successful",
+          "output_artifact_ids": [
+            "7bd465a5-ed1f-40f8-ad6d-4e27002de51a"
+          ]
+        },
+        {
+          "step_id": "task_aggregate_population_and_land_area_by_tract",
+          "title": "Calculate population and land area by tract",
+          "purpose": "Produce the requested per-census-tract total population and geometry-derived land area while retaining tract identifiers and joined attributes.",
+          "agent_id": "vector_analysis_b",
+          "operation": "aggregate",
+          "instructions": "Aggregate the joined census tract layer at the census-tract feature/unit level. Compute total population from the runtime-grounded joined population field and calculate each tract's land area from its valid polygon geometry. Preserve tract identifiers and output one record per census tract.",
+          "parameters": {
+            "operation": "aggregate",
+            "group_by": null,
+            "value_field": null,
+            "statistic": null
+          },
+          "depends_on": [
+            "task_attribute_join_population_to_tracts"
+          ],
+          "input_from_steps": [
+            "task_attribute_join_population_to_tracts"
+          ],
+          "status": "successful",
+          "output_artifact_ids": [
+            "381df16c-dd4d-481b-ab26-3df08681fe5b"
+          ]
+        }
+      ],
+      "requirements": [
+        {
+          "requirement_id": "req_join_fields",
+          "requirement_type": "required_fields",
+          "scope": "task_attribute_join_population_to_tracts input artifacts must contain a common tract identifier and the ACS total population field.",
+          "task_id": "task_attribute_join_population_to_tracts",
+          "artifact_roles": [
+            "input_1",
+            "input_2"
+          ],
+          "parameters": {
+            "required_fields_by_role": {
+              "input_1": [
+                "GEOID"
+              ],
+              "input_2": [
+                "GEOID",
+                "total_pop"
+              ]
+            }
+          },
+          "blocking": true,
+          "provenance": "USER_EXPLICIT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [
+            "be790f6e-aac7-43b2-96bc-15e5b4d49880",
+            "31c850ec-2eeb-49db-9d1b-3f56c4b6d3a9"
+          ],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_join_input_formats",
+          "requirement_type": "format_compatible",
+          "scope": "task_attribute_join_population_to_tracts inputs must use formats supported for GeoPackage vector and CSV attribute-table joining.",
+          "task_id": "task_attribute_join_population_to_tracts",
+          "artifact_roles": [
+            "input_1",
+            "input_2"
+          ],
+          "parameters": {
+            "formats_by_role": {
+              "input_1": [
+                "GPKG"
+              ],
+              "input_2": [
+                "CSV"
+              ]
+            }
+          },
+          "blocking": true,
+          "provenance": "WORKER_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [
+            "be790f6e-aac7-43b2-96bc-15e5b4d49880",
+            "31c850ec-2eeb-49db-9d1b-3f56c4b6d3a9"
+          ],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_area_geometry",
+          "requirement_type": "valid_geometry",
+          "scope": "task_aggregate_population_and_land_area_by_tract input must contain valid, non-empty polygon geometry for land-area calculation.",
+          "task_id": "task_aggregate_population_and_land_area_by_tract",
+          "artifact_roles": [
+            "population_joined_tracts"
+          ],
+          "parameters": {
+            "geometry_types": [
+              "Polygon",
+              "MultiPolygon"
+            ],
+            "allow_empty": false
+          },
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_area_crs",
+          "requirement_type": "crs_present",
+          "scope": "task_aggregate_population_and_land_area_by_tract input must retain an identified CRS so the reported land-area units are interpretable.",
+          "task_id": "task_aggregate_population_and_land_area_by_tract",
+          "artifact_roles": [
+            "population_joined_tracts"
+          ],
+          "parameters": {
+            "required": true
+          },
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        }
+      ],
+      "commitments": []
+    }
+  },
+  "workflow_state": {
+    "schema_version": "1.0.0",
+    "workflow_id": "82a42abc-395b-45c9-8fa3-3ab1898754e0",
+    "state_version": 18,
+    "user_goal": "Calculate total population and land area by census tract across Centre County.",
+    "feature_profile": "C4",
+    "feature_config": {
+      "profile_name": "C4",
+      "planner_mode": "gis_aware",
+      "qc_mode": "none",
+      "replanner_mode": "gis_aware",
+      "technical_invariants": true,
+      "local_recovery": true,
+      "structural_patching": true,
+      "gis_finding_routing": false
+    },
+    "current_plan_version": 1,
+    "tasks": {
+      "task_attribute_join_population_to_tracts": {
+        "task_id": "task_attribute_join_population_to_tracts",
+        "title": "Join population attributes to census tracts",
+        "purpose": "Attach the ACS total population attributes to the census tract polygons using runtime-grounded schema keys.",
+        "operation": "attribute_join",
+        "instructions": "Join the known census tract vector with the known ACS attribute table. Ground the vector and table join keys from runtime schema evidence; do not assume or rename field names. Preserve one output feature per census tract.",
+        "parameters": {
+          "operation": "attribute_join",
+          "vector_key": null,
+          "table_key": null
+        },
+        "required_capabilities": [
+          "attribute_join",
+          "vector_aggregation_and_joins"
+        ],
+        "depends_on": [],
+        "input_requirements": [
+          {
+            "role": "input_1",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          },
+          {
+            "role": "input_2",
+            "data_model": "table",
+            "formats": [
+              "CSV"
+            ],
+            "required": true
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "population_joined_tracts",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_join_fields",
+          "req_join_input_formats"
+        ],
+        "status": "successful",
+        "attempts": 1,
+        "active_binding_id": "8520133f-450b-40c4-bec5-a55bdd5ec88e",
+        "output_artifact_ids": [
+          "7bd465a5-ed1f-40f8-ad6d-4e27002de51a"
+        ],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      },
+      "task_aggregate_population_and_land_area_by_tract": {
+        "task_id": "task_aggregate_population_and_land_area_by_tract",
+        "title": "Calculate population and land area by tract",
+        "purpose": "Produce the requested per-census-tract total population and geometry-derived land area while retaining tract identifiers and joined attributes.",
+        "operation": "aggregate",
+        "instructions": "Aggregate the joined census tract layer at the census-tract feature/unit level. Compute total population from the runtime-grounded joined population field and calculate each tract's land area from its valid polygon geometry. Preserve tract identifiers and output one record per census tract.",
+        "parameters": {
+          "operation": "aggregate",
+          "group_by": null,
+          "value_field": null,
+          "statistic": null
+        },
+        "required_capabilities": [
+          "aggregate",
+          "vector_aggregation_and_joins"
+        ],
+        "depends_on": [
+          "task_attribute_join_population_to_tracts"
+        ],
+        "input_requirements": [
+          {
+            "role": "population_joined_tracts",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "population_land_area_by_tract",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_area_geometry",
+          "req_area_crs"
+        ],
+        "status": "successful",
+        "attempts": 1,
+        "active_binding_id": "0808e0ec-a6e5-4a41-94a7-44bf19ff0f94",
+        "output_artifact_ids": [
+          "381df16c-dd4d-481b-ab26-3df08681fe5b"
+        ],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      }
+    },
+    "edges": [
+      [
+        "task_attribute_join_population_to_tracts",
+        "task_aggregate_population_and_land_area_by_tract"
+      ]
+    ],
+    "bindings": {
+      "8520133f-450b-40c4-bec5-a55bdd5ec88e": {
+        "binding_id": "8520133f-450b-40c4-bec5-a55bdd5ec88e",
+        "task_id": "task_attribute_join_population_to_tracts",
+        "agent_id": "vector_analysis_b",
+        "operation": "attribute_join",
+        "instruction": "Join the known census tract vector with the known ACS attribute table. Ground the vector and table join keys from runtime schema evidence; do not assume or rename field names. Preserve one output feature per census tract.",
+        "input_bindings": [
+          {
+            "role": "input_1",
+            "artifact_id": "2ba9a80a-b520-4acb-b3b6-bf58614433bf",
+            "source_task_id": null,
+            "binding_order": 0
+          },
+          {
+            "role": "input_2",
+            "artifact_id": "f223e5d5-054d-4b6a-a9a9-30e4a8aeceed",
+            "source_task_id": null,
+            "binding_order": 1
+          }
+        ],
+        "agent_profile_snapshot": {
+          "agent_id": "vector_analysis_b",
+          "name": "Vector Analysis B",
+          "description": "Performs deterministic vector joins, dissolves, grouped aggregations, attribute joins, and buffering. Vector operations consume GeoPackage inputs. The service does not convert formats, repair invalid geometries, or reproject inputs automatically.",
+          "operations": [
+            "aggregate",
+            "attribute_join",
+            "buffer",
+            "dissolve",
+            "point_count_by_polygon",
+            "point_sum_by_polygon",
+            "spatial_join",
+            "vector_aggregation_and_joins"
+          ],
+          "skills": [
+            {
+              "skill_id": "vector_aggregation_and_joins",
+              "name": "Vector Aggregation and Joins",
+              "description": "Performs polygon dissolves, feature aggregations, spatial joins, attribute table joins, and spatial buffering on GeoPackage layers.",
+              "constraints": {
+                "spatial": "Requires matching coordinate reference systems for spatial joins. Requires projected CRS for metric buffer.",
+                "temporal": null,
+                "other": [
+                  "Accepts GeoPackage (.gpkg) vector format only. Rejects GeoJSON or Shapefiles.",
+                  "Accepts CSV tables for attribute join operations."
+                ]
+              }
+            }
+          ],
+          "inputs": {
+            "input_datasets": {
+              "required": true,
+              "description": "GeoPackage vector dataset(s) and optional CSV attribute table."
+            }
+          },
+          "outputs": [
+            {
+              "type": "vector",
+              "formats": [
+                "GPKG"
+              ],
+              "required": true,
+              "description": "Processed GeoPackage vector dataset."
+            }
+          ],
+          "parameters": {
+            "operation": {
+              "required": false,
+              "description": "Explicit operation name (dissolve, spatial_join, attribute_join, buffer, aggregate, point_count_by_polygon, point_sum_by_polygon)."
+            },
+            "count_field": {
+              "required": false,
+              "description": "Output field name for point_count_by_polygon."
+            },
+            "sum_field": {
+              "required": false,
+              "description": "Point-layer numeric field to sum for point_sum_by_polygon."
+            },
+            "output_field": {
+              "required": false,
+              "description": "Output field name for point_sum_by_polygon."
+            },
+            "vector_key": {
+              "required": false,
+              "description": "Field name in vector dataset for attribute join."
+            },
+            "table_key": {
+              "required": false,
+              "description": "Field name in tabular dataset for attribute join."
+            }
+          }
+        },
+        "endpoint": "https://www.geospatial-agentic-services.online/agents/vector_analysis_b/tasks",
+        "attempt": 1,
+        "invocation_id": null,
+        "status": "successful",
+        "started_at": "2026-08-21T18:55:18.818251Z",
+        "completed_at": "2026-08-21T18:55:18.850457Z",
+        "duration_seconds": 0.032223190006334335,
+        "output_artifact_ids": [
+          "7bd465a5-ed1f-40f8-ad6d-4e27002de51a"
+        ],
+        "messages": [
+          "Joined attributes by GEOID=GEOID, producing 16 features."
+        ],
+        "structured_error": null,
+        "created_at": "2026-08-21T18:55:18.812616Z"
+      },
+      "0808e0ec-a6e5-4a41-94a7-44bf19ff0f94": {
+        "binding_id": "0808e0ec-a6e5-4a41-94a7-44bf19ff0f94",
+        "task_id": "task_aggregate_population_and_land_area_by_tract",
+        "agent_id": "vector_analysis_b",
+        "operation": "aggregate",
+        "instruction": "Aggregate the joined census tract layer at the census-tract feature/unit level. Compute total population from the runtime-grounded joined population field and calculate each tract's land area from its valid polygon geometry. Preserve tract identifiers and output one record per census tract.",
+        "input_bindings": [
+          {
+            "role": "population_joined_tracts",
+            "artifact_id": "7bd465a5-ed1f-40f8-ad6d-4e27002de51a",
+            "source_task_id": "task_attribute_join_population_to_tracts",
+            "binding_order": 0
+          }
+        ],
+        "agent_profile_snapshot": {
+          "agent_id": "vector_analysis_b",
+          "name": "Vector Analysis B",
+          "description": "Performs deterministic vector joins, dissolves, grouped aggregations, attribute joins, and buffering. Vector operations consume GeoPackage inputs. The service does not convert formats, repair invalid geometries, or reproject inputs automatically.",
+          "operations": [
+            "aggregate",
+            "attribute_join",
+            "buffer",
+            "dissolve",
+            "point_count_by_polygon",
+            "point_sum_by_polygon",
+            "spatial_join",
+            "vector_aggregation_and_joins"
+          ],
+          "skills": [
+            {
+              "skill_id": "vector_aggregation_and_joins",
+              "name": "Vector Aggregation and Joins",
+              "description": "Performs polygon dissolves, feature aggregations, spatial joins, attribute table joins, and spatial buffering on GeoPackage layers.",
+              "constraints": {
+                "spatial": "Requires matching coordinate reference systems for spatial joins. Requires projected CRS for metric buffer.",
+                "temporal": null,
+                "other": [
+                  "Accepts GeoPackage (.gpkg) vector format only. Rejects GeoJSON or Shapefiles.",
+                  "Accepts CSV tables for attribute join operations."
+                ]
+              }
+            }
+          ],
+          "inputs": {
+            "input_datasets": {
+              "required": true,
+              "description": "GeoPackage vector dataset(s) and optional CSV attribute table."
+            }
+          },
+          "outputs": [
+            {
+              "type": "vector",
+              "formats": [
+                "GPKG"
+              ],
+              "required": true,
+              "description": "Processed GeoPackage vector dataset."
+            }
+          ],
+          "parameters": {
+            "operation": {
+              "required": false,
+              "description": "Explicit operation name (dissolve, spatial_join, attribute_join, buffer, aggregate, point_count_by_polygon, point_sum_by_polygon)."
+            },
+            "count_field": {
+              "required": false,
+              "description": "Output field name for point_count_by_polygon."
+            },
+            "sum_field": {
+              "required": false,
+              "description": "Point-layer numeric field to sum for point_sum_by_polygon."
+            },
+            "output_field": {
+              "required": false,
+              "description": "Output field name for point_sum_by_polygon."
+            },
+            "vector_key": {
+              "required": false,
+              "description": "Field name in vector dataset for attribute join."
+            },
+            "table_key": {
+              "required": false,
+              "description": "Field name in tabular dataset for attribute join."
+            }
+          }
+        },
+        "endpoint": "https://www.geospatial-agentic-services.online/agents/vector_analysis_b/tasks",
+        "attempt": 1,
+        "invocation_id": null,
+        "status": "successful",
+        "started_at": "2026-08-21T18:55:18.881028Z",
+        "completed_at": "2026-08-21T18:55:18.905901Z",
+        "duration_seconds": 0.024887245992431417,
+        "output_artifact_ids": [
+          "381df16c-dd4d-481b-ab26-3df08681fe5b"
+        ],
+        "messages": [
+          "Computed polygon-level aggregate fields for 16 features, preserving population field total_pop."
+        ],
+        "structured_error": null,
+        "created_at": "2026-08-21T18:55:18.875413Z"
+      }
+    },
+    "artifacts": {
+      "2ba9a80a-b520-4acb-b3b6-bf58614433bf": {
+        "artifact_id": "2ba9a80a-b520-4acb-b3b6-bf58614433bf",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg",
+        "content_hash": "9818cdd69d3b26cbd238d60780f5a566bee625b857232a79ed5ca02595c100a8",
+        "format": "gpkg",
+        "media_type": null,
+        "data_model": "vector",
+        "producer_task_id": null,
+        "producer_binding_id": null,
+        "role": "input_1",
+        "evidence_ids": [
+          "be790f6e-aac7-43b2-96bc-15e5b4d49880"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T18:54:57.087809Z",
+        "metadata": {
+          "source": "user_input"
+        }
+      },
+      "f223e5d5-054d-4b6a-a9a9-30e4a8aeceed": {
+        "artifact_id": "f223e5d5-054d-4b6a-a9a9-30e4a8aeceed",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_acs_centre_2024.csv",
+        "content_hash": "07aeaae70fda652250b9ef8042c26d2529bf448c8636a11b7c102a3eebde07b6",
+        "format": "csv",
+        "media_type": null,
+        "data_model": "table",
+        "producer_task_id": null,
+        "producer_binding_id": null,
+        "role": "input_2",
+        "evidence_ids": [
+          "31c850ec-2eeb-49db-9d1b-3f56c4b6d3a9"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T18:54:57.088647Z",
+        "metadata": {
+          "source": "user_input"
+        }
+      },
+      "7bd465a5-ed1f-40f8-ad6d-4e27002de51a": {
+        "artifact_id": "7bd465a5-ed1f-40f8-ad6d-4e27002de51a",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/attr_joined_51e330c1.gpkg",
+        "content_hash": "8d934b4eea855ded657418aaa719ceb456f680d6468d23a69915ded291d720b6",
+        "format": "gpkg",
+        "media_type": null,
+        "data_model": "vector",
+        "producer_task_id": "task_attribute_join_population_to_tracts",
+        "producer_binding_id": "8520133f-450b-40c4-bec5-a55bdd5ec88e",
+        "role": "population_joined_tracts",
+        "evidence_ids": [
+          "08a9f527-86a4-4d13-ab15-1fe4094279d1"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T18:55:18.854538Z",
+        "metadata": {}
+      },
+      "381df16c-dd4d-481b-ab26-3df08681fe5b": {
+        "artifact_id": "381df16c-dd4d-481b-ab26-3df08681fe5b",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/polygon_aggregate_b_e61fd777.gpkg",
+        "content_hash": "ca26305cdd5b9cbddf3970d94a5486ad5cffbe98fb86777da0b70bb1e4d6de5f",
+        "format": "gpkg",
+        "media_type": null,
+        "data_model": "vector",
+        "producer_task_id": "task_aggregate_population_and_land_area_by_tract",
+        "producer_binding_id": "0808e0ec-a6e5-4a41-94a7-44bf19ff0f94",
+        "role": "population_land_area_by_tract",
+        "evidence_ids": [
+          "c3928dca-0cae-4d45-9b77-c29bd40ed982"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T18:55:18.910685Z",
+        "metadata": {}
+      }
+    },
+    "derivations": {
+      "487d4798-4fae-4a0c-a4cf-7cbbe1a0a619": {
+        "derivation_id": "487d4798-4fae-4a0c-a4cf-7cbbe1a0a619",
+        "output_artifact_id": "7bd465a5-ed1f-40f8-ad6d-4e27002de51a",
+        "source_artifact_ids": [
+          "2ba9a80a-b520-4acb-b3b6-bf58614433bf",
+          "f223e5d5-054d-4b6a-a9a9-30e4a8aeceed"
+        ],
+        "producer_task_id": "task_attribute_join_population_to_tracts",
+        "operation": "attribute_join",
+        "parameters": {
+          "operation": "attribute_join",
+          "vector_key": null,
+          "table_key": null
+        },
+        "semantic_effect": "Produced role 'population_joined_tracts' using operation 'attribute_join'.",
+        "evidence_snapshot_ids": [],
+        "created_at": "2026-08-21T18:55:18.854589Z"
+      },
+      "fb7d5548-7056-43f6-be8a-17ca39291173": {
+        "derivation_id": "fb7d5548-7056-43f6-be8a-17ca39291173",
+        "output_artifact_id": "381df16c-dd4d-481b-ab26-3df08681fe5b",
+        "source_artifact_ids": [
+          "7bd465a5-ed1f-40f8-ad6d-4e27002de51a"
+        ],
+        "producer_task_id": "task_aggregate_population_and_land_area_by_tract",
+        "operation": "aggregate",
+        "parameters": {
+          "operation": "aggregate",
+          "group_by": null,
+          "value_field": null,
+          "statistic": null
+        },
+        "semantic_effect": "Produced role 'population_land_area_by_tract' using operation 'aggregate'.",
+        "evidence_snapshot_ids": [],
+        "created_at": "2026-08-21T18:55:18.910731Z"
+      }
+    },
+    "requirements": {
+      "req_join_fields": {
+        "requirement_id": "req_join_fields",
+        "requirement_type": "required_fields",
+        "scope": "task_attribute_join_population_to_tracts input artifacts must contain a common tract identifier and the ACS total population field.",
+        "task_id": "task_attribute_join_population_to_tracts",
+        "artifact_roles": [
+          "input_1",
+          "input_2"
+        ],
+        "parameters": {
+          "required_fields_by_role": {
+            "input_1": [
+              "GEOID"
+            ],
+            "input_2": [
+              "GEOID",
+              "total_pop"
+            ]
+          }
+        },
+        "blocking": true,
+        "provenance": "USER_EXPLICIT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [
+          "be790f6e-aac7-43b2-96bc-15e5b4d49880",
+          "31c850ec-2eeb-49db-9d1b-3f56c4b6d3a9"
+        ],
+        "superseded_by": null
+      },
+      "req_join_input_formats": {
+        "requirement_id": "req_join_input_formats",
+        "requirement_type": "format_compatible",
+        "scope": "task_attribute_join_population_to_tracts inputs must use formats supported for GeoPackage vector and CSV attribute-table joining.",
+        "task_id": "task_attribute_join_population_to_tracts",
+        "artifact_roles": [
+          "input_1",
+          "input_2"
+        ],
+        "parameters": {
+          "formats_by_role": {
+            "input_1": [
+              "GPKG"
+            ],
+            "input_2": [
+              "CSV"
+            ]
+          }
+        },
+        "blocking": true,
+        "provenance": "WORKER_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [
+          "be790f6e-aac7-43b2-96bc-15e5b4d49880",
+          "31c850ec-2eeb-49db-9d1b-3f56c4b6d3a9"
+        ],
+        "superseded_by": null
+      },
+      "req_area_geometry": {
+        "requirement_id": "req_area_geometry",
+        "requirement_type": "valid_geometry",
+        "scope": "task_aggregate_population_and_land_area_by_tract input must contain valid, non-empty polygon geometry for land-area calculation.",
+        "task_id": "task_aggregate_population_and_land_area_by_tract",
+        "artifact_roles": [
+          "population_joined_tracts"
+        ],
+        "parameters": {
+          "geometry_types": [
+            "Polygon",
+            "MultiPolygon"
+          ],
+          "allow_empty": false
+        },
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_area_crs": {
+        "requirement_id": "req_area_crs",
+        "requirement_type": "crs_present",
+        "scope": "task_aggregate_population_and_land_area_by_tract input must retain an identified CRS so the reported land-area units are interpretable.",
+        "task_id": "task_aggregate_population_and_land_area_by_tract",
+        "artifact_roles": [
+          "population_joined_tracts"
+        ],
+        "parameters": {
+          "required": true
+        },
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      }
+    },
+    "commitments": {},
+    "schema_mappings": {},
+    "evidence": {
+      "be790f6e-aac7-43b2-96bc-15e5b4d49880": {
+        "evidence_id": "be790f6e-aac7-43b2-96bc-15e5b4d49880",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "2ba9a80a-b520-4acb-b3b6-bf58614433bf"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg",
+          "format": "gpkg",
+          "size_bytes": 98304,
+          "complete": true,
+          "limitations": [],
+          "data_model": "vector",
+          "feature_count": 16,
+          "schema": {
+            "GEOID": "object",
+            "NAME": "object",
+            "COUNTYFP": "object",
+            "STATEFP": "object"
+          },
+          "schema_fields": [
+            "GEOID",
+            "NAME",
+            "COUNTYFP",
+            "STATEFP"
+          ],
+          "geometry_type": [
+            "Polygon"
+          ],
+          "geometry_valid": true,
+          "invalid_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "null_geometry_count": 0,
+          "bounds": [
+            238087.3824011362,
+            4508961.385028789,
+            272914.01066431846,
+            4543387.006183241
+          ],
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true,
+          "crs": "EPSG:26918",
+          "crs_authority": "EPSG:26918",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T18:54:57.099001Z",
+        "complete": true,
+        "limitations": []
+      },
+      "31c850ec-2eeb-49db-9d1b-3f56c4b6d3a9": {
+        "evidence_id": "31c850ec-2eeb-49db-9d1b-3f56c4b6d3a9",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "f223e5d5-054d-4b6a-a9a9-30e4a8aeceed"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_acs_centre_2024.csv",
+          "format": "csv",
+          "size_bytes": 747,
+          "complete": true,
+          "limitations": [],
+          "data_model": "table",
+          "inspected_row_count": 16,
+          "row_sample_complete": true,
+          "schema": {
+            "GEOID": "int64",
+            "tract_name": "object",
+            "median_income": "int64",
+            "median_rent": "int64",
+            "total_pop": "int64"
+          },
+          "schema_fields": [
+            "GEOID",
+            "tract_name",
+            "median_income",
+            "median_rent",
+            "total_pop"
+          ],
+          "coordinate_candidates": [],
+          "spatializable_from_coordinates": false,
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T18:54:57.101529Z",
+        "complete": true,
+        "limitations": []
+      },
+      "08a9f527-86a4-4d13-ab15-1fe4094279d1": {
+        "evidence_id": "08a9f527-86a4-4d13-ab15-1fe4094279d1",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "7bd465a5-ed1f-40f8-ad6d-4e27002de51a"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/attr_joined_51e330c1.gpkg",
+          "format": "gpkg",
+          "size_bytes": 98304,
+          "complete": true,
+          "limitations": [],
+          "data_model": "vector",
+          "feature_count": 16,
+          "schema": {
+            "GEOID": "object",
+            "NAME": "object",
+            "COUNTYFP": "object",
+            "STATEFP": "object",
+            "tract_name": "object",
+            "median_income": "int64",
+            "median_rent": "int64",
+            "total_pop": "int64"
+          },
+          "schema_fields": [
+            "GEOID",
+            "NAME",
+            "COUNTYFP",
+            "STATEFP",
+            "tract_name",
+            "median_income",
+            "median_rent",
+            "total_pop"
+          ],
+          "geometry_type": [
+            "Polygon"
+          ],
+          "geometry_valid": true,
+          "invalid_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "null_geometry_count": 0,
+          "bounds": [
+            238087.3824011362,
+            4508961.385028789,
+            272914.01066431846,
+            4543387.006183241
+          ],
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true,
+          "crs": "EPSG:26918",
+          "crs_authority": "EPSG:26918",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T18:55:18.862785Z",
+        "complete": true,
+        "limitations": []
+      },
+      "c3928dca-0cae-4d45-9b77-c29bd40ed982": {
+        "evidence_id": "c3928dca-0cae-4d45-9b77-c29bd40ed982",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "381df16c-dd4d-481b-ab26-3df08681fe5b"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/polygon_aggregate_b_e61fd777.gpkg",
+          "format": "gpkg",
+          "size_bytes": 98304,
+          "complete": true,
+          "limitations": [],
+          "data_model": "vector",
+          "feature_count": 16,
+          "schema": {
+            "GEOID": "object",
+            "NAME": "object",
+            "COUNTYFP": "object",
+            "STATEFP": "object",
+            "tract_name": "object",
+            "median_income": "int64",
+            "median_rent": "int64",
+            "total_pop": "int64",
+            "land_area_sq_m": "float64",
+            "land_area_km2": "float64"
+          },
+          "schema_fields": [
+            "GEOID",
+            "NAME",
+            "COUNTYFP",
+            "STATEFP",
+            "tract_name",
+            "median_income",
+            "median_rent",
+            "total_pop",
+            "land_area_sq_m",
+            "land_area_km2"
+          ],
+          "geometry_type": [
+            "Polygon"
+          ],
+          "geometry_valid": true,
+          "invalid_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "null_geometry_count": 0,
+          "bounds": [
+            238087.3824011362,
+            4508961.385028789,
+            272914.01066431846,
+            4543387.006183241
+          ],
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true,
+          "crs": "EPSG:26918",
+          "crs_authority": "EPSG:26918",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T18:55:18.919121Z",
+        "complete": true,
+        "limitations": []
+      }
+    },
+    "violations": {},
+    "execution_history": [
+      {
+        "event_id": "1beaf1eb-0600-43be-994f-b1be569b7716",
+        "event_type": "initial_plan_committed",
+        "actor": "planner_component",
+        "state_version": 0,
+        "plan_version": 1,
+        "task_id": null,
+        "reason": "Join the ACS population table to the Centre County census tract polygons, then aggregate each tract's total population and geometry-derived land area into a final GeoPackage layer.",
+        "metadata": {
+          "task_ids": [
+            "task_aggregate_population_and_land_area_by_tract",
+            "task_attribute_join_population_to_tracts"
+          ]
+        },
+        "created_at": "2026-08-21T18:55:18.803415Z"
+      },
+      {
+        "event_id": "978d2909-b833-4002-b358-6666c3870668",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 1,
+        "plan_version": 1,
+        "task_id": "task_attribute_join_population_to_tracts",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "proposed",
+          "to": "ready"
+        },
+        "created_at": "2026-08-21T18:55:18.808103Z"
+      },
+      {
+        "event_id": "3cc8946f-fdf9-47f0-8090-9097f8f09cf6",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 2,
+        "plan_version": 1,
+        "task_id": "task_attribute_join_population_to_tracts",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-21T18:55:18.810147Z"
+      },
+      {
+        "event_id": "12b83519-9dfd-4044-88fa-9bb942ceb3da",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 3,
+        "plan_version": 1,
+        "task_id": "task_attribute_join_population_to_tracts",
+        "reason": "Worker bound.",
+        "metadata": {
+          "from": "binding",
+          "to": "bound"
+        },
+        "created_at": "2026-08-21T18:55:18.812698Z"
+      },
+      {
+        "event_id": "8a7eb398-043d-4b87-8996-7e19a1af5bdf",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 4,
+        "plan_version": 1,
+        "task_id": "task_attribute_join_population_to_tracts",
+        "reason": "Worker started.",
+        "metadata": {
+          "from": "bound",
+          "to": "running"
+        },
+        "created_at": "2026-08-21T18:55:18.815220Z"
+      },
+      {
+        "event_id": "b1f41d7d-cb10-41a5-810b-efbdd52f9484",
+        "event_type": "worker_execution_completed",
+        "actor": "worker_executor",
+        "state_version": 5,
+        "plan_version": 1,
+        "task_id": "task_attribute_join_population_to_tracts",
+        "reason": "Worker returned successfully.",
+        "metadata": {
+          "binding_id": "8520133f-450b-40c4-bec5-a55bdd5ec88e",
+          "agent_id": "vector_analysis_b",
+          "operation": "attribute_join",
+          "attempt": 1,
+          "status": "successful",
+          "duration_seconds": 0.032223190006334335
+        },
+        "created_at": "2026-08-21T18:55:18.850579Z"
+      },
+      {
+        "event_id": "ef9aedf9-a46e-409f-9ffc-38ba3fffe876",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 5,
+        "plan_version": 1,
+        "task_id": "task_attribute_join_population_to_tracts",
+        "reason": "Worker returned a provisional result.",
+        "metadata": {
+          "from": "running",
+          "to": "provisional_success"
+        },
+        "created_at": "2026-08-21T18:55:18.850662Z"
+      },
+      {
+        "event_id": "19110e35-f97a-4f36-87f6-3482a9983239",
+        "event_type": "artifact_registered",
+        "actor": "artifact_registry",
+        "state_version": 6,
+        "plan_version": 1,
+        "task_id": "task_attribute_join_population_to_tracts",
+        "reason": null,
+        "metadata": {
+          "artifact_id": "7bd465a5-ed1f-40f8-ad6d-4e27002de51a",
+          "role": "population_joined_tracts",
+          "content_hash": "8d934b4eea855ded657418aaa719ceb456f680d6468d23a69915ded291d720b6"
+        },
+        "created_at": "2026-08-21T18:55:18.854621Z"
+      },
+      {
+        "event_id": "62aa3fbb-d4ef-49d8-847f-f0ccaf79ad9a",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 7,
+        "plan_version": 1,
+        "task_id": "task_attribute_join_population_to_tracts",
+        "reason": "Reviewing runtime evidence.",
+        "metadata": {
+          "from": "provisional_success",
+          "to": "validating"
+        },
+        "created_at": "2026-08-21T18:55:18.865266Z"
+      },
+      {
+        "event_id": "1de335e9-93b0-43a9-8cf9-549d0ca10fdc",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 8,
+        "plan_version": 1,
+        "task_id": "task_attribute_join_population_to_tracts",
+        "reason": "Shared technical response and output-role checks passed.",
+        "metadata": {
+          "from": "validating",
+          "to": "successful"
+        },
+        "created_at": "2026-08-21T18:55:18.867665Z"
+      },
+      {
+        "event_id": "570e7b34-6519-4d0b-bcea-c70485fc5fc0",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 9,
+        "plan_version": 1,
+        "task_id": "task_aggregate_population_and_land_area_by_tract",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "proposed",
+          "to": "ready"
+        },
+        "created_at": "2026-08-21T18:55:18.870034Z"
+      },
+      {
+        "event_id": "18288ee6-68fa-408e-8299-ac64f6903bc2",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 10,
+        "plan_version": 1,
+        "task_id": "task_aggregate_population_and_land_area_by_tract",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-21T18:55:18.872560Z"
+      },
+      {
+        "event_id": "7d24653c-b654-4320-ad92-fd0ed5228778",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 11,
+        "plan_version": 1,
+        "task_id": "task_aggregate_population_and_land_area_by_tract",
+        "reason": "Worker bound.",
+        "metadata": {
+          "from": "binding",
+          "to": "bound"
+        },
+        "created_at": "2026-08-21T18:55:18.875534Z"
+      },
+      {
+        "event_id": "4da47281-c55b-49da-b9e3-5a846898bb4a",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 12,
+        "plan_version": 1,
+        "task_id": "task_aggregate_population_and_land_area_by_tract",
+        "reason": "Worker started.",
+        "metadata": {
+          "from": "bound",
+          "to": "running"
+        },
+        "created_at": "2026-08-21T18:55:18.878548Z"
+      },
+      {
+        "event_id": "7df8c6b8-0fd3-4b44-9efe-6a120c413503",
+        "event_type": "worker_execution_completed",
+        "actor": "worker_executor",
+        "state_version": 13,
+        "plan_version": 1,
+        "task_id": "task_aggregate_population_and_land_area_by_tract",
+        "reason": "Worker returned successfully.",
+        "metadata": {
+          "binding_id": "0808e0ec-a6e5-4a41-94a7-44bf19ff0f94",
+          "agent_id": "vector_analysis_b",
+          "operation": "aggregate",
+          "attempt": 1,
+          "status": "successful",
+          "duration_seconds": 0.024887245992431417
+        },
+        "created_at": "2026-08-21T18:55:18.905999Z"
+      },
+      {
+        "event_id": "ddcb6bf4-7b46-4db6-96ff-8099d91e05e0",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 13,
+        "plan_version": 1,
+        "task_id": "task_aggregate_population_and_land_area_by_tract",
+        "reason": "Worker returned a provisional result.",
+        "metadata": {
+          "from": "running",
+          "to": "provisional_success"
+        },
+        "created_at": "2026-08-21T18:55:18.906078Z"
+      },
+      {
+        "event_id": "df15d040-ada3-40b6-9a97-72c7d1149a1f",
+        "event_type": "artifact_registered",
+        "actor": "artifact_registry",
+        "state_version": 14,
+        "plan_version": 1,
+        "task_id": "task_aggregate_population_and_land_area_by_tract",
+        "reason": null,
+        "metadata": {
+          "artifact_id": "381df16c-dd4d-481b-ab26-3df08681fe5b",
+          "role": "population_land_area_by_tract",
+          "content_hash": "ca26305cdd5b9cbddf3970d94a5486ad5cffbe98fb86777da0b70bb1e4d6de5f"
+        },
+        "created_at": "2026-08-21T18:55:18.910764Z"
+      },
+      {
+        "event_id": "54a69b12-b359-4d5e-bc96-d52ec7051a7b",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 15,
+        "plan_version": 1,
+        "task_id": "task_aggregate_population_and_land_area_by_tract",
+        "reason": "Reviewing runtime evidence.",
+        "metadata": {
+          "from": "provisional_success",
+          "to": "validating"
+        },
+        "created_at": "2026-08-21T18:55:18.922307Z"
+      },
+      {
+        "event_id": "4f85eadc-782a-4d85-bcf4-475d130f9353",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 16,
+        "plan_version": 1,
+        "task_id": "task_aggregate_population_and_land_area_by_tract",
+        "reason": "Shared technical response and output-role checks passed.",
+        "metadata": {
+          "from": "validating",
+          "to": "successful"
+        },
+        "created_at": "2026-08-21T18:55:18.925311Z"
+      },
+      {
+        "event_id": "03051817-a55c-41c2-8fe0-e4be3c807aa6",
+        "event_type": "workflow_completed",
+        "actor": "completion_policy",
+        "state_version": 17,
+        "plan_version": 1,
+        "task_id": null,
+        "reason": "All active tasks, blocking requirements, and terminal outputs are satisfied.",
+        "metadata": {
+          "final_artifact_ids": [
+            "381df16c-dd4d-481b-ab26-3df08681fe5b"
+          ]
+        },
+        "created_at": "2026-08-21T18:55:18.928388Z"
+      }
+    ],
+    "qc_history": [
+      {
+        "decision_id": "61851a0d-2437-4452-ac77-d2b934b19034",
+        "task_id": "task_attribute_join_population_to_tracts",
+        "verdict": "PASS",
+        "proposed_verdict": "PASS",
+        "reason": "Shared technical response and output-role checks passed.",
+        "acknowledged_finding_ids": [],
+        "action_class": "NONE",
+        "effective_action": "NONE",
+        "effective_action_source": "condition_policy",
+        "allowed_recovery_types": [],
+        "recovery_parameters": {},
+        "preserve_completed_work": true,
+        "forced_by_invariant": false,
+        "created_at": "2026-08-21T18:55:18.867574Z"
+      },
+      {
+        "decision_id": "dc50cc6c-5250-4569-98d1-8b5ee813d28e",
+        "task_id": "task_aggregate_population_and_land_area_by_tract",
+        "verdict": "PASS",
+        "proposed_verdict": "PASS",
+        "reason": "Shared technical response and output-role checks passed.",
+        "acknowledged_finding_ids": [],
+        "action_class": "NONE",
+        "effective_action": "NONE",
+        "effective_action_source": "condition_policy",
+        "allowed_recovery_types": [],
+        "recovery_parameters": {},
+        "preserve_completed_work": true,
+        "forced_by_invariant": false,
+        "created_at": "2026-08-21T18:55:18.925226Z"
+      }
+    ],
+    "replan_history": [],
+    "component_calls": [
+      {
+        "call_id": "8eaeb1ea-70a9-4138-b345-876115ef4987",
+        "component": "planner",
+        "prompt_hash": "879bbf4688237108aa73bcb12bca3ec0b568a6ec20b463cefe3a9dddb652d8de",
+        "tool_schema_hash": "441719facf91fd72ec7e126a4de0921e9629efd4cd39619a5dbe1be9fea2e3fe",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 5591,
+        "output_tokens": 2267,
+        "duration_seconds": 21.678634910000255,
+        "disposition": "successful",
+        "created_at": "2026-08-21T18:55:18.803358Z"
+      }
+    ],
+    "plan_versions": [
+      {
+        "version": 1,
+        "parent_version": null,
+        "reason": "Initial plan committed by independent Planner.",
+        "task_ids": [
+          "task_aggregate_population_and_land_area_by_tract",
+          "task_attribute_join_population_to_tracts"
+        ],
+        "edges": [
+          [
+            "task_attribute_join_population_to_tracts",
+            "task_aggregate_population_and_land_area_by_tract"
+          ]
+        ],
+        "created_at": "2026-08-21T18:55:18.795336Z"
+      }
+    ],
+    "budgets": {
+      "max_total_model_calls": 24,
+      "max_total_tokens": 120000,
+      "max_worker_calls": 30,
+      "max_local_recoveries": 6,
+      "max_replans": 3,
+      "max_runtime_seconds": 900.0,
+      "planner_retry_limit": 2,
+      "qc_retry_limit": 1,
+      "replanner_retry_limit": 1,
+      "total_model_calls": 1,
+      "total_tokens": 7858,
+      "worker_calls": 2,
+      "local_recoveries": 0,
+      "replans": 0
+    },
+    "terminal_state": "completed",
+    "terminal_reason": "All active tasks, blocking requirements, and terminal outputs are satisfied.",
+    "human_clarification": null,
+    "final_artifact_ids": [
+      "381df16c-dd4d-481b-ab26-3df08681fe5b"
+    ],
+    "required_terminal_roles": [
+      "population_land_area_by_tract"
+    ],
+    "final_disclosure": "Workflow completed with accepted terminal artifacts.",
+    "created_at": "2026-08-21T18:54:57.086490Z",
+    "updated_at": "2026-08-21T18:55:18.929821Z"
+  },
+  "execution_steps": [
+    {
+      "step_index": 1,
+      "step_id": "task_attribute_join_population_to_tracts",
+      "agent_id": "vector_analysis_b",
+      "title": "Join population attributes to census tracts",
+      "instructions": "Join the known census tract vector with the known ACS attribute table. Ground the vector and table join keys from runtime schema evidence; do not assume or rename field names. Preserve one output feature per census tract.",
+      "output_artifacts": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/attr_joined_51e330c1.gpkg"
+      ],
+      "status": "successful",
+      "error": null
+    },
+    {
+      "step_index": 2,
+      "step_id": "task_aggregate_population_and_land_area_by_tract",
+      "agent_id": "vector_analysis_b",
+      "title": "Calculate population and land area by tract",
+      "instructions": "Aggregate the joined census tract layer at the census-tract feature/unit level. Compute total population from the runtime-grounded joined population field and calculate each tract's land area from its valid polygon geometry. Preserve tract identifiers and output one record per census tract.",
+      "output_artifacts": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/polygon_aggregate_b_e61fd777.gpkg"
+      ],
+      "status": "successful",
+      "error": null
+    }
+  ],
+  "qc_evaluations": 0,
+  "qc_blocks": 0,
+  "qc_interventions": 0,
+  "effective_blocks": 0,
+  "effective_interventions": 0,
+  "qc_policy_overrides": 0,
+  "replanning_iterations": 0,
+  "error": null,
+  "ledger_events": [
+    {
+      "call_id": "8520133f-450b-40c4-bec5-a55bdd5ec88e",
+      "trajectory_id": "traj_ISS_Q29_C4_run3",
+      "agent_id": "vector_analysis_b",
+      "operation": "attribute_join",
+      "query": "Join the known census tract vector with the known ACS attribute table. Ground the vector and table join keys from runtime schema evidence; do not assume or rename field names. Preserve one output feature per census tract.",
+      "timestamp_start": 1787338518.818251,
+      "timestamp_end": 1787338518.850457,
+      "duration_seconds": 0.032223190006334335,
+      "input_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg",
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_acs_centre_2024.csv"
+      ],
+      "input_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg": "9818cdd69d3b26cbd238d60780f5a566bee625b857232a79ed5ca02595c100a8",
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_acs_centre_2024.csv": "07aeaae70fda652250b9ef8042c26d2529bf448c8636a11b7c102a3eebde07b6"
+      },
+      "parameters": {
+        "operation": "attribute_join",
+        "vector_key": null,
+        "table_key": null
+      },
+      "status": "completed",
+      "error_code": null,
+      "error_message": null,
+      "output_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/attr_joined_51e330c1.gpkg"
+      ],
+      "output_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/attr_joined_51e330c1.gpkg": "8d934b4eea855ded657418aaa719ceb456f680d6468d23a69915ded291d720b6"
+      },
+      "summary": "Joined attributes by GEOID=GEOID, producing 16 features.",
+      "raw_response": {
+        "binding_id": "8520133f-450b-40c4-bec5-a55bdd5ec88e",
+        "task_id": "task_attribute_join_population_to_tracts",
+        "attempt": 1
+      }
+    },
+    {
+      "call_id": "0808e0ec-a6e5-4a41-94a7-44bf19ff0f94",
+      "trajectory_id": "traj_ISS_Q29_C4_run3",
+      "agent_id": "vector_analysis_b",
+      "operation": "aggregate",
+      "query": "Aggregate the joined census tract layer at the census-tract feature/unit level. Compute total population from the runtime-grounded joined population field and calculate each tract's land area from its valid polygon geometry. Preserve tract identifiers and output one record per census tract.",
+      "timestamp_start": 1787338518.881028,
+      "timestamp_end": 1787338518.905901,
+      "duration_seconds": 0.024887245992431417,
+      "input_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/attr_joined_51e330c1.gpkg"
+      ],
+      "input_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/attr_joined_51e330c1.gpkg": "8d934b4eea855ded657418aaa719ceb456f680d6468d23a69915ded291d720b6"
+      },
+      "parameters": {
+        "operation": "aggregate",
+        "group_by": null,
+        "value_field": null,
+        "statistic": null
+      },
+      "status": "completed",
+      "error_code": null,
+      "error_message": null,
+      "output_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/polygon_aggregate_b_e61fd777.gpkg"
+      ],
+      "output_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/polygon_aggregate_b_e61fd777.gpkg": "ca26305cdd5b9cbddf3970d94a5486ad5cffbe98fb86777da0b70bb1e4d6de5f"
+      },
+      "summary": "Computed polygon-level aggregate fields for 16 features, preserving population field total_pop.",
+      "raw_response": {
+        "binding_id": "0808e0ec-a6e5-4a41-94a7-44bf19ff0f94",
+        "task_id": "task_aggregate_population_and_land_area_by_tract",
+        "attempt": 1
+      }
+    }
+  ],
+  "created_at": "2026-08-21T18:55:18.934440+00:00",
+  "evaluation": {
+    "task_id": "ISS_Q29",
+    "bafo_success": true,
+    "all_challenges_resolved": true,
+    "evaluability_status": "EVALUABLE",
+    "challenge_activated": true,
+    "trajectory_classification": "valid_bafo_pass",
+    "production_terminal_state": "completed",
+    "terminal_state": "successful",
+    "constraint_results": {
+      "clean_workflow_execution": {
+        "constraint_key": "clean_workflow_execution",
+        "status": "PASS",
+        "reason": "Clean workflow execution confirmed with zero false-positive interventions.",
+        "details": {}
+      },
+      "no_unnecessary_repairs": {
+        "constraint_key": "no_unnecessary_repairs",
+        "status": "PASS",
+        "reason": "Clean workflow execution confirmed with zero false-positive interventions.",
+        "details": {}
+      }
+    },
+    "passed_constraints": [
+      "clean_workflow_execution",
+      "no_unnecessary_repairs"
+    ],
+    "failed_constraints": [],
+    "unevaluable_constraints": [],
+    "inspected_artifacts_count": 2,
+    "events_count": 2,
+    "diagnostic_summary": "BAFO: True | State: successful (Valid: True) | Constraints: 2 PASS, 0 FAIL, 0 UNEVALUABLE | Events Recorded: 2 | Artifacts Inspected: 2"
+  },
+  "bafo_success": true,
+  "all_challenges_resolved": true,
+  "trajectory_classification": "valid_bafo_pass"
+}

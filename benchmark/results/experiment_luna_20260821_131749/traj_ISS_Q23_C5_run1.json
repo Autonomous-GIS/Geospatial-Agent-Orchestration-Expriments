@@ -1,0 +1,2950 @@
+{
+  "trajectory_id": "traj_ISS_Q23_C5_run1",
+  "task_id": "ISS_Q23",
+  "condition": "C5",
+  "model": "gpt-5.6-luna",
+  "run_index": 1,
+  "suite": "isolated",
+  "user_question": "Summarize mean elevation for the census tracts that intersect State College borough.",
+  "input_artifact_paths": [
+    "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_dem_centre_epsg3857.tif",
+    "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg"
+  ],
+  "status": "failed",
+  "total_wall_time": 80.865,
+  "rate_limit_wait_time": 0.0,
+  "provider_retry_wait_time": 0.0,
+  "orchestration_active_time": 80.845,
+  "worker_execution_time": 0.02,
+  "total_tokens": 38246,
+  "input_tokens": 29950,
+  "output_tokens": 8296,
+  "outputs": {
+    "summary": "The worker failed because no recognized conversion operation was provided. Revise the current conversion invocation to use a supported operation, then retry while preserving the retrieved borough boundary artifact.",
+    "artifacts": [],
+    "produced_artifacts": [
+      "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/projection_agent/reprojected_039d4daa.gpkg",
+      "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_424552ed_fx_state_college_boundary.gpkg"
+    ],
+    "workflow_plan": {
+      "workflow_id": "2b62b340-1a79-4f8f-9279-2a764f95bbd7",
+      "plan_version": 2,
+      "goal": "Summarize mean elevation for the census tracts that intersect State College borough.",
+      "workflow_steps": [
+        {
+          "step_id": "retrieve_state_college_borough",
+          "title": "Retrieve State College Borough Boundary",
+          "purpose": "Obtain a candidate polygon boundary for State College borough.",
+          "agent_id": "data_retrieval_agent",
+          "operation": "dataset_retrieval",
+          "instructions": "Retrieve a registered polygon dataset representing the State College borough boundary. The candidate must be inspected at runtime for spatial coverage, vector geometry, CRS, and GeoPackage compatibility.",
+          "parameters": {},
+          "depends_on": [],
+          "input_from_steps": [],
+          "status": "successful",
+          "output_artifact_ids": [
+            "b97b99fa-7c95-408a-a923-e68b9b3fcac7"
+          ]
+        },
+        {
+          "step_id": "reproject_census_tracts",
+          "title": "Reproject Census Tracts to DEM CRS",
+          "purpose": "Transform the census tract geometries from EPSG:26918 to the DEM CRS EPSG:3857 for compatible spatial overlay and zonal statistics.",
+          "agent_id": "projection_agent",
+          "operation": "reproject",
+          "instructions": "Reproject the census tract GeoPackage from its observed source CRS to EPSG:3857. Preserve tract attributes and polygon geometry.",
+          "parameters": {
+            "operation": "reproject",
+            "target_crs": "EPSG:3857"
+          },
+          "depends_on": [],
+          "input_from_steps": [],
+          "status": "successful",
+          "output_artifact_ids": [
+            "02ff0942-3e2a-4a4e-9a62-72042c2e53a8"
+          ]
+        },
+        {
+          "step_id": "reproject_borough_boundary",
+          "title": "Reproject Borough Boundary to DEM CRS",
+          "purpose": "Transform the retrieved borough boundary to EPSG:3857 so it can be overlaid with the census tracts.",
+          "agent_id": null,
+          "operation": "reproject",
+          "instructions": "Reproject the retrieved State College borough boundary to EPSG:3857 after runtime inspection confirms that its source CRS is present and known. Preserve polygon geometry.",
+          "parameters": {
+            "operation": "reproject",
+            "target_crs": "EPSG:3857"
+          },
+          "depends_on": [
+            "convert_borough_boundary"
+          ],
+          "input_from_steps": [
+            "convert_borough_boundary"
+          ],
+          "status": "proposed",
+          "output_artifact_ids": []
+        },
+        {
+          "step_id": "derive_intersecting_tracts",
+          "title": "Derive Census Tracts Intersecting State College Borough",
+          "purpose": "Identify the census tract geometries that intersect the State College borough boundary.",
+          "agent_id": null,
+          "operation": "overlay",
+          "instructions": "Perform a polygon intersection overlay between the projected census tracts and projected State College borough boundary. Retain tract identity attributes, including the observed GEOID field, so the resulting zones remain attributable to census tracts.",
+          "parameters": {
+            "operation": "overlay"
+          },
+          "depends_on": [
+            "reproject_census_tracts",
+            "reproject_borough_boundary"
+          ],
+          "input_from_steps": [
+            "reproject_census_tracts",
+            "reproject_borough_boundary"
+          ],
+          "status": "proposed",
+          "output_artifact_ids": []
+        },
+        {
+          "step_id": "compute_mean_elevation_by_tract",
+          "title": "Compute Mean Elevation by Intersecting Census Tract",
+          "purpose": "Calculate mean DEM elevation for each derived census-tract intersection zone.",
+          "agent_id": null,
+          "operation": "zonal_statistics",
+          "instructions": "Compute zonal statistics using the DEM and the intersecting census tract polygons. Produce a CSV summary containing the mean elevation for each tract zone and retain the tract identifier from the zone layer.",
+          "parameters": {
+            "operation": "zonal_statistics"
+          },
+          "depends_on": [
+            "derive_intersecting_tracts"
+          ],
+          "input_from_steps": [
+            "derive_intersecting_tracts"
+          ],
+          "status": "proposed",
+          "output_artifact_ids": []
+        },
+        {
+          "step_id": "convert_borough_boundary",
+          "title": "Convert Borough Boundary to Consumer-Compatible Vector Dataset",
+          "purpose": "Reconcile the retrieved borough boundary representation before reprojection while preserving its analytical role.",
+          "agent_id": "conversion_agent",
+          "operation": "format_and_spatial_conversion",
+          "instructions": "Convert the retrieved borough boundary into a GeoPackage vector representation accepted by the downstream reprojection task. Preserve polygon geometry, attributes, CRS metadata, and the borough_boundary role.",
+          "parameters": {
+            "operation": "format_and_spatial_conversion",
+            "target_format": "GPKG"
+          },
+          "depends_on": [
+            "retrieve_state_college_borough"
+          ],
+          "input_from_steps": [
+            "retrieve_state_college_borough"
+          ],
+          "status": "failed",
+          "output_artifact_ids": []
+        }
+      ],
+      "requirements": [
+        {
+          "requirement_id": "req_borough_coverage",
+          "requirement_type": "spatial_coverage",
+          "scope": "The retrieved borough boundary must represent State College borough.",
+          "task_id": "retrieve_state_college_borough",
+          "artifact_roles": [
+            "borough_boundary"
+          ],
+          "parameters": {
+            "place": "State College borough"
+          },
+          "blocking": true,
+          "provenance": "USER_EXPLICIT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [
+            "5f530259-8a79-4093-8544-eceb55a17893"
+          ],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_borough_format",
+          "requirement_type": "format_compatible",
+          "scope": "The retrieved borough boundary must be available in a vector format accepted by reprojection and overlay, preferably GeoPackage.",
+          "task_id": "retrieve_state_college_borough",
+          "artifact_roles": [
+            "borough_boundary"
+          ],
+          "parameters": {
+            "formats": [
+              "GPKG"
+            ],
+            "data_model": "vector"
+          },
+          "blocking": true,
+          "provenance": "WORKER_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [
+            "5f530259-8a79-4093-8544-eceb55a17893"
+          ],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_borough_crs_present",
+          "requirement_type": "crs_present",
+          "scope": "The retrieved borough boundary must have a known source CRS before reprojection.",
+          "task_id": "reproject_borough_boundary",
+          "artifact_roles": [
+            "borough_boundary"
+          ],
+          "parameters": {},
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [
+            "5f530259-8a79-4093-8544-eceb55a17893"
+          ],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_borough_valid_geometry",
+          "requirement_type": "valid_geometry",
+          "scope": "The borough boundary must contain valid, non-empty polygon geometry for reprojection and overlay.",
+          "task_id": "reproject_borough_boundary",
+          "artifact_roles": [
+            "borough_boundary"
+          ],
+          "parameters": {},
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [
+            "5f530259-8a79-4093-8544-eceb55a17893"
+          ],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_overlay_compatible_crs",
+          "requirement_type": "compatible_crs",
+          "scope": "The projected census tracts and projected borough boundary must use compatible CRSs for polygon overlay.",
+          "task_id": "derive_intersecting_tracts",
+          "artifact_roles": [
+            "tracts_projected",
+            "borough_projected"
+          ],
+          "parameters": {
+            "target_crs": "EPSG:3857"
+          },
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_overlay_valid_geometry",
+          "requirement_type": "valid_geometry",
+          "scope": "Both projected polygon inputs must have valid, non-empty geometries for overlay.",
+          "task_id": "derive_intersecting_tracts",
+          "artifact_roles": [
+            "tracts_projected",
+            "borough_projected"
+          ],
+          "parameters": {},
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_overlay_geoid",
+          "requirement_type": "required_fields",
+          "scope": "The intersecting tract output must retain the observed census tract identifier field GEOID.",
+          "task_id": "derive_intersecting_tracts",
+          "artifact_roles": [
+            "tracts_projected",
+            "intersecting_tracts"
+          ],
+          "parameters": {
+            "fields": [
+              "GEOID"
+            ]
+          },
+          "blocking": true,
+          "provenance": "DOWNSTREAM_CONSUMER",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_zonal_compatible_crs",
+          "requirement_type": "compatible_crs",
+          "scope": "The DEM and intersecting tract zones must use compatible CRSs for zonal statistics.",
+          "task_id": "compute_mean_elevation_by_tract",
+          "artifact_roles": [
+            "input_1",
+            "intersecting_tracts"
+          ],
+          "parameters": {
+            "raster_crs": "EPSG:3857",
+            "zone_crs": "EPSG:3857"
+          },
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_zonal_valid_geometry",
+          "requirement_type": "valid_geometry",
+          "scope": "The intersecting tract zones must contain valid, non-empty polygon geometries for zonal statistics.",
+          "task_id": "compute_mean_elevation_by_tract",
+          "artifact_roles": [
+            "intersecting_tracts"
+          ],
+          "parameters": {},
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_zonal_geoid",
+          "requirement_type": "required_fields",
+          "scope": "The zonal statistics output must retain the census tract identifier GEOID for each mean elevation result.",
+          "task_id": "compute_mean_elevation_by_tract",
+          "artifact_roles": [
+            "intersecting_tracts",
+            "mean_elevation_by_tract"
+          ],
+          "parameters": {
+            "fields": [
+              "GEOID"
+            ]
+          },
+          "blocking": true,
+          "provenance": "DOWNSTREAM_CONSUMER",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "4428b6f6-4b9b-4b2e-9c12-5601177f60cb",
+          "requirement_type": "compatible_crs",
+          "scope": "task_transition",
+          "task_id": "derive_intersecting_tracts",
+          "artifact_roles": [
+            "tracts_projected",
+            "borough_projected"
+          ],
+          "parameters": {},
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "operation_contract_catalog",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "d74726c5-d1b0-4434-a53f-46e1cd7b1e38",
+          "requirement_type": "valid_geometry",
+          "scope": "task_transition",
+          "task_id": "derive_intersecting_tracts",
+          "artifact_roles": [
+            "tracts_projected",
+            "borough_projected"
+          ],
+          "parameters": {},
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "operation_contract_catalog",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "caa1c1d5-643a-4555-aede-895e8472234b",
+          "requirement_type": "compatible_crs",
+          "scope": "task_transition",
+          "task_id": "compute_mean_elevation_by_tract",
+          "artifact_roles": [
+            "input_1",
+            "intersecting_tracts"
+          ],
+          "parameters": {},
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "operation_contract_catalog",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        }
+      ],
+      "commitments": []
+    }
+  },
+  "workflow_state": {
+    "schema_version": "1.0.0",
+    "workflow_id": "2b62b340-1a79-4f8f-9279-2a764f95bbd7",
+    "state_version": 33,
+    "user_goal": "Summarize mean elevation for the census tracts that intersect State College borough.",
+    "feature_profile": "C2",
+    "feature_config": {
+      "profile_name": "C2",
+      "planner_mode": "gis_aware",
+      "qc_mode": "gis_aware",
+      "replanner_mode": "gis_aware",
+      "technical_invariants": true,
+      "local_recovery": true,
+      "structural_patching": true,
+      "gis_finding_routing": true
+    },
+    "current_plan_version": 2,
+    "tasks": {
+      "retrieve_state_college_borough": {
+        "task_id": "retrieve_state_college_borough",
+        "title": "Retrieve State College Borough Boundary",
+        "purpose": "Obtain a candidate polygon boundary for State College borough.",
+        "operation": "dataset_retrieval",
+        "instructions": "Retrieve a registered polygon dataset representing the State College borough boundary. The candidate must be inspected at runtime for spatial coverage, vector geometry, CRS, and GeoPackage compatibility.",
+        "parameters": {},
+        "required_capabilities": [
+          "dataset_retrieval"
+        ],
+        "depends_on": [],
+        "input_requirements": [],
+        "expected_outputs": [
+          {
+            "role": "borough_boundary",
+            "data_model": "dataset",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_borough_coverage",
+          "req_borough_format"
+        ],
+        "status": "successful",
+        "attempts": 1,
+        "active_binding_id": "ee3a2f45-2433-45dc-b607-7f8dbd4b2eef",
+        "output_artifact_ids": [
+          "b97b99fa-7c95-408a-a923-e68b9b3fcac7"
+        ],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      },
+      "reproject_census_tracts": {
+        "task_id": "reproject_census_tracts",
+        "title": "Reproject Census Tracts to DEM CRS",
+        "purpose": "Transform the census tract geometries from EPSG:26918 to the DEM CRS EPSG:3857 for compatible spatial overlay and zonal statistics.",
+        "operation": "reproject",
+        "instructions": "Reproject the census tract GeoPackage from its observed source CRS to EPSG:3857. Preserve tract attributes and polygon geometry.",
+        "parameters": {
+          "operation": "reproject",
+          "target_crs": "EPSG:3857"
+        },
+        "required_capabilities": [
+          "reproject",
+          "coordinate_transformation"
+        ],
+        "depends_on": [],
+        "input_requirements": [
+          {
+            "role": "input_2",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "tracts_projected",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [],
+        "status": "successful",
+        "attempts": 1,
+        "active_binding_id": "883e479e-64f8-4280-9cae-5611c3f86b1d",
+        "output_artifact_ids": [
+          "02ff0942-3e2a-4a4e-9a62-72042c2e53a8"
+        ],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      },
+      "reproject_borough_boundary": {
+        "task_id": "reproject_borough_boundary",
+        "title": "Reproject Borough Boundary to DEM CRS",
+        "purpose": "Transform the retrieved borough boundary to EPSG:3857 so it can be overlaid with the census tracts.",
+        "operation": "reproject",
+        "instructions": "Reproject the retrieved State College borough boundary to EPSG:3857 after runtime inspection confirms that its source CRS is present and known. Preserve polygon geometry.",
+        "parameters": {
+          "operation": "reproject",
+          "target_crs": "EPSG:3857"
+        },
+        "required_capabilities": [
+          "reproject",
+          "coordinate_transformation"
+        ],
+        "depends_on": [
+          "convert_borough_boundary"
+        ],
+        "input_requirements": [
+          {
+            "role": "borough_boundary",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "borough_projected",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_borough_crs_present",
+          "req_borough_valid_geometry"
+        ],
+        "status": "proposed",
+        "attempts": 0,
+        "active_binding_id": null,
+        "output_artifact_ids": [],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      },
+      "derive_intersecting_tracts": {
+        "task_id": "derive_intersecting_tracts",
+        "title": "Derive Census Tracts Intersecting State College Borough",
+        "purpose": "Identify the census tract geometries that intersect the State College borough boundary.",
+        "operation": "overlay",
+        "instructions": "Perform a polygon intersection overlay between the projected census tracts and projected State College borough boundary. Retain tract identity attributes, including the observed GEOID field, so the resulting zones remain attributable to census tracts.",
+        "parameters": {
+          "operation": "overlay"
+        },
+        "required_capabilities": [
+          "overlay",
+          "vector_geoprocessing"
+        ],
+        "depends_on": [
+          "reproject_census_tracts",
+          "reproject_borough_boundary"
+        ],
+        "input_requirements": [
+          {
+            "role": "tracts_projected",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          },
+          {
+            "role": "borough_projected",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "intersecting_tracts",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_overlay_compatible_crs",
+          "req_overlay_valid_geometry",
+          "req_overlay_geoid",
+          "4428b6f6-4b9b-4b2e-9c12-5601177f60cb",
+          "d74726c5-d1b0-4434-a53f-46e1cd7b1e38"
+        ],
+        "status": "proposed",
+        "attempts": 0,
+        "active_binding_id": null,
+        "output_artifact_ids": [],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      },
+      "compute_mean_elevation_by_tract": {
+        "task_id": "compute_mean_elevation_by_tract",
+        "title": "Compute Mean Elevation by Intersecting Census Tract",
+        "purpose": "Calculate mean DEM elevation for each derived census-tract intersection zone.",
+        "operation": "zonal_statistics",
+        "instructions": "Compute zonal statistics using the DEM and the intersecting census tract polygons. Produce a CSV summary containing the mean elevation for each tract zone and retain the tract identifier from the zone layer.",
+        "parameters": {
+          "operation": "zonal_statistics"
+        },
+        "required_capabilities": [
+          "zonal_statistics",
+          "raster_geoprocessing"
+        ],
+        "depends_on": [
+          "derive_intersecting_tracts"
+        ],
+        "input_requirements": [
+          {
+            "role": "input_1",
+            "data_model": "raster",
+            "formats": [
+              "TIF"
+            ],
+            "required": true
+          },
+          {
+            "role": "intersecting_tracts",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "mean_elevation_by_tract",
+            "data_model": "table",
+            "formats": [
+              "CSV"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_zonal_compatible_crs",
+          "req_zonal_valid_geometry",
+          "req_zonal_geoid",
+          "caa1c1d5-643a-4555-aede-895e8472234b"
+        ],
+        "status": "proposed",
+        "attempts": 0,
+        "active_binding_id": null,
+        "output_artifact_ids": [],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      },
+      "convert_borough_boundary": {
+        "task_id": "convert_borough_boundary",
+        "title": "Convert Borough Boundary to Consumer-Compatible Vector Dataset",
+        "purpose": "Reconcile the retrieved borough boundary representation before reprojection while preserving its analytical role.",
+        "operation": "format_and_spatial_conversion",
+        "instructions": "Convert the retrieved borough boundary into a GeoPackage vector representation accepted by the downstream reprojection task. Preserve polygon geometry, attributes, CRS metadata, and the borough_boundary role.",
+        "parameters": {
+          "operation": "format_and_spatial_conversion",
+          "target_format": "GPKG"
+        },
+        "required_capabilities": [
+          "format_and_spatial_conversion"
+        ],
+        "depends_on": [
+          "retrieve_state_college_borough"
+        ],
+        "input_requirements": [
+          {
+            "role": "borough_boundary",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "borough_boundary",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [],
+        "status": "failed",
+        "attempts": 1,
+        "active_binding_id": "b045a1a8-d531-425c-85c2-58f7a87ca7de",
+        "output_artifact_ids": [],
+        "last_error": {
+          "code": "E_OPERATION_UNRECOGNIZED",
+          "message": "No recognized conversion operation.",
+          "retryable": false,
+          "details": {}
+        },
+        "created_in_plan_version": 2,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      }
+    },
+    "edges": [
+      [
+        "convert_borough_boundary",
+        "reproject_borough_boundary"
+      ],
+      [
+        "derive_intersecting_tracts",
+        "compute_mean_elevation_by_tract"
+      ],
+      [
+        "reproject_borough_boundary",
+        "derive_intersecting_tracts"
+      ],
+      [
+        "reproject_census_tracts",
+        "derive_intersecting_tracts"
+      ],
+      [
+        "retrieve_state_college_borough",
+        "convert_borough_boundary"
+      ]
+    ],
+    "bindings": {
+      "883e479e-64f8-4280-9cae-5611c3f86b1d": {
+        "binding_id": "883e479e-64f8-4280-9cae-5611c3f86b1d",
+        "task_id": "reproject_census_tracts",
+        "agent_id": "projection_agent",
+        "operation": "reproject",
+        "instruction": "Reproject the census tract GeoPackage from its observed source CRS to EPSG:3857. Preserve tract attributes and polygon geometry.",
+        "input_bindings": [
+          {
+            "role": "input_2",
+            "artifact_id": "25eccafc-04b1-470b-81f9-86ea19e8915d",
+            "source_task_id": null,
+            "binding_order": 0
+          }
+        ],
+        "agent_profile_snapshot": {
+          "agent_id": "projection_agent",
+          "name": "Projection Agent",
+          "description": "Reprojects vector artifacts between explicitly identified coordinate reference systems and assigns a CRS when explicitly supplied. The service never guesses an unknown CRS.",
+          "operations": [
+            "assign_crs",
+            "coordinate_transformation",
+            "reproject"
+          ],
+          "skills": [
+            {
+              "skill_id": "coordinate_transformation",
+              "name": "Coordinate Transformation",
+              "description": "Transforms vector geometry coordinates to a target CRS or defines an explicit CRS on datasets with missing metadata.",
+              "constraints": {
+                "spatial": "Reprojection requires a known source CRS and an explicit target CRS. assign_crs requires an explicit CRS to assign.",
+                "temporal": null,
+                "other": [
+                  "The service does not infer or guess unknown coordinate reference systems."
+                ]
+              }
+            }
+          ],
+          "inputs": {
+            "input_datasets": {
+              "required": true,
+              "description": "Vector dataset in GeoPackage or GeoJSON format."
+            }
+          },
+          "outputs": [
+            {
+              "type": "vector",
+              "formats": [
+                "GPKG"
+              ],
+              "required": true,
+              "description": "Reprojected or CRS-assigned vector dataset."
+            }
+          ],
+          "parameters": {
+            "operation": {
+              "required": false,
+              "description": "Explicit operation name (reproject, assign_crs)."
+            },
+            "target_crs": {
+              "required": false,
+              "description": "Explicit target EPSG/CRS identifier."
+            }
+          }
+        },
+        "endpoint": "https://www.geospatial-agentic-services.online/agents/projection_agent/tasks",
+        "attempt": 1,
+        "invocation_id": null,
+        "status": "successful",
+        "started_at": "2026-08-21T19:03:45.333337Z",
+        "completed_at": "2026-08-21T19:03:45.350990Z",
+        "duration_seconds": 0.017661912002949975,
+        "output_artifact_ids": [
+          "02ff0942-3e2a-4a4e-9a62-72042c2e53a8"
+        ],
+        "messages": [
+          "Reprojected 16 features to EPSG:3857."
+        ],
+        "structured_error": null,
+        "created_at": "2026-08-21T19:03:45.326914Z"
+      },
+      "ee3a2f45-2433-45dc-b607-7f8dbd4b2eef": {
+        "binding_id": "ee3a2f45-2433-45dc-b607-7f8dbd4b2eef",
+        "task_id": "retrieve_state_college_borough",
+        "agent_id": "data_retrieval_agent",
+        "operation": "dataset_retrieval",
+        "instruction": "Retrieve a registered polygon dataset representing the State College borough boundary. The candidate must be inspected at runtime for spatial coverage, vector geometry, CRS, and GeoPackage compatibility.",
+        "input_bindings": [],
+        "agent_profile_snapshot": {
+          "agent_id": "data_retrieval_agent",
+          "name": "Data Retrieval Agent",
+          "description": "Searches the available catalog and returns the highest-ranked available dataset candidate. Query criteria influence retrieval but are not guarantees of task-level suitability. Returned metadata describe the retrieved artifact. Clients should inspect returned metadata before downstream use.",
+          "operations": [
+            "dataset_retrieval"
+          ],
+          "skills": [
+            {
+              "skill_id": "dataset_retrieval",
+              "name": "Dataset Retrieval",
+              "description": "Retrieves registered benchmark datasets matching requested criteria from the catalog.",
+              "constraints": {
+                "spatial": "Returns datasets covering registered spatial boundaries.",
+                "temporal": "Returns datasets with metadata indicating time/year of acquisition.",
+                "other": [
+                  "The service does not determine downstream analytical fitness.",
+                  "Supports candidate exclusion via exclude_artifact_ids."
+                ]
+              }
+            }
+          ],
+          "inputs": {
+            "input_datasets": {
+              "required": false,
+              "description": "Not required for data retrieval."
+            }
+          },
+          "outputs": [
+            {
+              "type": "dataset",
+              "formats": [
+                "GPKG",
+                "GeoJSON",
+                "GeoTIFF",
+                "CSV"
+              ],
+              "required": true,
+              "description": "Retrieved dataset artifact."
+            }
+          ],
+          "parameters": {
+            "exclude_artifact_ids": {
+              "required": false,
+              "description": "Optional list of artifact IDs to exclude from candidate ranking."
+            }
+          }
+        },
+        "endpoint": "https://www.geospatial-agentic-services.online/agents/data_retrieval_agent/tasks",
+        "attempt": 1,
+        "invocation_id": null,
+        "status": "successful",
+        "started_at": "2026-08-21T19:03:48.626216Z",
+        "completed_at": "2026-08-21T19:03:48.628621Z",
+        "duration_seconds": 0.0024063369928626344,
+        "output_artifact_ids": [
+          "b97b99fa-7c95-408a-a923-e68b9b3fcac7"
+        ],
+        "messages": [
+          "Successfully retrieved dataset: fx_state_college_boundary.gpkg"
+        ],
+        "structured_error": null,
+        "created_at": "2026-08-21T19:03:48.618636Z"
+      },
+      "432d26e2-7680-4ed3-b43b-89a539cbf15c": {
+        "binding_id": "432d26e2-7680-4ed3-b43b-89a539cbf15c",
+        "task_id": "reproject_borough_boundary",
+        "agent_id": "projection_agent",
+        "operation": "reproject",
+        "instruction": "Reproject the retrieved State College borough boundary to EPSG:3857 after runtime inspection confirms that its source CRS is present and known. Preserve polygon geometry.",
+        "input_bindings": [
+          {
+            "role": "borough_boundary",
+            "artifact_id": "b97b99fa-7c95-408a-a923-e68b9b3fcac7",
+            "source_task_id": "retrieve_state_college_borough",
+            "binding_order": 0
+          }
+        ],
+        "agent_profile_snapshot": {
+          "agent_id": "projection_agent",
+          "name": "Projection Agent",
+          "description": "Reprojects vector artifacts between explicitly identified coordinate reference systems and assigns a CRS when explicitly supplied. The service never guesses an unknown CRS.",
+          "operations": [
+            "assign_crs",
+            "coordinate_transformation",
+            "reproject"
+          ],
+          "skills": [
+            {
+              "skill_id": "coordinate_transformation",
+              "name": "Coordinate Transformation",
+              "description": "Transforms vector geometry coordinates to a target CRS or defines an explicit CRS on datasets with missing metadata.",
+              "constraints": {
+                "spatial": "Reprojection requires a known source CRS and an explicit target CRS. assign_crs requires an explicit CRS to assign.",
+                "temporal": null,
+                "other": [
+                  "The service does not infer or guess unknown coordinate reference systems."
+                ]
+              }
+            }
+          ],
+          "inputs": {
+            "input_datasets": {
+              "required": true,
+              "description": "Vector dataset in GeoPackage or GeoJSON format."
+            }
+          },
+          "outputs": [
+            {
+              "type": "vector",
+              "formats": [
+                "GPKG"
+              ],
+              "required": true,
+              "description": "Reprojected or CRS-assigned vector dataset."
+            }
+          ],
+          "parameters": {
+            "operation": {
+              "required": false,
+              "description": "Explicit operation name (reproject, assign_crs)."
+            },
+            "target_crs": {
+              "required": false,
+              "description": "Explicit target EPSG/CRS identifier."
+            }
+          }
+        },
+        "endpoint": "https://www.geospatial-agentic-services.online/agents/projection_agent/tasks",
+        "attempt": 1,
+        "invocation_id": null,
+        "status": "precondition_blocked",
+        "started_at": null,
+        "completed_at": null,
+        "duration_seconds": 0.0,
+        "output_artifact_ids": [],
+        "messages": [],
+        "structured_error": {
+          "code": "E_PRECONDITION_BLOCKED",
+          "message": "One or more deterministic task preconditions are not satisfied by the bound inputs.",
+          "retryable": false,
+          "details": {
+            "violation_ids": [
+              "6beab2cd-8382-4a27-ae4f-46324f7fcce0"
+            ]
+          }
+        },
+        "created_at": "2026-08-21T19:03:52.307686Z"
+      },
+      "b045a1a8-d531-425c-85c2-58f7a87ca7de": {
+        "binding_id": "b045a1a8-d531-425c-85c2-58f7a87ca7de",
+        "task_id": "convert_borough_boundary",
+        "agent_id": "conversion_agent",
+        "operation": "format_and_spatial_conversion",
+        "instruction": "Convert the retrieved borough boundary into a GeoPackage vector representation accepted by the downstream reprojection task. Preserve polygon geometry, attributes, CRS metadata, and the borough_boundary role.",
+        "input_bindings": [
+          {
+            "role": "borough_boundary",
+            "artifact_id": "b97b99fa-7c95-408a-a923-e68b9b3fcac7",
+            "source_task_id": "retrieve_state_college_borough",
+            "binding_order": 0
+          }
+        ],
+        "agent_profile_snapshot": {
+          "agent_id": "conversion_agent",
+          "name": "Conversion Agent",
+          "description": "Converts supported artifact representations without changing the analytical meaning of the data. CSV-to-points requires explicit coordinate-field names and a source CRS.",
+          "operations": [
+            "csv_to_points",
+            "format_and_spatial_conversion",
+            "geojson_to_gpkg",
+            "table_to_csv"
+          ],
+          "skills": [
+            {
+              "skill_id": "format_and_spatial_conversion",
+              "name": "Format and Spatial Conversion",
+              "description": "Converts data formats between GeoJSON and GeoPackage, spatializes coordinate tables into vector point layers, and exports tabular data.",
+              "constraints": {
+                "spatial": "CSV-to-points requires latitude and longitude fields and assigns a documented source CRS.",
+                "temporal": null,
+                "other": [
+                  "The service does not fabricate missing records or infer unknown CRS definitions."
+                ]
+              }
+            }
+          ],
+          "inputs": {
+            "input_datasets": {
+              "required": true,
+              "description": "Input dataset in CSV, GeoJSON, or GeoPackage format."
+            }
+          },
+          "outputs": [
+            {
+              "type": "vector",
+              "formats": [
+                "GPKG"
+              ],
+              "required": false,
+              "description": "Converted spatial layer."
+            },
+            {
+              "type": "table",
+              "formats": [
+                "CSV"
+              ],
+              "required": false,
+              "description": "Exported attribute table."
+            }
+          ],
+          "parameters": {
+            "operation": {
+              "required": false,
+              "description": "Explicit operation name (csv_to_points, geojson_to_gpkg, table_to_csv)."
+            },
+            "lat_col": {
+              "required": false,
+              "description": "Name of latitude column in CSV."
+            },
+            "lon_col": {
+              "required": false,
+              "description": "Name of longitude column in CSV."
+            },
+            "crs": {
+              "required": false,
+              "default": "EPSG:4326",
+              "description": "Coordinate reference system for constructed points."
+            }
+          }
+        },
+        "endpoint": "https://www.geospatial-agentic-services.online/agents/conversion_agent/tasks",
+        "attempt": 1,
+        "invocation_id": null,
+        "status": "failed",
+        "started_at": "2026-08-21T19:04:20.489769Z",
+        "completed_at": "2026-08-21T19:04:20.489932Z",
+        "duration_seconds": 0.0001633200008654967,
+        "output_artifact_ids": [],
+        "messages": [],
+        "structured_error": {
+          "code": "E_OPERATION_UNRECOGNIZED",
+          "message": "No recognized conversion operation.",
+          "retryable": false,
+          "details": {}
+        },
+        "created_at": "2026-08-21T19:04:20.472769Z"
+      }
+    },
+    "artifacts": {
+      "b940b00c-3034-4b1d-bd9e-7142ea6b7e84": {
+        "artifact_id": "b940b00c-3034-4b1d-bd9e-7142ea6b7e84",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_dem_centre_epsg3857.tif",
+        "content_hash": "82fb0234a7db7c93766e71c019c8609f7509bb26db5ada8af297fd2a755d93bc",
+        "format": "tif",
+        "media_type": null,
+        "data_model": "raster",
+        "producer_task_id": null,
+        "producer_binding_id": null,
+        "role": "input_1",
+        "evidence_ids": [
+          "38afce9b-fd77-4c5e-9257-ba75b08eeb24"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T19:03:04.506477Z",
+        "metadata": {
+          "source": "user_input"
+        }
+      },
+      "25eccafc-04b1-470b-81f9-86ea19e8915d": {
+        "artifact_id": "25eccafc-04b1-470b-81f9-86ea19e8915d",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg",
+        "content_hash": "9818cdd69d3b26cbd238d60780f5a566bee625b857232a79ed5ca02595c100a8",
+        "format": "gpkg",
+        "media_type": null,
+        "data_model": "vector",
+        "producer_task_id": null,
+        "producer_binding_id": null,
+        "role": "input_2",
+        "evidence_ids": [
+          "c0271618-ce10-4619-bb38-07f13504cfbe"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T19:03:04.507232Z",
+        "metadata": {
+          "source": "user_input"
+        }
+      },
+      "02ff0942-3e2a-4a4e-9a62-72042c2e53a8": {
+        "artifact_id": "02ff0942-3e2a-4a4e-9a62-72042c2e53a8",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/projection_agent/reprojected_039d4daa.gpkg",
+        "content_hash": "01279cf077724f2fb6a541841a981f316fef0ca93e8c40e828c878ddeff1fdc0",
+        "format": "gpkg",
+        "media_type": null,
+        "data_model": "vector",
+        "producer_task_id": "reproject_census_tracts",
+        "producer_binding_id": "883e479e-64f8-4280-9cae-5611c3f86b1d",
+        "role": "tracts_projected",
+        "evidence_ids": [
+          "ec5c6dde-46cc-4801-8077-8034b206d37a"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T19:03:45.354287Z",
+        "metadata": {}
+      },
+      "b97b99fa-7c95-408a-a923-e68b9b3fcac7": {
+        "artifact_id": "b97b99fa-7c95-408a-a923-e68b9b3fcac7",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_424552ed_fx_state_college_boundary.gpkg",
+        "content_hash": "8babd6041cfb3fb8cd2a574e212372b937de7810908f0691bde166acca8d126a",
+        "format": "gpkg",
+        "media_type": null,
+        "data_model": "vector",
+        "producer_task_id": "retrieve_state_college_borough",
+        "producer_binding_id": "ee3a2f45-2433-45dc-b607-7f8dbd4b2eef",
+        "role": "borough_boundary",
+        "evidence_ids": [
+          "5f530259-8a79-4093-8544-eceb55a17893"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T19:03:48.632096Z",
+        "metadata": {}
+      }
+    },
+    "derivations": {
+      "afbb7e84-02ef-4fe7-9447-b62b618f958d": {
+        "derivation_id": "afbb7e84-02ef-4fe7-9447-b62b618f958d",
+        "output_artifact_id": "02ff0942-3e2a-4a4e-9a62-72042c2e53a8",
+        "source_artifact_ids": [
+          "25eccafc-04b1-470b-81f9-86ea19e8915d"
+        ],
+        "producer_task_id": "reproject_census_tracts",
+        "operation": "reproject",
+        "parameters": {
+          "operation": "reproject",
+          "target_crs": "EPSG:3857"
+        },
+        "semantic_effect": "Produced role 'tracts_projected' using operation 'reproject'.",
+        "evidence_snapshot_ids": [],
+        "created_at": "2026-08-21T19:03:45.354326Z"
+      },
+      "7925299b-94bf-4a7a-afca-313c3478f284": {
+        "derivation_id": "7925299b-94bf-4a7a-afca-313c3478f284",
+        "output_artifact_id": "b97b99fa-7c95-408a-a923-e68b9b3fcac7",
+        "source_artifact_ids": [],
+        "producer_task_id": "retrieve_state_college_borough",
+        "operation": "dataset_retrieval",
+        "parameters": {},
+        "semantic_effect": "Produced role 'borough_boundary' using operation 'dataset_retrieval'.",
+        "evidence_snapshot_ids": [],
+        "created_at": "2026-08-21T19:03:48.632126Z"
+      }
+    },
+    "requirements": {
+      "req_borough_coverage": {
+        "requirement_id": "req_borough_coverage",
+        "requirement_type": "spatial_coverage",
+        "scope": "The retrieved borough boundary must represent State College borough.",
+        "task_id": "retrieve_state_college_borough",
+        "artifact_roles": [
+          "borough_boundary"
+        ],
+        "parameters": {
+          "place": "State College borough"
+        },
+        "blocking": true,
+        "provenance": "USER_EXPLICIT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [
+          "5f530259-8a79-4093-8544-eceb55a17893"
+        ],
+        "superseded_by": null
+      },
+      "req_borough_format": {
+        "requirement_id": "req_borough_format",
+        "requirement_type": "format_compatible",
+        "scope": "The retrieved borough boundary must be available in a vector format accepted by reprojection and overlay, preferably GeoPackage.",
+        "task_id": "retrieve_state_college_borough",
+        "artifact_roles": [
+          "borough_boundary"
+        ],
+        "parameters": {
+          "formats": [
+            "GPKG"
+          ],
+          "data_model": "vector"
+        },
+        "blocking": true,
+        "provenance": "WORKER_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [
+          "5f530259-8a79-4093-8544-eceb55a17893"
+        ],
+        "superseded_by": null
+      },
+      "req_borough_crs_present": {
+        "requirement_id": "req_borough_crs_present",
+        "requirement_type": "crs_present",
+        "scope": "The retrieved borough boundary must have a known source CRS before reprojection.",
+        "task_id": "reproject_borough_boundary",
+        "artifact_roles": [
+          "borough_boundary"
+        ],
+        "parameters": {},
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [
+          "5f530259-8a79-4093-8544-eceb55a17893"
+        ],
+        "superseded_by": null
+      },
+      "req_borough_valid_geometry": {
+        "requirement_id": "req_borough_valid_geometry",
+        "requirement_type": "valid_geometry",
+        "scope": "The borough boundary must contain valid, non-empty polygon geometry for reprojection and overlay.",
+        "task_id": "reproject_borough_boundary",
+        "artifact_roles": [
+          "borough_boundary"
+        ],
+        "parameters": {},
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [
+          "5f530259-8a79-4093-8544-eceb55a17893"
+        ],
+        "superseded_by": null
+      },
+      "req_overlay_compatible_crs": {
+        "requirement_id": "req_overlay_compatible_crs",
+        "requirement_type": "compatible_crs",
+        "scope": "The projected census tracts and projected borough boundary must use compatible CRSs for polygon overlay.",
+        "task_id": "derive_intersecting_tracts",
+        "artifact_roles": [
+          "tracts_projected",
+          "borough_projected"
+        ],
+        "parameters": {
+          "target_crs": "EPSG:3857"
+        },
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_overlay_valid_geometry": {
+        "requirement_id": "req_overlay_valid_geometry",
+        "requirement_type": "valid_geometry",
+        "scope": "Both projected polygon inputs must have valid, non-empty geometries for overlay.",
+        "task_id": "derive_intersecting_tracts",
+        "artifact_roles": [
+          "tracts_projected",
+          "borough_projected"
+        ],
+        "parameters": {},
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_overlay_geoid": {
+        "requirement_id": "req_overlay_geoid",
+        "requirement_type": "required_fields",
+        "scope": "The intersecting tract output must retain the observed census tract identifier field GEOID.",
+        "task_id": "derive_intersecting_tracts",
+        "artifact_roles": [
+          "tracts_projected",
+          "intersecting_tracts"
+        ],
+        "parameters": {
+          "fields": [
+            "GEOID"
+          ]
+        },
+        "blocking": true,
+        "provenance": "DOWNSTREAM_CONSUMER",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_zonal_compatible_crs": {
+        "requirement_id": "req_zonal_compatible_crs",
+        "requirement_type": "compatible_crs",
+        "scope": "The DEM and intersecting tract zones must use compatible CRSs for zonal statistics.",
+        "task_id": "compute_mean_elevation_by_tract",
+        "artifact_roles": [
+          "input_1",
+          "intersecting_tracts"
+        ],
+        "parameters": {
+          "raster_crs": "EPSG:3857",
+          "zone_crs": "EPSG:3857"
+        },
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_zonal_valid_geometry": {
+        "requirement_id": "req_zonal_valid_geometry",
+        "requirement_type": "valid_geometry",
+        "scope": "The intersecting tract zones must contain valid, non-empty polygon geometries for zonal statistics.",
+        "task_id": "compute_mean_elevation_by_tract",
+        "artifact_roles": [
+          "intersecting_tracts"
+        ],
+        "parameters": {},
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_zonal_geoid": {
+        "requirement_id": "req_zonal_geoid",
+        "requirement_type": "required_fields",
+        "scope": "The zonal statistics output must retain the census tract identifier GEOID for each mean elevation result.",
+        "task_id": "compute_mean_elevation_by_tract",
+        "artifact_roles": [
+          "intersecting_tracts",
+          "mean_elevation_by_tract"
+        ],
+        "parameters": {
+          "fields": [
+            "GEOID"
+          ]
+        },
+        "blocking": true,
+        "provenance": "DOWNSTREAM_CONSUMER",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "4428b6f6-4b9b-4b2e-9c12-5601177f60cb": {
+        "requirement_id": "4428b6f6-4b9b-4b2e-9c12-5601177f60cb",
+        "requirement_type": "compatible_crs",
+        "scope": "task_transition",
+        "task_id": "derive_intersecting_tracts",
+        "artifact_roles": [
+          "tracts_projected",
+          "borough_projected"
+        ],
+        "parameters": {},
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "operation_contract_catalog",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "d74726c5-d1b0-4434-a53f-46e1cd7b1e38": {
+        "requirement_id": "d74726c5-d1b0-4434-a53f-46e1cd7b1e38",
+        "requirement_type": "valid_geometry",
+        "scope": "task_transition",
+        "task_id": "derive_intersecting_tracts",
+        "artifact_roles": [
+          "tracts_projected",
+          "borough_projected"
+        ],
+        "parameters": {},
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "operation_contract_catalog",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "caa1c1d5-643a-4555-aede-895e8472234b": {
+        "requirement_id": "caa1c1d5-643a-4555-aede-895e8472234b",
+        "requirement_type": "compatible_crs",
+        "scope": "task_transition",
+        "task_id": "compute_mean_elevation_by_tract",
+        "artifact_roles": [
+          "input_1",
+          "intersecting_tracts"
+        ],
+        "parameters": {},
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "operation_contract_catalog",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      }
+    },
+    "commitments": {},
+    "schema_mappings": {},
+    "evidence": {
+      "38afce9b-fd77-4c5e-9257-ba75b08eeb24": {
+        "evidence_id": "38afce9b-fd77-4c5e-9257-ba75b08eeb24",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "b940b00c-3034-4b1d-bd9e-7142ea6b7e84"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_dem_centre_epsg3857.tif",
+          "format": "tif",
+          "size_bytes": 160483,
+          "complete": true,
+          "limitations": [],
+          "data_model": "raster",
+          "width": 200,
+          "height": 200,
+          "band_count": 1,
+          "resolution": [
+            222.6389815865457,
+            220.748668296556
+          ],
+          "transform": [
+            222.6389815865457,
+            0.0,
+            -8694052.230954666,
+            0.0,
+            -220.748668296556,
+            5012341.663847517,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "grid_origin": [
+            -8694052.230954666,
+            5012341.663847517
+          ],
+          "bounds": [
+            -8694052.230954666,
+            4968191.930188206,
+            -8649524.434637357,
+            5012341.663847517
+          ],
+          "nodata": null,
+          "dtype": "float32",
+          "driver": "GTiff",
+          "crs": "EPSG:3857",
+          "crs_authority": "EPSG:3857",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T19:03:04.509915Z",
+        "complete": true,
+        "limitations": []
+      },
+      "c0271618-ce10-4619-bb38-07f13504cfbe": {
+        "evidence_id": "c0271618-ce10-4619-bb38-07f13504cfbe",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "25eccafc-04b1-470b-81f9-86ea19e8915d"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg",
+          "format": "gpkg",
+          "size_bytes": 98304,
+          "complete": true,
+          "limitations": [],
+          "data_model": "vector",
+          "feature_count": 16,
+          "schema": {
+            "GEOID": "object",
+            "NAME": "object",
+            "COUNTYFP": "object",
+            "STATEFP": "object"
+          },
+          "schema_fields": [
+            "GEOID",
+            "NAME",
+            "COUNTYFP",
+            "STATEFP"
+          ],
+          "geometry_type": [
+            "Polygon"
+          ],
+          "geometry_valid": true,
+          "invalid_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "null_geometry_count": 0,
+          "bounds": [
+            238087.3824011362,
+            4508961.385028789,
+            272914.01066431846,
+            4543387.006183241
+          ],
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true,
+          "crs": "EPSG:26918",
+          "crs_authority": "EPSG:26918",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T19:03:04.516743Z",
+        "complete": true,
+        "limitations": []
+      },
+      "ec5c6dde-46cc-4801-8077-8034b206d37a": {
+        "evidence_id": "ec5c6dde-46cc-4801-8077-8034b206d37a",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "02ff0942-3e2a-4a4e-9a62-72042c2e53a8"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/projection_agent/reprojected_039d4daa.gpkg",
+          "format": "gpkg",
+          "size_bytes": 98304,
+          "complete": true,
+          "limitations": [],
+          "data_model": "vector",
+          "feature_count": 16,
+          "schema": {
+            "GEOID": "object",
+            "NAME": "object",
+            "COUNTYFP": "object",
+            "STATEFP": "object"
+          },
+          "schema_fields": [
+            "GEOID",
+            "NAME",
+            "COUNTYFP",
+            "STATEFP"
+          ],
+          "geometry_type": [
+            "Polygon"
+          ],
+          "geometry_valid": true,
+          "invalid_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "null_geometry_count": 0,
+          "bounds": [
+            -8694052.230954666,
+            4968191.930188205,
+            -8649524.434637357,
+            5012341.663847517
+          ],
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true,
+          "crs": "EPSG:3857",
+          "crs_authority": "EPSG:3857",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T19:03:45.360636Z",
+        "complete": true,
+        "limitations": []
+      },
+      "5f530259-8a79-4093-8544-eceb55a17893": {
+        "evidence_id": "5f530259-8a79-4093-8544-eceb55a17893",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "b97b99fa-7c95-408a-a923-e68b9b3fcac7"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_424552ed_fx_state_college_boundary.gpkg",
+          "format": "gpkg",
+          "size_bytes": 98304,
+          "complete": true,
+          "limitations": [],
+          "data_model": "vector",
+          "feature_count": 1,
+          "schema": {
+            "GEOID": "object",
+            "NAME": "object",
+            "TYPE": "object"
+          },
+          "schema_fields": [
+            "GEOID",
+            "NAME",
+            "TYPE"
+          ],
+          "geometry_type": [
+            "Polygon"
+          ],
+          "geometry_valid": true,
+          "invalid_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "null_geometry_count": 0,
+          "bounds": [
+            256968.8034961426,
+            4518189.311213346,
+            261296.18387299398,
+            4521657.552605943
+          ],
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true,
+          "crs": "EPSG:26918",
+          "crs_authority": "EPSG:26918",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T19:03:48.638774Z",
+        "complete": true,
+        "limitations": []
+      }
+    },
+    "violations": {
+      "8c71c23a-7950-4198-b608-928671c8e580": {
+        "violation_id": "8c71c23a-7950-4198-b608-928671c8e580",
+        "code": "CRS_INCOMPATIBLE",
+        "layer": "deterministic_task_contract",
+        "task_id": "derive_intersecting_tracts",
+        "artifact_ids": [
+          "25eccafc-04b1-470b-81f9-86ea19e8915d",
+          "02ff0942-3e2a-4a4e-9a62-72042c2e53a8"
+        ],
+        "requirement_ids": [],
+        "evidence_ids": [
+          "c0271618-ce10-4619-bb38-07f13504cfbe",
+          "ec5c6dde-46cc-4801-8077-8034b206d37a"
+        ],
+        "blocking": true,
+        "deterministic": true,
+        "computationally_resolvable": true,
+        "status": "active",
+        "created_in_plan_version": 1,
+        "resolved_by_evidence_ids": [],
+        "resolved_in_plan_version": null,
+        "created_at": "2026-08-21T19:03:45.361003Z",
+        "resolved_at": null
+      },
+      "6beab2cd-8382-4a27-ae4f-46324f7fcce0": {
+        "violation_id": "6beab2cd-8382-4a27-ae4f-46324f7fcce0",
+        "code": "DATA_MODEL_INCOMPATIBLE",
+        "layer": "deterministic_task_contract",
+        "task_id": "reproject_borough_boundary",
+        "artifact_ids": [
+          "b97b99fa-7c95-408a-a923-e68b9b3fcac7"
+        ],
+        "requirement_ids": [],
+        "evidence_ids": [
+          "5f530259-8a79-4093-8544-eceb55a17893"
+        ],
+        "blocking": true,
+        "deterministic": true,
+        "computationally_resolvable": true,
+        "status": "active",
+        "created_in_plan_version": 1,
+        "resolved_by_evidence_ids": [],
+        "resolved_in_plan_version": null,
+        "created_at": "2026-08-21T19:03:48.639057Z",
+        "resolved_at": null
+      }
+    },
+    "execution_history": [
+      {
+        "event_id": "a5bb4459-a995-4c17-942b-b4885192c904",
+        "event_type": "initial_plan_committed",
+        "actor": "planner_component",
+        "state_version": 0,
+        "plan_version": 1,
+        "task_id": null,
+        "reason": "Retrieve a State College borough boundary, transform the tract and borough layers to the DEM CRS, derive the census-tract areas intersecting the borough, and compute mean DEM elevation for those zones.",
+        "metadata": {
+          "task_ids": [
+            "compute_mean_elevation_by_tract",
+            "derive_intersecting_tracts",
+            "reproject_borough_boundary",
+            "reproject_census_tracts",
+            "retrieve_state_college_borough"
+          ]
+        },
+        "created_at": "2026-08-21T19:03:45.319851Z"
+      },
+      {
+        "event_id": "42355dfe-c523-42ac-88e6-1c6434365684",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 1,
+        "plan_version": 1,
+        "task_id": "reproject_census_tracts",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "proposed",
+          "to": "ready"
+        },
+        "created_at": "2026-08-21T19:03:45.322962Z"
+      },
+      {
+        "event_id": "d0f38fc1-2388-4e9c-968e-e877482013bf",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 2,
+        "plan_version": 1,
+        "task_id": "reproject_census_tracts",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-21T19:03:45.325066Z"
+      },
+      {
+        "event_id": "bb017037-dd11-4562-b6e6-3e76c227ca4a",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 3,
+        "plan_version": 1,
+        "task_id": "reproject_census_tracts",
+        "reason": "Worker bound.",
+        "metadata": {
+          "from": "binding",
+          "to": "bound"
+        },
+        "created_at": "2026-08-21T19:03:45.326967Z"
+      },
+      {
+        "event_id": "4d0d616b-4679-43c9-9f0e-359ced8ef629",
+        "event_type": "pre_execution_requirements_evaluated",
+        "actor": "invariant_engine",
+        "state_version": 4,
+        "plan_version": 1,
+        "task_id": "reproject_census_tracts",
+        "reason": "All currently evaluable preconditions are satisfied.",
+        "metadata": {
+          "evaluated_requirement_ids": [],
+          "blocking_violation_ids": []
+        },
+        "created_at": "2026-08-21T19:03:45.329005Z"
+      },
+      {
+        "event_id": "09d57a90-39f7-49f8-8b29-dc11f42927e5",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 5,
+        "plan_version": 1,
+        "task_id": "reproject_census_tracts",
+        "reason": "Worker started.",
+        "metadata": {
+          "from": "bound",
+          "to": "running"
+        },
+        "created_at": "2026-08-21T19:03:45.330921Z"
+      },
+      {
+        "event_id": "4f4554d3-78a2-4a41-8daa-32e9079cef35",
+        "event_type": "worker_execution_completed",
+        "actor": "worker_executor",
+        "state_version": 6,
+        "plan_version": 1,
+        "task_id": "reproject_census_tracts",
+        "reason": "Worker returned successfully.",
+        "metadata": {
+          "binding_id": "883e479e-64f8-4280-9cae-5611c3f86b1d",
+          "agent_id": "projection_agent",
+          "operation": "reproject",
+          "attempt": 1,
+          "status": "successful",
+          "duration_seconds": 0.017661912002949975
+        },
+        "created_at": "2026-08-21T19:03:45.351071Z"
+      },
+      {
+        "event_id": "543641cf-9009-4cc5-83de-5dc8f890bb07",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 6,
+        "plan_version": 1,
+        "task_id": "reproject_census_tracts",
+        "reason": "Worker returned a provisional result.",
+        "metadata": {
+          "from": "running",
+          "to": "provisional_success"
+        },
+        "created_at": "2026-08-21T19:03:45.351144Z"
+      },
+      {
+        "event_id": "e686df0b-e49e-40f6-a4be-5167cc66b5ac",
+        "event_type": "artifact_registered",
+        "actor": "artifact_registry",
+        "state_version": 7,
+        "plan_version": 1,
+        "task_id": "reproject_census_tracts",
+        "reason": null,
+        "metadata": {
+          "artifact_id": "02ff0942-3e2a-4a4e-9a62-72042c2e53a8",
+          "role": "tracts_projected",
+          "content_hash": "01279cf077724f2fb6a541841a981f316fef0ca93e8c40e828c878ddeff1fdc0"
+        },
+        "created_at": "2026-08-21T19:03:45.354350Z"
+      },
+      {
+        "event_id": "5ee517f5-32e8-4bb6-ae53-32a260a7d4e0",
+        "event_type": "deterministic_contract_violation_detected",
+        "actor": "invariant_engine",
+        "state_version": 7,
+        "plan_version": 1,
+        "task_id": "derive_intersecting_tracts",
+        "reason": "Detected task-contract violation: CRS_INCOMPATIBLE.",
+        "metadata": {
+          "violation_id": "8c71c23a-7950-4198-b608-928671c8e580",
+          "code": "CRS_INCOMPATIBLE",
+          "artifact_ids": [
+            "25eccafc-04b1-470b-81f9-86ea19e8915d",
+            "02ff0942-3e2a-4a4e-9a62-72042c2e53a8"
+          ],
+          "computationally_resolvable": true,
+          "details": {
+            "operation": "overlay",
+            "crs_values": [
+              "EPSG:26918",
+              "EPSG:3857"
+            ]
+          }
+        },
+        "created_at": "2026-08-21T19:03:45.361033Z"
+      },
+      {
+        "event_id": "e60f7b60-9bd6-4fb1-b565-765ccefd6045",
+        "event_type": "downstream_requirement_pre_evaluated",
+        "actor": "invariant_engine",
+        "state_version": 7,
+        "plan_version": 1,
+        "task_id": "derive_intersecting_tracts",
+        "reason": "New producer evidence established a downstream task precondition violation.",
+        "metadata": {
+          "producer_task_id": "reproject_census_tracts",
+          "violation_ids": [
+            "8c71c23a-7950-4198-b608-928671c8e580"
+          ]
+        },
+        "created_at": "2026-08-21T19:03:45.361094Z"
+      },
+      {
+        "event_id": "72138e76-2799-4b77-b11f-cbba5f9c43e3",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 8,
+        "plan_version": 1,
+        "task_id": "reproject_census_tracts",
+        "reason": "Reviewing runtime evidence.",
+        "metadata": {
+          "from": "provisional_success",
+          "to": "validating"
+        },
+        "created_at": "2026-08-21T19:03:45.363485Z"
+      },
+      {
+        "event_id": "fef1ab66-8598-4d5e-9929-5ad4024642ec",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 9,
+        "plan_version": 1,
+        "task_id": "reproject_census_tracts",
+        "reason": "The reproject task succeeded. Runtime evidence confirms a complete GPKG vector artifact with 16 valid polygon features, preserved GEOID and other tract attributes, and CRS EPSG:3857 matching the task target. There are no active deterministic violations for the current task. The downstream CRS incompatibility is a downstream precondition and does not invalidate this successful producer.",
+        "metadata": {
+          "from": "validating",
+          "to": "successful"
+        },
+        "created_at": "2026-08-21T19:03:48.609794Z"
+      },
+      {
+        "event_id": "232f6d58-7182-43b8-be63-105a40cf0d04",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 10,
+        "plan_version": 1,
+        "task_id": "retrieve_state_college_borough",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "proposed",
+          "to": "ready"
+        },
+        "created_at": "2026-08-21T19:03:48.613372Z"
+      },
+      {
+        "event_id": "ea621c01-e0e6-4276-b129-6412955241ff",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 11,
+        "plan_version": 1,
+        "task_id": "retrieve_state_college_borough",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-21T19:03:48.616187Z"
+      },
+      {
+        "event_id": "5331e13b-13f0-44cf-bb61-ac54765b7847",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 12,
+        "plan_version": 1,
+        "task_id": "retrieve_state_college_borough",
+        "reason": "Worker bound.",
+        "metadata": {
+          "from": "binding",
+          "to": "bound"
+        },
+        "created_at": "2026-08-21T19:03:48.618691Z"
+      },
+      {
+        "event_id": "0b2a6c58-9974-45e4-bdf3-adb55f0b9215",
+        "event_type": "pre_execution_requirements_evaluated",
+        "actor": "invariant_engine",
+        "state_version": 13,
+        "plan_version": 1,
+        "task_id": "retrieve_state_college_borough",
+        "reason": "All currently evaluable preconditions are satisfied.",
+        "metadata": {
+          "evaluated_requirement_ids": [],
+          "blocking_violation_ids": []
+        },
+        "created_at": "2026-08-21T19:03:48.621204Z"
+      },
+      {
+        "event_id": "f3e7bd53-93a5-4331-a475-28b1209176b8",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 14,
+        "plan_version": 1,
+        "task_id": "retrieve_state_college_borough",
+        "reason": "Worker started.",
+        "metadata": {
+          "from": "bound",
+          "to": "running"
+        },
+        "created_at": "2026-08-21T19:03:48.623683Z"
+      },
+      {
+        "event_id": "2fd8c234-a631-4678-8ca8-23fef385a474",
+        "event_type": "worker_execution_completed",
+        "actor": "worker_executor",
+        "state_version": 15,
+        "plan_version": 1,
+        "task_id": "retrieve_state_college_borough",
+        "reason": "Worker returned successfully.",
+        "metadata": {
+          "binding_id": "ee3a2f45-2433-45dc-b607-7f8dbd4b2eef",
+          "agent_id": "data_retrieval_agent",
+          "operation": "dataset_retrieval",
+          "attempt": 1,
+          "status": "successful",
+          "duration_seconds": 0.0024063369928626344
+        },
+        "created_at": "2026-08-21T19:03:48.628677Z"
+      },
+      {
+        "event_id": "ec60ec5c-7aa4-4f3d-983c-a8be089eabf0",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 15,
+        "plan_version": 1,
+        "task_id": "retrieve_state_college_borough",
+        "reason": "Worker returned a provisional result.",
+        "metadata": {
+          "from": "running",
+          "to": "provisional_success"
+        },
+        "created_at": "2026-08-21T19:03:48.628732Z"
+      },
+      {
+        "event_id": "b9c48fef-bda0-4734-9784-27a487a3f283",
+        "event_type": "artifact_registered",
+        "actor": "artifact_registry",
+        "state_version": 16,
+        "plan_version": 1,
+        "task_id": "retrieve_state_college_borough",
+        "reason": null,
+        "metadata": {
+          "artifact_id": "b97b99fa-7c95-408a-a923-e68b9b3fcac7",
+          "role": "borough_boundary",
+          "content_hash": "8babd6041cfb3fb8cd2a574e212372b937de7810908f0691bde166acca8d126a"
+        },
+        "created_at": "2026-08-21T19:03:48.632148Z"
+      },
+      {
+        "event_id": "a58c51ba-8571-4d24-85aa-291962991bb4",
+        "event_type": "deterministic_contract_violation_detected",
+        "actor": "invariant_engine",
+        "state_version": 16,
+        "plan_version": 1,
+        "task_id": "reproject_borough_boundary",
+        "reason": "Detected task-contract violation: DATA_MODEL_INCOMPATIBLE.",
+        "metadata": {
+          "violation_id": "6beab2cd-8382-4a27-ae4f-46324f7fcce0",
+          "code": "DATA_MODEL_INCOMPATIBLE",
+          "artifact_ids": [
+            "b97b99fa-7c95-408a-a923-e68b9b3fcac7"
+          ],
+          "computationally_resolvable": true,
+          "details": {
+            "role": "borough_boundary",
+            "required_data_model": "dataset",
+            "actual_data_model": "vector"
+          }
+        },
+        "created_at": "2026-08-21T19:03:48.639085Z"
+      },
+      {
+        "event_id": "356d3565-e218-483d-b143-b1c5ce6c54db",
+        "event_type": "downstream_requirement_pre_evaluated",
+        "actor": "invariant_engine",
+        "state_version": 16,
+        "plan_version": 1,
+        "task_id": "reproject_borough_boundary",
+        "reason": "New producer evidence established a downstream task precondition violation.",
+        "metadata": {
+          "producer_task_id": "retrieve_state_college_borough",
+          "violation_ids": [
+            "6beab2cd-8382-4a27-ae4f-46324f7fcce0"
+          ]
+        },
+        "created_at": "2026-08-21T19:03:48.639166Z"
+      },
+      {
+        "event_id": "8d93f575-9ad8-4970-be83-9e72235f620b",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 17,
+        "plan_version": 1,
+        "task_id": "retrieve_state_college_borough",
+        "reason": "Reviewing runtime evidence.",
+        "metadata": {
+          "from": "provisional_success",
+          "to": "validating"
+        },
+        "created_at": "2026-08-21T19:03:48.642364Z"
+      },
+      {
+        "event_id": "53e6f974-5778-486a-9a88-0391bf4010cf",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 18,
+        "plan_version": 1,
+        "task_id": "retrieve_state_college_borough",
+        "reason": "The retrieval worker succeeded. Runtime evidence confirms a complete GeoPackage vector artifact with polygon geometry, valid geometry, required coverage, and CRS EPSG:26918. There are no deterministic violations for the current retrieval task. Downstream compatibility issues do not invalidate this successful producer.",
+        "metadata": {
+          "from": "validating",
+          "to": "successful"
+        },
+        "created_at": "2026-08-21T19:03:52.293269Z"
+      },
+      {
+        "event_id": "a2855745-4ad9-4f14-8199-084c91678deb",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 19,
+        "plan_version": 1,
+        "task_id": "reproject_borough_boundary",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "proposed",
+          "to": "ready"
+        },
+        "created_at": "2026-08-21T19:03:52.300576Z"
+      },
+      {
+        "event_id": "21ec33e9-656f-49f7-bd16-1daa1ee25106",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 20,
+        "plan_version": 1,
+        "task_id": "reproject_borough_boundary",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-21T19:03:52.303593Z"
+      },
+      {
+        "event_id": "953d0823-cfa0-458d-8d3d-331ba2838772",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 21,
+        "plan_version": 1,
+        "task_id": "reproject_borough_boundary",
+        "reason": "Worker bound.",
+        "metadata": {
+          "from": "binding",
+          "to": "bound"
+        },
+        "created_at": "2026-08-21T19:03:52.307748Z"
+      },
+      {
+        "event_id": "e38d6a35-f887-416f-afa7-674d3f96fb12",
+        "event_type": "pre_execution_requirements_evaluated",
+        "actor": "invariant_engine",
+        "state_version": 22,
+        "plan_version": 1,
+        "task_id": "reproject_borough_boundary",
+        "reason": "Known blocking preconditions failed.",
+        "metadata": {
+          "evaluated_requirement_ids": [
+            "req_borough_crs_present",
+            "req_borough_valid_geometry"
+          ],
+          "blocking_violation_ids": [
+            "6beab2cd-8382-4a27-ae4f-46324f7fcce0"
+          ]
+        },
+        "created_at": "2026-08-21T19:03:52.311016Z"
+      },
+      {
+        "event_id": "57a9e48f-e1f5-41b9-9121-790098242415",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 23,
+        "plan_version": 1,
+        "task_id": "reproject_borough_boundary",
+        "reason": "Reviewing known blocking preconditions before execution.",
+        "metadata": {
+          "from": "bound",
+          "to": "validating"
+        },
+        "created_at": "2026-08-21T19:03:52.313984Z"
+      },
+      {
+        "event_id": "b6b5cf08-7e7c-4b32-b03a-4d7bf23a7892",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 24,
+        "plan_version": 1,
+        "task_id": "reproject_borough_boundary",
+        "reason": "The current task is blocked by the active deterministic DATA_MODEL_INCOMPATIBLE violation: the bound borough boundary artifact is a vector dataset, while the task contract requires a GPKG dataset input. Structural replanning is required to convert or otherwise reconcile the data model before reprojection can proceed. The downstream CRS violation is not acknowledged because it belongs to a downstream task.",
+        "metadata": {
+          "from": "validating",
+          "to": "rejected"
+        },
+        "created_at": "2026-08-21T19:03:57.007443Z"
+      },
+      {
+        "event_id": "4b785d20-0d78-460e-80a0-188afbeae39e",
+        "event_type": "replanner_patch_normalized",
+        "actor": "graph_controller",
+        "state_version": 25,
+        "plan_version": 1,
+        "task_id": "reproject_borough_boundary",
+        "reason": "Applied controller-owned patch normalization before graph validation.",
+        "metadata": {
+          "normalizations": [
+            "convert_borough_boundary:removed_controller_fields=active_binding_id,attempts,created_in_plan_version,last_error,output_artifact_ids,requirement_ids,status,superseded_in_plan_version"
+          ]
+        },
+        "created_at": "2026-08-21T19:04:20.446647Z"
+      },
+      {
+        "event_id": "a96293ba-4158-4d61-9ec8-d0a5c6ca1927",
+        "event_type": "graph_patch_committed",
+        "actor": "graph_controller",
+        "state_version": 25,
+        "plan_version": 2,
+        "task_id": null,
+        "reason": "Insert the smallest advertised data-model conversion for the retrieved borough boundary, preserve the borough_boundary role, and route the existing reprojection through it. The existing census-tract reprojection already targets EPSG:3857, so enabling the borough reprojection resolves the downstream CRS incompatibility without changing unaffected work or requirement IDs.",
+        "metadata": {
+          "inserted": [
+            "convert_borough_boundary"
+          ],
+          "removed": [],
+          "superseded": [],
+          "stale": [
+            "compute_mean_elevation_by_tract",
+            "derive_intersecting_tracts",
+            "reproject_borough_boundary"
+          ]
+        },
+        "created_at": "2026-08-21T19:04:20.449609Z"
+      },
+      {
+        "event_id": "c090245a-f6e2-4c06-9a39-7b01630c38c3",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 26,
+        "plan_version": 2,
+        "task_id": "convert_borough_boundary",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "proposed",
+          "to": "ready"
+        },
+        "created_at": "2026-08-21T19:04:20.464144Z"
+      },
+      {
+        "event_id": "ed19632f-8cdf-4ab1-b4b0-4e7438d41f40",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 27,
+        "plan_version": 2,
+        "task_id": "convert_borough_boundary",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-21T19:04:20.468544Z"
+      },
+      {
+        "event_id": "69a1e4c0-ab07-43c4-90e1-12f4d9c97c18",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 28,
+        "plan_version": 2,
+        "task_id": "convert_borough_boundary",
+        "reason": "Worker bound.",
+        "metadata": {
+          "from": "binding",
+          "to": "bound"
+        },
+        "created_at": "2026-08-21T19:04:20.472831Z"
+      },
+      {
+        "event_id": "0994cd53-b3b0-4981-8e8e-3ec9ba4bb7d6",
+        "event_type": "pre_execution_requirements_evaluated",
+        "actor": "invariant_engine",
+        "state_version": 29,
+        "plan_version": 2,
+        "task_id": "convert_borough_boundary",
+        "reason": "All currently evaluable preconditions are satisfied.",
+        "metadata": {
+          "evaluated_requirement_ids": [],
+          "blocking_violation_ids": []
+        },
+        "created_at": "2026-08-21T19:04:20.478579Z"
+      },
+      {
+        "event_id": "f78f231e-73b7-42ba-aebb-bcdb9eaf0c8f",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 30,
+        "plan_version": 2,
+        "task_id": "convert_borough_boundary",
+        "reason": "Worker started.",
+        "metadata": {
+          "from": "bound",
+          "to": "running"
+        },
+        "created_at": "2026-08-21T19:04:20.482990Z"
+      },
+      {
+        "event_id": "aaa31d75-e578-4de2-9b83-45d5bbbd56cb",
+        "event_type": "worker_execution_completed",
+        "actor": "worker_executor",
+        "state_version": 31,
+        "plan_version": 2,
+        "task_id": "convert_borough_boundary",
+        "reason": "No recognized conversion operation.",
+        "metadata": {
+          "binding_id": "b045a1a8-d531-425c-85c2-58f7a87ca7de",
+          "agent_id": "conversion_agent",
+          "operation": "format_and_spatial_conversion",
+          "attempt": 1,
+          "status": "failed",
+          "duration_seconds": 0.0001633200008654967
+        },
+        "created_at": "2026-08-21T19:04:20.489984Z"
+      },
+      {
+        "event_id": "746e1baf-d293-46df-95e1-f46220861ccd",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 31,
+        "plan_version": 2,
+        "task_id": "convert_borough_boundary",
+        "reason": "Worker execution failed.",
+        "metadata": {
+          "from": "running",
+          "to": "failed"
+        },
+        "created_at": "2026-08-21T19:04:20.490046Z"
+      },
+      {
+        "event_id": "815b340a-7a19-4d99-8758-94afb9da3c4e",
+        "event_type": "local_recovery_rejected",
+        "actor": "loop_controller",
+        "state_version": 32,
+        "plan_version": 2,
+        "task_id": "convert_borough_boundary",
+        "reason": "QC authorized local recovery types, but none is currently applicable: ['revise_invocation', 'retry'].",
+        "metadata": {},
+        "created_at": "2026-08-21T19:04:25.334594Z"
+      }
+    ],
+    "qc_history": [
+      {
+        "decision_id": "qc-reproject-census-tracts-20260821",
+        "task_id": "reproject_census_tracts",
+        "verdict": "PASS",
+        "proposed_verdict": "PASS",
+        "reason": "The reproject task succeeded. Runtime evidence confirms a complete GPKG vector artifact with 16 valid polygon features, preserved GEOID and other tract attributes, and CRS EPSG:3857 matching the task target. There are no active deterministic violations for the current task. The downstream CRS incompatibility is a downstream precondition and does not invalidate this successful producer.",
+        "acknowledged_finding_ids": [],
+        "action_class": "NONE",
+        "effective_action": "NONE",
+        "effective_action_source": "qc_component",
+        "allowed_recovery_types": [],
+        "recovery_parameters": {},
+        "preserve_completed_work": true,
+        "forced_by_invariant": false,
+        "created_at": "2026-08-21T19:03:45.361003Z"
+      },
+      {
+        "decision_id": "qc-retrieve-state-college-borough-20260821",
+        "task_id": "retrieve_state_college_borough",
+        "verdict": "PASS",
+        "proposed_verdict": "PASS",
+        "reason": "The retrieval worker succeeded. Runtime evidence confirms a complete GeoPackage vector artifact with polygon geometry, valid geometry, required coverage, and CRS EPSG:26918. There are no deterministic violations for the current retrieval task. Downstream compatibility issues do not invalidate this successful producer.",
+        "acknowledged_finding_ids": [],
+        "action_class": "NONE",
+        "effective_action": "NONE",
+        "effective_action_source": "qc_component",
+        "allowed_recovery_types": [],
+        "recovery_parameters": {},
+        "preserve_completed_work": true,
+        "forced_by_invariant": false,
+        "created_at": "2026-08-21T19:03:48.700000Z"
+      },
+      {
+        "decision_id": "qc-reproject-borough-boundary-20260821",
+        "task_id": "reproject_borough_boundary",
+        "verdict": "BLOCK",
+        "proposed_verdict": "BLOCK",
+        "reason": "The current task is blocked by the active deterministic DATA_MODEL_INCOMPATIBLE violation: the bound borough boundary artifact is a vector dataset, while the task contract requires a GPKG dataset input. Structural replanning is required to convert or otherwise reconcile the data model before reprojection can proceed. The downstream CRS violation is not acknowledged because it belongs to a downstream task.",
+        "acknowledged_finding_ids": [
+          "6beab2cd-8382-4a27-ae4f-46324f7fcce0"
+        ],
+        "action_class": "STRUCTURAL_REPLAN",
+        "effective_action": "STRUCTURAL_REPLAN",
+        "effective_action_source": "deterministic_invariant_guardrail",
+        "allowed_recovery_types": [
+          "convert_data_model"
+        ],
+        "recovery_parameters": {
+          "blocking_codes": [
+            "DATA_MODEL_INCOMPATIBLE"
+          ],
+          "blocking_artifact_ids": [
+            "b97b99fa-7c95-408a-a923-e68b9b3fcac7"
+          ],
+          "recovery_goal": "Apply the smallest structural/task patch that resolves every current deterministic blocker while preserving accepted work."
+        },
+        "preserve_completed_work": true,
+        "forced_by_invariant": true,
+        "created_at": "2026-08-21T19:03:48.639057Z"
+      },
+      {
+        "decision_id": "qc-convert-borough-boundary-20260821",
+        "task_id": "convert_borough_boundary",
+        "verdict": "BLOCK",
+        "proposed_verdict": "BLOCK",
+        "reason": "The worker failed because no recognized conversion operation was provided. Revise the current conversion invocation to use a supported operation, then retry while preserving the retrieved borough boundary artifact.",
+        "acknowledged_finding_ids": [],
+        "action_class": "LOCAL_RECOVERY",
+        "effective_action": "LOCAL_RECOVERY",
+        "effective_action_source": "qc_component",
+        "allowed_recovery_types": [
+          "revise_invocation",
+          "retry"
+        ],
+        "recovery_parameters": {
+          "recovery_goal": "Retry only after changing a relevant parameter, input, or invocation."
+        },
+        "preserve_completed_work": true,
+        "forced_by_invariant": false,
+        "created_at": "2026-08-21T19:04:00Z"
+      }
+    ],
+    "replan_history": [
+      {
+        "decision_id": "b906694b-df24-4fa8-99b3-cb287c1d3375",
+        "base_plan_version": 1,
+        "rationale": "Insert the smallest advertised data-model conversion for the retrieved borough boundary, preserve the borough_boundary role, and route the existing reprojection through it. The existing census-tract reprojection already targets EPSG:3857, so enabling the borough reprojection resolves the downstream CRS incompatibility without changing unaffected work or requirement IDs.",
+        "patch": {
+          "base_plan_version": 1,
+          "rationale": "Insert the smallest advertised data-model conversion for the retrieved borough boundary, preserve the borough_boundary role, and route the existing reprojection through it. The existing census-tract reprojection already targets EPSG:3857, so enabling the borough reprojection resolves the downstream CRS incompatibility without changing unaffected work or requirement IDs.",
+          "insert_tasks": [
+            {
+              "task_id": "convert_borough_boundary",
+              "title": "Convert Borough Boundary to Consumer-Compatible Vector Dataset",
+              "purpose": "Reconcile the retrieved borough boundary representation before reprojection while preserving its analytical role.",
+              "operation": "format_and_spatial_conversion",
+              "instructions": "Convert the retrieved borough boundary into a GeoPackage vector representation accepted by the downstream reprojection task. Preserve polygon geometry, attributes, CRS metadata, and the borough_boundary role.",
+              "parameters": {
+                "operation": "format_and_spatial_conversion",
+                "target_format": "GPKG"
+              },
+              "required_capabilities": [
+                "format_and_spatial_conversion"
+              ],
+              "depends_on": [
+                "retrieve_state_college_borough"
+              ],
+              "input_requirements": [
+                {
+                  "role": "borough_boundary",
+                  "data_model": "vector",
+                  "formats": [
+                    "GPKG"
+                  ],
+                  "required": true
+                }
+              ],
+              "expected_outputs": [
+                {
+                  "role": "borough_boundary",
+                  "data_model": "vector",
+                  "formats": [
+                    "GPKG"
+                  ],
+                  "required": true
+                }
+              ],
+              "requirement_ids": [],
+              "status": "proposed",
+              "attempts": 0,
+              "active_binding_id": null,
+              "output_artifact_ids": [],
+              "last_error": null,
+              "created_in_plan_version": 1,
+              "superseded_in_plan_version": null,
+              "metadata": {}
+            }
+          ],
+          "remove_task_ids": [],
+          "supersede_task_ids": [],
+          "update_tasks": {
+            "reproject_borough_boundary": {
+              "task_id": null,
+              "title": null,
+              "purpose": null,
+              "operation": null,
+              "instructions": null,
+              "parameters": null,
+              "required_capabilities": null,
+              "depends_on": [
+                "convert_borough_boundary"
+              ],
+              "input_requirements": [
+                {
+                  "role": "borough_boundary",
+                  "data_model": "vector",
+                  "formats": [
+                    "GPKG"
+                  ],
+                  "required": true
+                }
+              ],
+              "expected_outputs": null,
+              "requirement_ids": null,
+              "status": "proposed",
+              "attempts": 0,
+              "active_binding_id": null,
+              "output_artifact_ids": null,
+              "last_error": null,
+              "created_in_plan_version": null,
+              "superseded_in_plan_version": null,
+              "metadata": null
+            }
+          },
+          "add_dependencies": [],
+          "remove_dependencies": [],
+          "reuse_artifact_ids": [
+            "02ff0942-3e2a-4a4e-9a62-72042c2e53a8",
+            "b97b99fa-7c95-408a-a923-e68b9b3fcac7"
+          ],
+          "reset_task_ids": [
+            "reproject_borough_boundary"
+          ],
+          "commitment_revisions": []
+        },
+        "accepted": true,
+        "created_at": "2026-08-21T19:04:20.449816Z"
+      }
+    ],
+    "component_calls": [
+      {
+        "call_id": "7c78fff9-48c1-4a90-8bef-1b604915eb4b",
+        "component": "planner",
+        "prompt_hash": "879bbf4688237108aa73bcb12bca3ec0b568a6ec20b463cefe3a9dddb652d8de",
+        "tool_schema_hash": "441719facf91fd72ec7e126a4de0921e9629efd4cd39619a5dbe1be9fea2e3fe",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 5689,
+        "output_tokens": 4902,
+        "duration_seconds": 40.77739437100536,
+        "disposition": "successful",
+        "created_at": "2026-08-21T19:03:45.319809Z"
+      },
+      {
+        "call_id": "c1f9fedc-9906-435e-86bb-696b589393fe",
+        "component": "qc",
+        "prompt_hash": "f32e58c2015bc65d1615821b0bf588e3118841b8fd13c0f66435ff64db6bc238",
+        "tool_schema_hash": "264376b66f6ac19b4d57965f2f5a135067cea57302b6779a763ae77f3e5ccb86",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 3440,
+        "output_tokens": 282,
+        "duration_seconds": 3.2399481030006427,
+        "disposition": "successful",
+        "created_at": "2026-08-21T19:03:48.609668Z"
+      },
+      {
+        "call_id": "408c4e37-0352-4a18-b0e8-dc60c05272fd",
+        "component": "qc",
+        "prompt_hash": "f32e58c2015bc65d1615821b0bf588e3118841b8fd13c0f66435ff64db6bc238",
+        "tool_schema_hash": "264376b66f6ac19b4d57965f2f5a135067cea57302b6779a763ae77f3e5ccb86",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 3234,
+        "output_tokens": 265,
+        "duration_seconds": 3.6445087140018586,
+        "disposition": "successful",
+        "created_at": "2026-08-21T19:03:52.293132Z"
+      },
+      {
+        "call_id": "75a55792-c785-4977-93e8-30e41c1177da",
+        "component": "qc",
+        "prompt_hash": "f32e58c2015bc65d1615821b0bf588e3118841b8fd13c0f66435ff64db6bc238",
+        "tool_schema_hash": "264376b66f6ac19b4d57965f2f5a135067cea57302b6779a763ae77f3e5ccb86",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 4080,
+        "output_tokens": 460,
+        "duration_seconds": 4.686620045002201,
+        "disposition": "successful",
+        "created_at": "2026-08-21T19:03:57.007316Z"
+      },
+      {
+        "call_id": "83c0bfcf-0296-403c-8f08-ef5b72e1b722",
+        "component": "replanner",
+        "prompt_hash": "f44710a3ce878e6a4887fd0f8c607350a27b597530562dd74f9ecf59fc440071",
+        "tool_schema_hash": "7e4bffd48521db6cb33fd211812492847a9f5babb3e39c9ed1a4933eb33e3e0a",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 10213,
+        "output_tokens": 2045,
+        "duration_seconds": 23.423009976992034,
+        "disposition": "successful",
+        "created_at": "2026-08-21T19:04:20.458691Z"
+      },
+      {
+        "call_id": "b59d1d7e-7c9c-43ed-b197-24d8b0c86615",
+        "component": "qc",
+        "prompt_hash": "f32e58c2015bc65d1615821b0bf588e3118841b8fd13c0f66435ff64db6bc238",
+        "tool_schema_hash": "264376b66f6ac19b4d57965f2f5a135067cea57302b6779a763ae77f3e5ccb86",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 3294,
+        "output_tokens": 342,
+        "duration_seconds": 4.835770802004845,
+        "disposition": "successful",
+        "created_at": "2026-08-21T19:04:25.334456Z"
+      }
+    ],
+    "plan_versions": [
+      {
+        "version": 1,
+        "parent_version": null,
+        "reason": "Initial plan committed by independent Planner.",
+        "task_ids": [
+          "compute_mean_elevation_by_tract",
+          "derive_intersecting_tracts",
+          "reproject_borough_boundary",
+          "reproject_census_tracts",
+          "retrieve_state_college_borough"
+        ],
+        "edges": [
+          [
+            "derive_intersecting_tracts",
+            "compute_mean_elevation_by_tract"
+          ],
+          [
+            "reproject_borough_boundary",
+            "derive_intersecting_tracts"
+          ],
+          [
+            "reproject_census_tracts",
+            "derive_intersecting_tracts"
+          ],
+          [
+            "retrieve_state_college_borough",
+            "reproject_borough_boundary"
+          ]
+        ],
+        "created_at": "2026-08-21T19:03:45.313536Z"
+      },
+      {
+        "version": 2,
+        "parent_version": 1,
+        "reason": "Insert the smallest advertised data-model conversion for the retrieved borough boundary, preserve the borough_boundary role, and route the existing reprojection through it. The existing census-tract reprojection already targets EPSG:3857, so enabling the borough reprojection resolves the downstream CRS incompatibility without changing unaffected work or requirement IDs.",
+        "task_ids": [
+          "compute_mean_elevation_by_tract",
+          "convert_borough_boundary",
+          "derive_intersecting_tracts",
+          "reproject_borough_boundary",
+          "reproject_census_tracts",
+          "retrieve_state_college_borough"
+        ],
+        "edges": [
+          [
+            "convert_borough_boundary",
+            "reproject_borough_boundary"
+          ],
+          [
+            "derive_intersecting_tracts",
+            "compute_mean_elevation_by_tract"
+          ],
+          [
+            "reproject_borough_boundary",
+            "derive_intersecting_tracts"
+          ],
+          [
+            "reproject_census_tracts",
+            "derive_intersecting_tracts"
+          ],
+          [
+            "retrieve_state_college_borough",
+            "convert_borough_boundary"
+          ]
+        ],
+        "created_at": "2026-08-21T19:04:20.449564Z"
+      }
+    ],
+    "budgets": {
+      "max_total_model_calls": 24,
+      "max_total_tokens": 120000,
+      "max_worker_calls": 30,
+      "max_local_recoveries": 6,
+      "max_replans": 3,
+      "max_runtime_seconds": 900.0,
+      "planner_retry_limit": 2,
+      "qc_retry_limit": 1,
+      "replanner_retry_limit": 1,
+      "total_model_calls": 6,
+      "total_tokens": 38246,
+      "worker_calls": 3,
+      "local_recoveries": 0,
+      "replans": 1
+    },
+    "terminal_state": "failed_unrecoverable",
+    "terminal_reason": "The worker failed because no recognized conversion operation was provided. Revise the current conversion invocation to use a supported operation, then retry while preserving the retrieved borough boundary artifact.",
+    "human_clarification": null,
+    "final_artifact_ids": [],
+    "required_terminal_roles": [
+      "mean_elevation_by_tract"
+    ],
+    "final_disclosure": null,
+    "created_at": "2026-08-21T19:03:04.504907Z",
+    "updated_at": "2026-08-21T19:04:25.337569Z"
+  },
+  "execution_steps": [
+    {
+      "step_index": 1,
+      "step_id": "retrieve_state_college_borough",
+      "agent_id": "data_retrieval_agent",
+      "title": "Retrieve State College Borough Boundary",
+      "instructions": "Retrieve a registered polygon dataset representing the State College borough boundary. The candidate must be inspected at runtime for spatial coverage, vector geometry, CRS, and GeoPackage compatibility.",
+      "output_artifacts": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_424552ed_fx_state_college_boundary.gpkg"
+      ],
+      "status": "successful",
+      "error": null
+    },
+    {
+      "step_index": 2,
+      "step_id": "reproject_census_tracts",
+      "agent_id": "projection_agent",
+      "title": "Reproject Census Tracts to DEM CRS",
+      "instructions": "Reproject the census tract GeoPackage from its observed source CRS to EPSG:3857. Preserve tract attributes and polygon geometry.",
+      "output_artifacts": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/projection_agent/reprojected_039d4daa.gpkg"
+      ],
+      "status": "successful",
+      "error": null
+    },
+    {
+      "step_index": 3,
+      "step_id": "reproject_borough_boundary",
+      "agent_id": null,
+      "title": "Reproject Borough Boundary to DEM CRS",
+      "instructions": "Reproject the retrieved State College borough boundary to EPSG:3857 after runtime inspection confirms that its source CRS is present and known. Preserve polygon geometry.",
+      "output_artifacts": [],
+      "status": "proposed",
+      "error": null
+    },
+    {
+      "step_index": 4,
+      "step_id": "derive_intersecting_tracts",
+      "agent_id": null,
+      "title": "Derive Census Tracts Intersecting State College Borough",
+      "instructions": "Perform a polygon intersection overlay between the projected census tracts and projected State College borough boundary. Retain tract identity attributes, including the observed GEOID field, so the resulting zones remain attributable to census tracts.",
+      "output_artifacts": [],
+      "status": "proposed",
+      "error": null
+    },
+    {
+      "step_index": 5,
+      "step_id": "compute_mean_elevation_by_tract",
+      "agent_id": null,
+      "title": "Compute Mean Elevation by Intersecting Census Tract",
+      "instructions": "Compute zonal statistics using the DEM and the intersecting census tract polygons. Produce a CSV summary containing the mean elevation for each tract zone and retain the tract identifier from the zone layer.",
+      "output_artifacts": [],
+      "status": "proposed",
+      "error": null
+    },
+    {
+      "step_index": 6,
+      "step_id": "convert_borough_boundary",
+      "agent_id": "conversion_agent",
+      "title": "Convert Borough Boundary to Consumer-Compatible Vector Dataset",
+      "instructions": "Convert the retrieved borough boundary into a GeoPackage vector representation accepted by the downstream reprojection task. Preserve polygon geometry, attributes, CRS metadata, and the borough_boundary role.",
+      "output_artifacts": [],
+      "status": "failed",
+      "error": {
+        "code": "E_OPERATION_UNRECOGNIZED",
+        "message": "No recognized conversion operation.",
+        "retryable": false,
+        "details": {}
+      }
+    }
+  ],
+  "qc_evaluations": 4,
+  "qc_blocks": 2,
+  "qc_interventions": 2,
+  "effective_blocks": 2,
+  "effective_interventions": 2,
+  "qc_policy_overrides": 0,
+  "replanning_iterations": 1,
+  "error": "The worker failed because no recognized conversion operation was provided. Revise the current conversion invocation to use a supported operation, then retry while preserving the retrieved borough boundary artifact.",
+  "ledger_events": [
+    {
+      "call_id": "883e479e-64f8-4280-9cae-5611c3f86b1d",
+      "trajectory_id": "traj_ISS_Q23_C2_run1",
+      "agent_id": "projection_agent",
+      "operation": "reproject",
+      "query": "Reproject the census tract GeoPackage from its observed source CRS to EPSG:3857. Preserve tract attributes and polygon geometry.",
+      "timestamp_start": 1787339025.333337,
+      "timestamp_end": 1787339025.35099,
+      "duration_seconds": 0.017661912002949975,
+      "input_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg"
+      ],
+      "input_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg": "9818cdd69d3b26cbd238d60780f5a566bee625b857232a79ed5ca02595c100a8"
+      },
+      "parameters": {
+        "operation": "reproject",
+        "target_crs": "EPSG:3857"
+      },
+      "status": "completed",
+      "error_code": null,
+      "error_message": null,
+      "output_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/projection_agent/reprojected_039d4daa.gpkg"
+      ],
+      "output_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/projection_agent/reprojected_039d4daa.gpkg": "01279cf077724f2fb6a541841a981f316fef0ca93e8c40e828c878ddeff1fdc0"
+      },
+      "summary": "Reprojected 16 features to EPSG:3857.",
+      "raw_response": {
+        "binding_id": "883e479e-64f8-4280-9cae-5611c3f86b1d",
+        "task_id": "reproject_census_tracts",
+        "attempt": 1
+      }
+    },
+    {
+      "call_id": "ee3a2f45-2433-45dc-b607-7f8dbd4b2eef",
+      "trajectory_id": "traj_ISS_Q23_C2_run1",
+      "agent_id": "data_retrieval_agent",
+      "operation": "dataset_retrieval",
+      "query": "Retrieve a registered polygon dataset representing the State College borough boundary. The candidate must be inspected at runtime for spatial coverage, vector geometry, CRS, and GeoPackage compatibility.",
+      "timestamp_start": 1787339028.626216,
+      "timestamp_end": 1787339028.628621,
+      "duration_seconds": 0.0024063369928626344,
+      "input_artifact_paths": [],
+      "input_artifact_hashes": {},
+      "parameters": {},
+      "status": "completed",
+      "error_code": null,
+      "error_message": null,
+      "output_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_424552ed_fx_state_college_boundary.gpkg"
+      ],
+      "output_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_424552ed_fx_state_college_boundary.gpkg": "8babd6041cfb3fb8cd2a574e212372b937de7810908f0691bde166acca8d126a"
+      },
+      "summary": "Successfully retrieved dataset: fx_state_college_boundary.gpkg",
+      "raw_response": {
+        "binding_id": "ee3a2f45-2433-45dc-b607-7f8dbd4b2eef",
+        "task_id": "retrieve_state_college_borough",
+        "attempt": 1
+      }
+    },
+    {
+      "call_id": "b045a1a8-d531-425c-85c2-58f7a87ca7de",
+      "trajectory_id": "traj_ISS_Q23_C2_run1",
+      "agent_id": "conversion_agent",
+      "operation": "format_and_spatial_conversion",
+      "query": "Convert the retrieved borough boundary into a GeoPackage vector representation accepted by the downstream reprojection task. Preserve polygon geometry, attributes, CRS metadata, and the borough_boundary role.",
+      "timestamp_start": 1787339060.489769,
+      "timestamp_end": 1787339060.489932,
+      "duration_seconds": 0.0001633200008654967,
+      "input_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_424552ed_fx_state_college_boundary.gpkg"
+      ],
+      "input_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_424552ed_fx_state_college_boundary.gpkg": "8babd6041cfb3fb8cd2a574e212372b937de7810908f0691bde166acca8d126a"
+      },
+      "parameters": {
+        "operation": "format_and_spatial_conversion",
+        "target_format": "GPKG"
+      },
+      "status": "failed",
+      "error_code": "E_OPERATION_UNRECOGNIZED",
+      "error_message": "No recognized conversion operation.",
+      "output_artifact_paths": [],
+      "output_artifact_hashes": {},
+      "summary": "",
+      "raw_response": {
+        "binding_id": "b045a1a8-d531-425c-85c2-58f7a87ca7de",
+        "task_id": "convert_borough_boundary",
+        "attempt": 1
+      }
+    }
+  ],
+  "created_at": "2026-08-21T19:04:25.344756+00:00",
+  "evaluation": {
+    "task_id": "ISS_Q23",
+    "bafo_success": false,
+    "all_challenges_resolved": false,
+    "evaluability_status": "EVALUABLE",
+    "challenge_activated": true,
+    "trajectory_classification": "valid_bafo_fail",
+    "production_terminal_state": "failed_unrecoverable",
+    "terminal_state": "failed",
+    "constraint_results": {
+      "harmonized_crs_before_zonal_stats": {
+        "constraint_key": "harmonized_crs_before_zonal_stats",
+        "status": "PASS",
+        "reason": "Raster and vector spatial references harmonized for zonal statistics.",
+        "details": {
+          "output_features": 16
+        }
+      },
+      "zonal_statistics_output": {
+        "constraint_key": "zonal_statistics_output",
+        "status": "PASS",
+        "reason": "Raster and vector spatial references harmonized for zonal statistics.",
+        "details": {
+          "output_features": 16
+        }
+      }
+    },
+    "passed_constraints": [
+      "harmonized_crs_before_zonal_stats",
+      "zonal_statistics_output"
+    ],
+    "failed_constraints": [],
+    "unevaluable_constraints": [],
+    "inspected_artifacts_count": 2,
+    "events_count": 3,
+    "diagnostic_summary": "BAFO: False | State: failed (Valid: False) | Constraints: 2 PASS, 0 FAIL, 0 UNEVALUABLE | Events Recorded: 3 | Artifacts Inspected: 2"
+  },
+  "bafo_success": false,
+  "all_challenges_resolved": false,
+  "trajectory_classification": "valid_bafo_fail"
+}

@@ -1,0 +1,2097 @@
+{
+  "trajectory_id": "traj_ISS_Q17_C1_run2",
+  "task_id": "ISS_Q17",
+  "condition": "C1",
+  "model": "gpt-5.6-luna",
+  "run_index": 2,
+  "suite": "isolated",
+  "user_question": "Calculate mean elevation for every census tract that intersects State College borough.",
+  "input_artifact_paths": [
+    "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_dem_partial_60pct_utm.tif",
+    "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_dem_centre_30m_utm.tif",
+    "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_state_college_boundary.gpkg"
+  ],
+  "status": "successful",
+  "total_wall_time": 60.001,
+  "rate_limit_wait_time": 0.0,
+  "provider_retry_wait_time": 0.0,
+  "orchestration_active_time": 59.958,
+  "worker_execution_time": 0.042,
+  "total_tokens": 18791,
+  "input_tokens": 13580,
+  "output_tokens": 5211,
+  "outputs": {
+    "summary": "Workflow completed with accepted terminal artifacts.",
+    "artifacts": [
+      "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/raster_analysis_agent/zonal_stats_3e22001b.csv"
+    ],
+    "produced_artifacts": [
+      "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_bba5b515_fx_tracts_centre_utm.gpkg",
+      "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_a/intersect_9d081975.gpkg",
+      "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/raster_analysis_agent/zonal_stats_3e22001b.csv"
+    ],
+    "workflow_plan": {
+      "workflow_id": "3129aa6c-e3f7-410e-b7c5-ab1b55c8d81a",
+      "plan_version": 1,
+      "goal": "Calculate mean elevation for every census tract that intersects State College borough.",
+      "workflow_steps": [
+        {
+          "step_id": "task_retrieve_census_tracts",
+          "title": "Retrieve census tract polygons",
+          "purpose": "Obtain a census tract polygon dataset covering State College borough.",
+          "agent_id": "data_retrieval_agent",
+          "operation": "dataset_retrieval",
+          "instructions": "Retrieve the highest-ranked available census tract polygon dataset covering State College borough. Return the retrieved artifact metadata for downstream suitability checks.",
+          "parameters": {},
+          "depends_on": [],
+          "input_from_steps": [],
+          "status": "successful",
+          "output_artifact_ids": [
+            "34541f54-b0ab-467f-91be-6c3c99354096"
+          ]
+        },
+        {
+          "step_id": "task_select_intersecting_tracts",
+          "title": "Select census tracts intersecting State College borough",
+          "purpose": "Produce the census tract polygons that intersect the supplied State College borough boundary.",
+          "agent_id": "vector_analysis_a",
+          "operation": "overlay",
+          "instructions": "Perform an intersection overlay between the retrieved census tract polygon dataset and the State College borough boundary. Retain the census tract identity and attributes needed for the final zonal statistics output.",
+          "parameters": {
+            "operation": "overlay"
+          },
+          "depends_on": [
+            "task_retrieve_census_tracts"
+          ],
+          "input_from_steps": [
+            "task_retrieve_census_tracts"
+          ],
+          "status": "successful",
+          "output_artifact_ids": [
+            "cd5f190d-931e-4311-b80a-ab0851b91c7d"
+          ]
+        },
+        {
+          "step_id": "task_mean_elevation_by_tract",
+          "title": "Calculate mean elevation by intersecting census tract",
+          "purpose": "Calculate mean elevation for every census tract that intersects State College borough.",
+          "agent_id": "raster_analysis_agent",
+          "operation": "zonal_statistics",
+          "instructions": "Compute mean raster elevation for each polygon in the intersecting census tract zones using the supplied DEM rasters. Return a CSV table that preserves the census tract identity fields and contains the calculated mean elevation.",
+          "parameters": {
+            "operation": "zonal_statistics"
+          },
+          "depends_on": [
+            "task_select_intersecting_tracts"
+          ],
+          "input_from_steps": [
+            "task_select_intersecting_tracts"
+          ],
+          "status": "successful",
+          "output_artifact_ids": [
+            "79b730b8-9e02-4474-a343-54178332835c"
+          ]
+        }
+      ],
+      "requirements": [
+        {
+          "requirement_id": "req_retrieval_spatial_coverage",
+          "requirement_type": "spatial_coverage",
+          "scope": "Retrieved census tract dataset must cover State College borough.",
+          "task_id": "task_retrieve_census_tracts",
+          "artifact_roles": [
+            "census_tract_dataset"
+          ],
+          "parameters": {
+            "coverage_target": "State College borough"
+          },
+          "blocking": true,
+          "provenance": "USER_EXPLICIT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "pending",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_intersection_compatible_crs",
+          "requirement_type": "compatible_crs",
+          "scope": "The census tract dataset and State College borough boundary must have compatible coordinate reference systems for intersection overlay.",
+          "task_id": "task_select_intersecting_tracts",
+          "artifact_roles": [
+            "census_tract_dataset",
+            "input_3"
+          ],
+          "parameters": {},
+          "blocking": true,
+          "provenance": "WORKER_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_intersection_valid_geometry",
+          "requirement_type": "valid_geometry",
+          "scope": "Polygon geometries supplied to the intersection overlay must be valid.",
+          "task_id": "task_select_intersecting_tracts",
+          "artifact_roles": [
+            "census_tract_dataset",
+            "input_3"
+          ],
+          "parameters": {},
+          "blocking": true,
+          "provenance": "WORKER_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_zonal_compatible_crs",
+          "requirement_type": "compatible_crs",
+          "scope": "The supplied DEM rasters and intersecting census tract zones must have compatible coordinate reference systems for zonal statistics.",
+          "task_id": "task_mean_elevation_by_tract",
+          "artifact_roles": [
+            "input_1",
+            "input_2",
+            "intersecting_census_tracts"
+          ],
+          "parameters": {},
+          "blocking": true,
+          "provenance": "WORKER_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "4cd77905-dcd0-4799-819e-7b3c2f8e7b34",
+          "requirement_type": "compatible_crs",
+          "scope": "task_transition",
+          "task_id": "task_select_intersecting_tracts",
+          "artifact_roles": [
+            "census_tract_dataset",
+            "input_3"
+          ],
+          "parameters": {},
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "operation_contract_catalog",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "69258bf5-40fb-4478-bc70-3cc83ffcdeb0",
+          "requirement_type": "valid_geometry",
+          "scope": "task_transition",
+          "task_id": "task_select_intersecting_tracts",
+          "artifact_roles": [
+            "census_tract_dataset",
+            "input_3"
+          ],
+          "parameters": {},
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "operation_contract_catalog",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "36c52350-f916-456f-85ad-29cf9b158a8d",
+          "requirement_type": "compatible_crs",
+          "scope": "task_transition",
+          "task_id": "task_mean_elevation_by_tract",
+          "artifact_roles": [
+            "input_1",
+            "input_2",
+            "intersecting_census_tracts"
+          ],
+          "parameters": {},
+          "blocking": true,
+          "provenance": "OPERATION_CONTRACT",
+          "created_by": "operation_contract_catalog",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [],
+          "superseded_by": null
+        }
+      ],
+      "commitments": []
+    }
+  },
+  "workflow_state": {
+    "schema_version": "1.0.0",
+    "workflow_id": "3129aa6c-e3f7-410e-b7c5-ab1b55c8d81a",
+    "state_version": 26,
+    "user_goal": "Calculate mean elevation for every census tract that intersects State College borough.",
+    "feature_profile": "C1",
+    "feature_config": {
+      "profile_name": "C1",
+      "planner_mode": "generic",
+      "qc_mode": "generic",
+      "replanner_mode": "generic",
+      "technical_invariants": true,
+      "local_recovery": true,
+      "structural_patching": true,
+      "gis_finding_routing": false
+    },
+    "current_plan_version": 1,
+    "tasks": {
+      "task_retrieve_census_tracts": {
+        "task_id": "task_retrieve_census_tracts",
+        "title": "Retrieve census tract polygons",
+        "purpose": "Obtain a census tract polygon dataset covering State College borough.",
+        "operation": "dataset_retrieval",
+        "instructions": "Retrieve the highest-ranked available census tract polygon dataset covering State College borough. Return the retrieved artifact metadata for downstream suitability checks.",
+        "parameters": {},
+        "required_capabilities": [
+          "dataset_retrieval"
+        ],
+        "depends_on": [],
+        "input_requirements": [],
+        "expected_outputs": [
+          {
+            "role": "census_tract_dataset",
+            "data_model": "dataset",
+            "formats": [
+              "GPKG",
+              "GeoJSON",
+              "GeoTIFF",
+              "CSV"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_retrieval_spatial_coverage"
+        ],
+        "status": "successful",
+        "attempts": 1,
+        "active_binding_id": "7a5c7455-1ef9-4678-8c7b-e77a717168f0",
+        "output_artifact_ids": [
+          "34541f54-b0ab-467f-91be-6c3c99354096"
+        ],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      },
+      "task_select_intersecting_tracts": {
+        "task_id": "task_select_intersecting_tracts",
+        "title": "Select census tracts intersecting State College borough",
+        "purpose": "Produce the census tract polygons that intersect the supplied State College borough boundary.",
+        "operation": "overlay",
+        "instructions": "Perform an intersection overlay between the retrieved census tract polygon dataset and the State College borough boundary. Retain the census tract identity and attributes needed for the final zonal statistics output.",
+        "parameters": {
+          "operation": "overlay"
+        },
+        "required_capabilities": [
+          "overlay"
+        ],
+        "depends_on": [
+          "task_retrieve_census_tracts"
+        ],
+        "input_requirements": [
+          {
+            "role": "census_tract_dataset",
+            "data_model": "dataset",
+            "formats": [
+              "GPKG",
+              "GeoJSON"
+            ],
+            "required": true
+          },
+          {
+            "role": "input_3",
+            "data_model": "vector",
+            "formats": [
+              "gpkg"
+            ],
+            "required": true
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "intersecting_census_tracts",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_intersection_compatible_crs",
+          "req_intersection_valid_geometry",
+          "4cd77905-dcd0-4799-819e-7b3c2f8e7b34",
+          "69258bf5-40fb-4478-bc70-3cc83ffcdeb0"
+        ],
+        "status": "successful",
+        "attempts": 1,
+        "active_binding_id": "9de88b74-b0d0-4094-8142-74d3143ae703",
+        "output_artifact_ids": [
+          "cd5f190d-931e-4311-b80a-ab0851b91c7d"
+        ],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      },
+      "task_mean_elevation_by_tract": {
+        "task_id": "task_mean_elevation_by_tract",
+        "title": "Calculate mean elevation by intersecting census tract",
+        "purpose": "Calculate mean elevation for every census tract that intersects State College borough.",
+        "operation": "zonal_statistics",
+        "instructions": "Compute mean raster elevation for each polygon in the intersecting census tract zones using the supplied DEM rasters. Return a CSV table that preserves the census tract identity fields and contains the calculated mean elevation.",
+        "parameters": {
+          "operation": "zonal_statistics"
+        },
+        "required_capabilities": [
+          "zonal_statistics"
+        ],
+        "depends_on": [
+          "task_select_intersecting_tracts"
+        ],
+        "input_requirements": [
+          {
+            "role": "input_1",
+            "data_model": "raster",
+            "formats": [
+              "tif"
+            ],
+            "required": true
+          },
+          {
+            "role": "input_2",
+            "data_model": "raster",
+            "formats": [
+              "tif"
+            ],
+            "required": true
+          },
+          {
+            "role": "intersecting_census_tracts",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "mean_elevation_by_tract",
+            "data_model": "table",
+            "formats": [
+              "CSV"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_zonal_compatible_crs",
+          "36c52350-f916-456f-85ad-29cf9b158a8d"
+        ],
+        "status": "successful",
+        "attempts": 1,
+        "active_binding_id": "396252fd-6002-4024-a277-9b875aeeebe6",
+        "output_artifact_ids": [
+          "79b730b8-9e02-4474-a343-54178332835c"
+        ],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      }
+    },
+    "edges": [
+      [
+        "task_retrieve_census_tracts",
+        "task_select_intersecting_tracts"
+      ],
+      [
+        "task_select_intersecting_tracts",
+        "task_mean_elevation_by_tract"
+      ]
+    ],
+    "bindings": {
+      "7a5c7455-1ef9-4678-8c7b-e77a717168f0": {
+        "binding_id": "7a5c7455-1ef9-4678-8c7b-e77a717168f0",
+        "task_id": "task_retrieve_census_tracts",
+        "agent_id": "data_retrieval_agent",
+        "operation": "dataset_retrieval",
+        "instruction": "Retrieve the highest-ranked available census tract polygon dataset covering State College borough. Return the retrieved artifact metadata for downstream suitability checks.",
+        "input_bindings": [],
+        "agent_profile_snapshot": {
+          "agent_id": "data_retrieval_agent",
+          "name": "Data Retrieval Agent",
+          "description": "Searches the available catalog and returns the highest-ranked available dataset candidate. Query criteria influence retrieval but are not guarantees of task-level suitability. Returned metadata describe the retrieved artifact. Clients should inspect returned metadata before downstream use.",
+          "operations": [
+            "dataset_retrieval"
+          ],
+          "skills": [
+            {
+              "skill_id": "dataset_retrieval",
+              "name": "Dataset Retrieval",
+              "description": "Retrieves registered benchmark datasets matching requested criteria from the catalog.",
+              "constraints": {
+                "spatial": "Returns datasets covering registered spatial boundaries.",
+                "temporal": "Returns datasets with metadata indicating time/year of acquisition.",
+                "other": [
+                  "The service does not determine downstream analytical fitness.",
+                  "Supports candidate exclusion via exclude_artifact_ids."
+                ]
+              }
+            }
+          ],
+          "inputs": {
+            "input_datasets": {
+              "required": false,
+              "description": "Not required for data retrieval."
+            }
+          },
+          "outputs": [
+            {
+              "type": "dataset",
+              "formats": [
+                "GPKG",
+                "GeoJSON",
+                "GeoTIFF",
+                "CSV"
+              ],
+              "required": true,
+              "description": "Retrieved dataset artifact."
+            }
+          ],
+          "parameters": {
+            "exclude_artifact_ids": {
+              "required": false,
+              "description": "Optional list of artifact IDs to exclude from candidate ranking."
+            }
+          }
+        },
+        "endpoint": "https://www.geospatial-agentic-services.online/agents/data_retrieval_agent/tasks",
+        "attempt": 1,
+        "invocation_id": null,
+        "status": "successful",
+        "started_at": "2026-08-21T20:36:29.800872Z",
+        "completed_at": "2026-08-21T20:36:29.802778Z",
+        "duration_seconds": 0.0019098760094493628,
+        "output_artifact_ids": [
+          "34541f54-b0ab-467f-91be-6c3c99354096"
+        ],
+        "messages": [
+          "Successfully retrieved dataset: fx_tracts_centre_utm.gpkg"
+        ],
+        "structured_error": null,
+        "created_at": "2026-08-21T20:36:29.796791Z"
+      },
+      "9de88b74-b0d0-4094-8142-74d3143ae703": {
+        "binding_id": "9de88b74-b0d0-4094-8142-74d3143ae703",
+        "task_id": "task_select_intersecting_tracts",
+        "agent_id": "vector_analysis_a",
+        "operation": "overlay",
+        "instruction": "Perform an intersection overlay between the retrieved census tract polygon dataset and the State College borough boundary. Retain the census tract identity and attributes needed for the final zonal statistics output.",
+        "input_bindings": [
+          {
+            "role": "census_tract_dataset",
+            "artifact_id": "34541f54-b0ab-467f-91be-6c3c99354096",
+            "source_task_id": "task_retrieve_census_tracts",
+            "binding_order": 0
+          },
+          {
+            "role": "input_3",
+            "artifact_id": "c34596b8-eed9-460f-b496-03af22b00971",
+            "source_task_id": null,
+            "binding_order": 1
+          }
+        ],
+        "agent_profile_snapshot": {
+          "agent_id": "vector_analysis_a",
+          "name": "Vector Analysis A",
+          "description": "Performs deterministic vector geoprocessing including buffering, clipping, overlay/intersection, explicit geometry repair, and spatial joins. Binary spatial operations require compatible coordinate reference systems. Distance operations use the coordinate system and units of the provided input artifact.",
+          "operations": [
+            "buffer",
+            "clip",
+            "geometry_repair",
+            "overlay",
+            "spatial_join",
+            "vector_geoprocessing"
+          ],
+          "skills": [
+            {
+              "skill_id": "vector_geoprocessing",
+              "name": "Vector Geoprocessing",
+              "description": "Performs spatial buffering, clipping, polygon intersection overlay, geometry validation/repair, and spatial joins.",
+              "constraints": {
+                "spatial": "Requires matching coordinate reference systems for binary operations. Distance operations require projected coordinate reference systems.",
+                "temporal": null,
+                "other": [
+                  "The service performs only the requested operation.",
+                  "It does not automatically reproject inputs or repair geometries unless explicitly requested."
+                ]
+              }
+            }
+          ],
+          "inputs": {
+            "input_datasets": {
+              "required": true,
+              "description": "One or two vector datasets in GeoPackage (.gpkg) or GeoJSON format."
+            }
+          },
+          "outputs": [
+            {
+              "type": "vector",
+              "formats": [
+                "GPKG",
+                "GeoJSON"
+              ],
+              "required": true,
+              "description": "Processed vector dataset."
+            }
+          ],
+          "parameters": {
+            "operation": {
+              "required": false,
+              "description": "Explicit operation name (buffer, clip, overlay, geometry_repair, spatial_join)."
+            },
+            "distance": {
+              "required": false,
+              "description": "Buffer distance value."
+            },
+            "unit": {
+              "required": false,
+              "default": "meters",
+              "description": "Buffer distance unit (meters, km)."
+            }
+          }
+        },
+        "endpoint": "https://www.geospatial-agentic-services.online/agents/vector_analysis_a/tasks",
+        "attempt": 1,
+        "invocation_id": null,
+        "status": "successful",
+        "started_at": "2026-08-21T20:36:36.028716Z",
+        "completed_at": "2026-08-21T20:36:36.058627Z",
+        "duration_seconds": 0.02991884200309869,
+        "output_artifact_ids": [
+          "cd5f190d-931e-4311-b80a-ab0851b91c7d"
+        ],
+        "messages": [
+          "Intersected vectors resulting in 1 features."
+        ],
+        "structured_error": null,
+        "created_at": "2026-08-21T20:36:36.020898Z"
+      },
+      "396252fd-6002-4024-a277-9b875aeeebe6": {
+        "binding_id": "396252fd-6002-4024-a277-9b875aeeebe6",
+        "task_id": "task_mean_elevation_by_tract",
+        "agent_id": "raster_analysis_agent",
+        "operation": "zonal_statistics",
+        "instruction": "Compute mean raster elevation for each polygon in the intersecting census tract zones using the supplied DEM rasters. Return a CSV table that preserves the census tract identity fields and contains the calculated mean elevation.",
+        "input_bindings": [
+          {
+            "role": "input_1",
+            "artifact_id": "0f2efa22-8852-47c4-9d52-d5c3d35e3c8a",
+            "source_task_id": null,
+            "binding_order": 0
+          },
+          {
+            "role": "input_2",
+            "artifact_id": "2599597e-6b89-4f29-afd2-407c469d372c",
+            "source_task_id": null,
+            "binding_order": 1
+          },
+          {
+            "role": "intersecting_census_tracts",
+            "artifact_id": "cd5f190d-931e-4311-b80a-ab0851b91c7d",
+            "source_task_id": "task_select_intersecting_tracts",
+            "binding_order": 2
+          }
+        ],
+        "agent_profile_snapshot": {
+          "agent_id": "raster_analysis_agent",
+          "name": "Raster Analysis Agent",
+          "description": "Performs deterministic raster reprojection, resampling, clipping, raster calculation, and zonal statistics. Consumes GeoTIFF rasters and GeoPackage polygon zones.",
+          "operations": [
+            "clip",
+            "raster_calculator",
+            "raster_geoprocessing",
+            "reproject_raster",
+            "resample",
+            "zonal_statistics"
+          ],
+          "skills": [
+            {
+              "skill_id": "raster_geoprocessing",
+              "name": "Raster Geoprocessing",
+              "description": "Executes raster calculations, reprojections, grid resampling, spatial masking, and zonal aggregations.",
+              "constraints": {
+                "spatial": "Raster calculation requires compatible grid definitions and CRS. Zonal statistics require matching CRS between raster and GeoPackage zones.",
+                "temporal": null,
+                "other": [
+                  "Accepts GeoTIFF (.tif) rasters and GeoPackage (.gpkg) polygon zones.",
+                  "Does not accept GeoJSON zones for zonal statistics."
+                ]
+              }
+            }
+          ],
+          "inputs": {
+            "input_datasets": {
+              "required": true,
+              "description": "GeoTIFF raster file(s) and optional GeoPackage polygon zone layer."
+            }
+          },
+          "outputs": [
+            {
+              "type": "raster",
+              "formats": [
+                "GeoTIFF"
+              ],
+              "required": false,
+              "description": "Processed raster dataset."
+            },
+            {
+              "type": "table",
+              "formats": [
+                "CSV"
+              ],
+              "required": false,
+              "description": "Zonal statistics summary table."
+            }
+          ],
+          "parameters": {
+            "operation": {
+              "required": false,
+              "description": "Explicit operation (zonal_statistics, raster_calculator, resample, clip, reproject_raster)."
+            },
+            "resolution": {
+              "required": false,
+              "description": "Target pixel resolution in meters for resampling."
+            },
+            "target_crs": {
+              "required": false,
+              "description": "Target coordinate reference system for raster reprojection."
+            }
+          }
+        },
+        "endpoint": "https://www.geospatial-agentic-services.online/agents/raster_analysis_agent/tasks",
+        "attempt": 1,
+        "invocation_id": null,
+        "status": "successful",
+        "started_at": "2026-08-21T20:36:39.436973Z",
+        "completed_at": "2026-08-21T20:36:39.447261Z",
+        "duration_seconds": 0.01029522500175517,
+        "output_artifact_ids": [
+          "79b730b8-9e02-4474-a343-54178332835c"
+        ],
+        "messages": [
+          "Calculated zonal statistics for 1 zones."
+        ],
+        "structured_error": null,
+        "created_at": "2026-08-21T20:36:39.427369Z"
+      }
+    },
+    "artifacts": {
+      "0f2efa22-8852-47c4-9d52-d5c3d35e3c8a": {
+        "artifact_id": "0f2efa22-8852-47c4-9d52-d5c3d35e3c8a",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_dem_partial_60pct_utm.tif",
+        "content_hash": "c853b59bebcfe95bfa54a5b406befe9e135708b247f6d7ac162633e166fb9031",
+        "format": "tif",
+        "media_type": null,
+        "data_model": "raster",
+        "producer_task_id": null,
+        "producer_binding_id": null,
+        "role": "input_1",
+        "evidence_ids": [
+          "a98307cb-eb50-4269-8e14-91bff515b3b4"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T20:35:49.540251Z",
+        "metadata": {
+          "source": "user_input"
+        }
+      },
+      "2599597e-6b89-4f29-afd2-407c469d372c": {
+        "artifact_id": "2599597e-6b89-4f29-afd2-407c469d372c",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_dem_centre_30m_utm.tif",
+        "content_hash": "1426addcdb0dea68e59a3b63a33a5efbf17fd56a0b1fd066a4bbf52595accdcb",
+        "format": "tif",
+        "media_type": null,
+        "data_model": "raster",
+        "producer_task_id": null,
+        "producer_binding_id": null,
+        "role": "input_2",
+        "evidence_ids": [
+          "c5834dfc-5b0b-48be-a949-ab82b7e98f10"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T20:35:49.552748Z",
+        "metadata": {
+          "source": "user_input"
+        }
+      },
+      "c34596b8-eed9-460f-b496-03af22b00971": {
+        "artifact_id": "c34596b8-eed9-460f-b496-03af22b00971",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_state_college_boundary.gpkg",
+        "content_hash": "8babd6041cfb3fb8cd2a574e212372b937de7810908f0691bde166acca8d126a",
+        "format": "gpkg",
+        "media_type": null,
+        "data_model": "vector",
+        "producer_task_id": null,
+        "producer_binding_id": null,
+        "role": "input_3",
+        "evidence_ids": [
+          "35137fd0-0ceb-4d03-b0bc-54daa5296994"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T20:35:49.553547Z",
+        "metadata": {
+          "source": "user_input"
+        }
+      },
+      "34541f54-b0ab-467f-91be-6c3c99354096": {
+        "artifact_id": "34541f54-b0ab-467f-91be-6c3c99354096",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_bba5b515_fx_tracts_centre_utm.gpkg",
+        "content_hash": "9818cdd69d3b26cbd238d60780f5a566bee625b857232a79ed5ca02595c100a8",
+        "format": "gpkg",
+        "media_type": null,
+        "data_model": "vector",
+        "producer_task_id": "task_retrieve_census_tracts",
+        "producer_binding_id": "7a5c7455-1ef9-4678-8c7b-e77a717168f0",
+        "role": "census_tract_dataset",
+        "evidence_ids": [
+          "c78e0ac0-68a6-4f59-9a71-7e29da5c856d"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T20:36:29.806118Z",
+        "metadata": {}
+      },
+      "cd5f190d-931e-4311-b80a-ab0851b91c7d": {
+        "artifact_id": "cd5f190d-931e-4311-b80a-ab0851b91c7d",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_a/intersect_9d081975.gpkg",
+        "content_hash": "1fb84edcdc6895a4994ad0acdbb72cd71b227b167ba57a336e6f1d13c9b1abe7",
+        "format": "gpkg",
+        "media_type": null,
+        "data_model": "vector",
+        "producer_task_id": "task_select_intersecting_tracts",
+        "producer_binding_id": "9de88b74-b0d0-4094-8142-74d3143ae703",
+        "role": "intersecting_census_tracts",
+        "evidence_ids": [
+          "68b7ca05-35ac-41a3-84b5-a4493718c15c"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T20:36:36.061617Z",
+        "metadata": {}
+      },
+      "79b730b8-9e02-4474-a343-54178332835c": {
+        "artifact_id": "79b730b8-9e02-4474-a343-54178332835c",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/raster_analysis_agent/zonal_stats_3e22001b.csv",
+        "content_hash": "fe6b4e52375875194532b1637760ac372e8687497f120ab334a39dbc07cfacda",
+        "format": "csv",
+        "media_type": null,
+        "data_model": "table",
+        "producer_task_id": "task_mean_elevation_by_tract",
+        "producer_binding_id": "396252fd-6002-4024-a277-9b875aeeebe6",
+        "role": "mean_elevation_by_tract",
+        "evidence_ids": [
+          "4be6106b-dc8c-4f2c-b263-a746ea8939a9"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T20:36:39.450903Z",
+        "metadata": {}
+      }
+    },
+    "derivations": {
+      "1e4975c2-3722-4d1b-a0f5-ad2ba10e0c3c": {
+        "derivation_id": "1e4975c2-3722-4d1b-a0f5-ad2ba10e0c3c",
+        "output_artifact_id": "34541f54-b0ab-467f-91be-6c3c99354096",
+        "source_artifact_ids": [],
+        "producer_task_id": "task_retrieve_census_tracts",
+        "operation": "dataset_retrieval",
+        "parameters": {},
+        "semantic_effect": "Produced role 'census_tract_dataset' using operation 'dataset_retrieval'.",
+        "evidence_snapshot_ids": [],
+        "created_at": "2026-08-21T20:36:29.806153Z"
+      },
+      "7ea892f9-832e-4f69-b817-af0bde38abbf": {
+        "derivation_id": "7ea892f9-832e-4f69-b817-af0bde38abbf",
+        "output_artifact_id": "cd5f190d-931e-4311-b80a-ab0851b91c7d",
+        "source_artifact_ids": [
+          "34541f54-b0ab-467f-91be-6c3c99354096",
+          "c34596b8-eed9-460f-b496-03af22b00971"
+        ],
+        "producer_task_id": "task_select_intersecting_tracts",
+        "operation": "overlay",
+        "parameters": {
+          "operation": "overlay"
+        },
+        "semantic_effect": "Produced role 'intersecting_census_tracts' using operation 'overlay'.",
+        "evidence_snapshot_ids": [],
+        "created_at": "2026-08-21T20:36:36.061647Z"
+      },
+      "8b81c290-af84-4a12-a2ff-f152ed30d2dc": {
+        "derivation_id": "8b81c290-af84-4a12-a2ff-f152ed30d2dc",
+        "output_artifact_id": "79b730b8-9e02-4474-a343-54178332835c",
+        "source_artifact_ids": [
+          "0f2efa22-8852-47c4-9d52-d5c3d35e3c8a",
+          "2599597e-6b89-4f29-afd2-407c469d372c",
+          "cd5f190d-931e-4311-b80a-ab0851b91c7d"
+        ],
+        "producer_task_id": "task_mean_elevation_by_tract",
+        "operation": "zonal_statistics",
+        "parameters": {
+          "operation": "zonal_statistics"
+        },
+        "semantic_effect": "Produced role 'mean_elevation_by_tract' using operation 'zonal_statistics'.",
+        "evidence_snapshot_ids": [],
+        "created_at": "2026-08-21T20:36:39.450936Z"
+      }
+    },
+    "requirements": {
+      "req_retrieval_spatial_coverage": {
+        "requirement_id": "req_retrieval_spatial_coverage",
+        "requirement_type": "spatial_coverage",
+        "scope": "Retrieved census tract dataset must cover State College borough.",
+        "task_id": "task_retrieve_census_tracts",
+        "artifact_roles": [
+          "census_tract_dataset"
+        ],
+        "parameters": {
+          "coverage_target": "State College borough"
+        },
+        "blocking": true,
+        "provenance": "USER_EXPLICIT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "pending",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_intersection_compatible_crs": {
+        "requirement_id": "req_intersection_compatible_crs",
+        "requirement_type": "compatible_crs",
+        "scope": "The census tract dataset and State College borough boundary must have compatible coordinate reference systems for intersection overlay.",
+        "task_id": "task_select_intersecting_tracts",
+        "artifact_roles": [
+          "census_tract_dataset",
+          "input_3"
+        ],
+        "parameters": {},
+        "blocking": true,
+        "provenance": "WORKER_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_intersection_valid_geometry": {
+        "requirement_id": "req_intersection_valid_geometry",
+        "requirement_type": "valid_geometry",
+        "scope": "Polygon geometries supplied to the intersection overlay must be valid.",
+        "task_id": "task_select_intersecting_tracts",
+        "artifact_roles": [
+          "census_tract_dataset",
+          "input_3"
+        ],
+        "parameters": {},
+        "blocking": true,
+        "provenance": "WORKER_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "req_zonal_compatible_crs": {
+        "requirement_id": "req_zonal_compatible_crs",
+        "requirement_type": "compatible_crs",
+        "scope": "The supplied DEM rasters and intersecting census tract zones must have compatible coordinate reference systems for zonal statistics.",
+        "task_id": "task_mean_elevation_by_tract",
+        "artifact_roles": [
+          "input_1",
+          "input_2",
+          "intersecting_census_tracts"
+        ],
+        "parameters": {},
+        "blocking": true,
+        "provenance": "WORKER_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "4cd77905-dcd0-4799-819e-7b3c2f8e7b34": {
+        "requirement_id": "4cd77905-dcd0-4799-819e-7b3c2f8e7b34",
+        "requirement_type": "compatible_crs",
+        "scope": "task_transition",
+        "task_id": "task_select_intersecting_tracts",
+        "artifact_roles": [
+          "census_tract_dataset",
+          "input_3"
+        ],
+        "parameters": {},
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "operation_contract_catalog",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "69258bf5-40fb-4478-bc70-3cc83ffcdeb0": {
+        "requirement_id": "69258bf5-40fb-4478-bc70-3cc83ffcdeb0",
+        "requirement_type": "valid_geometry",
+        "scope": "task_transition",
+        "task_id": "task_select_intersecting_tracts",
+        "artifact_roles": [
+          "census_tract_dataset",
+          "input_3"
+        ],
+        "parameters": {},
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "operation_contract_catalog",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      },
+      "36c52350-f916-456f-85ad-29cf9b158a8d": {
+        "requirement_id": "36c52350-f916-456f-85ad-29cf9b158a8d",
+        "requirement_type": "compatible_crs",
+        "scope": "task_transition",
+        "task_id": "task_mean_elevation_by_tract",
+        "artifact_roles": [
+          "input_1",
+          "input_2",
+          "intersecting_census_tracts"
+        ],
+        "parameters": {},
+        "blocking": true,
+        "provenance": "OPERATION_CONTRACT",
+        "created_by": "operation_contract_catalog",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [],
+        "superseded_by": null
+      }
+    },
+    "commitments": {},
+    "schema_mappings": {},
+    "evidence": {
+      "a98307cb-eb50-4269-8e14-91bff515b3b4": {
+        "evidence_id": "a98307cb-eb50-4269-8e14-91bff515b3b4",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "0f2efa22-8852-47c4-9d52-d5c3d35e3c8a"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_dem_partial_60pct_utm.tif",
+          "format": "tif",
+          "size_bytes": 3199834,
+          "complete": true,
+          "limitations": [],
+          "data_model": "raster",
+          "width": 696,
+          "height": 1148,
+          "band_count": 1,
+          "resolution": [
+            30.0,
+            30.0
+          ],
+          "transform": [
+            30.0,
+            0.0,
+            238087.3824011362,
+            0.0,
+            -30.0,
+            4543387.006183241,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "grid_origin": [
+            238087.3824011362,
+            4543387.006183241
+          ],
+          "bounds": [
+            238087.3824011362,
+            4508947.006183241,
+            258967.3824011362,
+            4543387.006183241
+          ],
+          "nodata": null,
+          "dtype": "float32",
+          "driver": "GTiff",
+          "crs": "EPSG:26918",
+          "crs_authority": "EPSG:26918",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T20:35:49.555949Z",
+        "complete": true,
+        "limitations": []
+      },
+      "c5834dfc-5b0b-48be-a949-ab82b7e98f10": {
+        "evidence_id": "c5834dfc-5b0b-48be-a949-ab82b7e98f10",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "2599597e-6b89-4f29-afd2-407c469d372c"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_dem_centre_30m_utm.tif",
+          "format": "tif",
+          "size_bytes": 5338558,
+          "complete": true,
+          "limitations": [],
+          "data_model": "raster",
+          "width": 1161,
+          "height": 1148,
+          "band_count": 1,
+          "resolution": [
+            30.0,
+            30.0
+          ],
+          "transform": [
+            30.0,
+            0.0,
+            238087.3824011362,
+            0.0,
+            -30.0,
+            4543387.006183241,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "grid_origin": [
+            238087.3824011362,
+            4543387.006183241
+          ],
+          "bounds": [
+            238087.3824011362,
+            4508947.006183241,
+            272917.3824011362,
+            4543387.006183241
+          ],
+          "nodata": null,
+          "dtype": "float32",
+          "driver": "GTiff",
+          "crs": "EPSG:26918",
+          "crs_authority": "EPSG:26918",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T20:35:49.558098Z",
+        "complete": true,
+        "limitations": []
+      },
+      "35137fd0-0ceb-4d03-b0bc-54daa5296994": {
+        "evidence_id": "35137fd0-0ceb-4d03-b0bc-54daa5296994",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "c34596b8-eed9-460f-b496-03af22b00971"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_state_college_boundary.gpkg",
+          "format": "gpkg",
+          "size_bytes": 98304,
+          "complete": true,
+          "limitations": [],
+          "data_model": "vector",
+          "feature_count": 1,
+          "schema": {
+            "GEOID": "object",
+            "NAME": "object",
+            "TYPE": "object"
+          },
+          "schema_fields": [
+            "GEOID",
+            "NAME",
+            "TYPE"
+          ],
+          "geometry_type": [
+            "Polygon"
+          ],
+          "geometry_valid": true,
+          "invalid_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "null_geometry_count": 0,
+          "bounds": [
+            256968.8034961426,
+            4518189.311213346,
+            261296.18387299398,
+            4521657.552605943
+          ],
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true,
+          "crs": "EPSG:26918",
+          "crs_authority": "EPSG:26918",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T20:35:49.563764Z",
+        "complete": true,
+        "limitations": []
+      },
+      "c78e0ac0-68a6-4f59-9a71-7e29da5c856d": {
+        "evidence_id": "c78e0ac0-68a6-4f59-9a71-7e29da5c856d",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "34541f54-b0ab-467f-91be-6c3c99354096"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_bba5b515_fx_tracts_centre_utm.gpkg",
+          "format": "gpkg",
+          "size_bytes": 98304,
+          "complete": true,
+          "limitations": [],
+          "data_model": "vector",
+          "feature_count": 16,
+          "schema": {
+            "GEOID": "object",
+            "NAME": "object",
+            "COUNTYFP": "object",
+            "STATEFP": "object"
+          },
+          "schema_fields": [
+            "GEOID",
+            "NAME",
+            "COUNTYFP",
+            "STATEFP"
+          ],
+          "geometry_type": [
+            "Polygon"
+          ],
+          "geometry_valid": true,
+          "invalid_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "null_geometry_count": 0,
+          "bounds": [
+            238087.3824011362,
+            4508961.385028789,
+            272914.01066431846,
+            4543387.006183241
+          ],
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true,
+          "crs": "EPSG:26918",
+          "crs_authority": "EPSG:26918",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T20:36:29.813477Z",
+        "complete": true,
+        "limitations": []
+      },
+      "68b7ca05-35ac-41a3-84b5-a4493718c15c": {
+        "evidence_id": "68b7ca05-35ac-41a3-84b5-a4493718c15c",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "cd5f190d-931e-4311-b80a-ab0851b91c7d"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_a/intersect_9d081975.gpkg",
+          "format": "gpkg",
+          "size_bytes": 98304,
+          "complete": true,
+          "limitations": [],
+          "data_model": "vector",
+          "feature_count": 1,
+          "schema": {
+            "GEOID_1": "object",
+            "NAME_1": "object",
+            "COUNTYFP": "object",
+            "STATEFP": "object",
+            "GEOID_2": "object",
+            "NAME_2": "object",
+            "TYPE": "object"
+          },
+          "schema_fields": [
+            "GEOID_1",
+            "NAME_1",
+            "COUNTYFP",
+            "STATEFP",
+            "GEOID_2",
+            "NAME_2",
+            "TYPE"
+          ],
+          "geometry_type": [
+            "Polygon"
+          ],
+          "geometry_valid": true,
+          "invalid_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "null_geometry_count": 0,
+          "bounds": [
+            256968.8034961426,
+            4518189.311213346,
+            261296.18387299398,
+            4521657.552605943
+          ],
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true,
+          "crs": "EPSG:26918",
+          "crs_authority": "EPSG:26918",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T20:36:36.067470Z",
+        "complete": true,
+        "limitations": []
+      },
+      "4be6106b-dc8c-4f2c-b263-a746ea8939a9": {
+        "evidence_id": "4be6106b-dc8c-4f2c-b263-a746ea8939a9",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "79b730b8-9e02-4474-a343-54178332835c"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/raster_analysis_agent/zonal_stats_3e22001b.csv",
+          "format": "csv",
+          "size_bytes": 59,
+          "complete": true,
+          "limitations": [],
+          "data_model": "table",
+          "inspected_row_count": 1,
+          "row_sample_complete": true,
+          "schema": {
+            "zone_id": "int64",
+            "cell_count": "int64",
+            "mean_elevation": "float64"
+          },
+          "schema_fields": [
+            "zone_id",
+            "cell_count",
+            "mean_elevation"
+          ],
+          "coordinate_candidates": [],
+          "spatializable_from_coordinates": false,
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T20:36:39.452855Z",
+        "complete": true,
+        "limitations": []
+      }
+    },
+    "violations": {},
+    "execution_history": [
+      {
+        "event_id": "298bc560-934b-4eb3-ad36-2714cfa5bf15",
+        "event_type": "initial_plan_committed",
+        "actor": "planner_component",
+        "state_version": 0,
+        "plan_version": 1,
+        "task_id": null,
+        "reason": "Retrieve census tract polygons covering State College borough, select tracts intersecting the supplied borough boundary, and compute mean elevation for those tracts using the supplied DEM rasters.",
+        "metadata": {
+          "task_ids": [
+            "task_mean_elevation_by_tract",
+            "task_retrieve_census_tracts",
+            "task_select_intersecting_tracts"
+          ]
+        },
+        "created_at": "2026-08-21T20:36:29.789722Z"
+      },
+      {
+        "event_id": "ceebbeb8-61be-481a-af57-e3185df66941",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 1,
+        "plan_version": 1,
+        "task_id": "task_retrieve_census_tracts",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "proposed",
+          "to": "ready"
+        },
+        "created_at": "2026-08-21T20:36:29.792782Z"
+      },
+      {
+        "event_id": "b32f9192-bb7a-4ce5-b25d-c4b824cfe127",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 2,
+        "plan_version": 1,
+        "task_id": "task_retrieve_census_tracts",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-21T20:36:29.794874Z"
+      },
+      {
+        "event_id": "9c7d375d-6305-41dd-8068-8ced52806253",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 3,
+        "plan_version": 1,
+        "task_id": "task_retrieve_census_tracts",
+        "reason": "Worker bound.",
+        "metadata": {
+          "from": "binding",
+          "to": "bound"
+        },
+        "created_at": "2026-08-21T20:36:29.796851Z"
+      },
+      {
+        "event_id": "e1315e26-116c-44af-af48-b4f8a07cb117",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 4,
+        "plan_version": 1,
+        "task_id": "task_retrieve_census_tracts",
+        "reason": "Worker started.",
+        "metadata": {
+          "from": "bound",
+          "to": "running"
+        },
+        "created_at": "2026-08-21T20:36:29.798865Z"
+      },
+      {
+        "event_id": "1280041a-73b0-4637-8514-9f984facd646",
+        "event_type": "worker_execution_completed",
+        "actor": "worker_executor",
+        "state_version": 5,
+        "plan_version": 1,
+        "task_id": "task_retrieve_census_tracts",
+        "reason": "Worker returned successfully.",
+        "metadata": {
+          "binding_id": "7a5c7455-1ef9-4678-8c7b-e77a717168f0",
+          "agent_id": "data_retrieval_agent",
+          "operation": "dataset_retrieval",
+          "attempt": 1,
+          "status": "successful",
+          "duration_seconds": 0.0019098760094493628
+        },
+        "created_at": "2026-08-21T20:36:29.802843Z"
+      },
+      {
+        "event_id": "888cebcf-853f-4c82-9cf7-5d4c491cae67",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 5,
+        "plan_version": 1,
+        "task_id": "task_retrieve_census_tracts",
+        "reason": "Worker returned a provisional result.",
+        "metadata": {
+          "from": "running",
+          "to": "provisional_success"
+        },
+        "created_at": "2026-08-21T20:36:29.802903Z"
+      },
+      {
+        "event_id": "0366dd85-9106-46d8-903e-42d1710ace86",
+        "event_type": "artifact_registered",
+        "actor": "artifact_registry",
+        "state_version": 6,
+        "plan_version": 1,
+        "task_id": "task_retrieve_census_tracts",
+        "reason": null,
+        "metadata": {
+          "artifact_id": "34541f54-b0ab-467f-91be-6c3c99354096",
+          "role": "census_tract_dataset",
+          "content_hash": "9818cdd69d3b26cbd238d60780f5a566bee625b857232a79ed5ca02595c100a8"
+        },
+        "created_at": "2026-08-21T20:36:29.806179Z"
+      },
+      {
+        "event_id": "428d8a9d-8884-472e-8c80-dc4ea8cf5afc",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 7,
+        "plan_version": 1,
+        "task_id": "task_retrieve_census_tracts",
+        "reason": "Reviewing runtime evidence.",
+        "metadata": {
+          "from": "provisional_success",
+          "to": "validating"
+        },
+        "created_at": "2026-08-21T20:36:29.815660Z"
+      },
+      {
+        "event_id": "1e75a378-16dd-4d06-9adf-143488b32458",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 8,
+        "plan_version": 1,
+        "task_id": "task_retrieve_census_tracts",
+        "reason": "The retrieval worker succeeded and produced a complete, inspected census tract polygon artifact in GPKG format. The artifact has valid polygon geometry, a metric projected CRS matching the State College boundary, and bounds encompassing the boundary extent. No deterministic violations or evidence-grounded defects affect this retrieval task; downstream overlay suitability checks remain the responsibility of the downstream task.",
+        "metadata": {
+          "from": "validating",
+          "to": "successful"
+        },
+        "created_at": "2026-08-21T20:36:36.014154Z"
+      },
+      {
+        "event_id": "2202b295-2fcd-43d3-bdaa-3d3541c9fde5",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 9,
+        "plan_version": 1,
+        "task_id": "task_select_intersecting_tracts",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "proposed",
+          "to": "ready"
+        },
+        "created_at": "2026-08-21T20:36:36.016675Z"
+      },
+      {
+        "event_id": "59e0f0f2-7b34-4eff-89bc-410b53fe58ca",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 10,
+        "plan_version": 1,
+        "task_id": "task_select_intersecting_tracts",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-21T20:36:36.018803Z"
+      },
+      {
+        "event_id": "db09b115-5ac1-4e84-b136-1b44c7775105",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 11,
+        "plan_version": 1,
+        "task_id": "task_select_intersecting_tracts",
+        "reason": "Worker bound.",
+        "metadata": {
+          "from": "binding",
+          "to": "bound"
+        },
+        "created_at": "2026-08-21T20:36:36.020951Z"
+      },
+      {
+        "event_id": "10add038-86f9-4d41-bba2-828e12225fe9",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 12,
+        "plan_version": 1,
+        "task_id": "task_select_intersecting_tracts",
+        "reason": "Worker started.",
+        "metadata": {
+          "from": "bound",
+          "to": "running"
+        },
+        "created_at": "2026-08-21T20:36:36.026515Z"
+      },
+      {
+        "event_id": "9b28324c-d915-44b8-bc9b-b0a259002812",
+        "event_type": "worker_execution_completed",
+        "actor": "worker_executor",
+        "state_version": 13,
+        "plan_version": 1,
+        "task_id": "task_select_intersecting_tracts",
+        "reason": "Worker returned successfully.",
+        "metadata": {
+          "binding_id": "9de88b74-b0d0-4094-8142-74d3143ae703",
+          "agent_id": "vector_analysis_a",
+          "operation": "overlay",
+          "attempt": 1,
+          "status": "successful",
+          "duration_seconds": 0.02991884200309869
+        },
+        "created_at": "2026-08-21T20:36:36.058696Z"
+      },
+      {
+        "event_id": "7e01ffd4-efd8-47e6-82fd-acb88a8f88c0",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 13,
+        "plan_version": 1,
+        "task_id": "task_select_intersecting_tracts",
+        "reason": "Worker returned a provisional result.",
+        "metadata": {
+          "from": "running",
+          "to": "provisional_success"
+        },
+        "created_at": "2026-08-21T20:36:36.058759Z"
+      },
+      {
+        "event_id": "22184b21-81b1-44d1-b66b-3c8d8302ee49",
+        "event_type": "artifact_registered",
+        "actor": "artifact_registry",
+        "state_version": 14,
+        "plan_version": 1,
+        "task_id": "task_select_intersecting_tracts",
+        "reason": null,
+        "metadata": {
+          "artifact_id": "cd5f190d-931e-4311-b80a-ab0851b91c7d",
+          "role": "intersecting_census_tracts",
+          "content_hash": "1fb84edcdc6895a4994ad0acdbb72cd71b227b167ba57a336e6f1d13c9b1abe7"
+        },
+        "created_at": "2026-08-21T20:36:36.061668Z"
+      },
+      {
+        "event_id": "f530f756-870a-41ac-89ed-73993484dfcf",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 15,
+        "plan_version": 1,
+        "task_id": "task_select_intersecting_tracts",
+        "reason": "Reviewing runtime evidence.",
+        "metadata": {
+          "from": "provisional_success",
+          "to": "validating"
+        },
+        "created_at": "2026-08-21T20:36:36.069960Z"
+      },
+      {
+        "event_id": "cee1d982-4b1f-43dd-a5b5-1fcad8cd01ec",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 16,
+        "plan_version": 1,
+        "task_id": "task_select_intersecting_tracts",
+        "reason": "The overlay task succeeded. The output artifact is a complete GPKG vector dataset with one valid polygon feature, a metric EPSG:26918 CRS, and the required census tract identity fields. All current-task requirements are satisfied, with no deterministic violations or evidence-grounded defects.",
+        "metadata": {
+          "from": "validating",
+          "to": "successful"
+        },
+        "created_at": "2026-08-21T20:36:39.417478Z"
+      },
+      {
+        "event_id": "882e4153-a0f2-48dd-9cba-b71f4feed3d6",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 17,
+        "plan_version": 1,
+        "task_id": "task_mean_elevation_by_tract",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "proposed",
+          "to": "ready"
+        },
+        "created_at": "2026-08-21T20:36:39.421354Z"
+      },
+      {
+        "event_id": "7176b44b-a122-4066-9422-4d466eb6e6fc",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 18,
+        "plan_version": 1,
+        "task_id": "task_mean_elevation_by_tract",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-21T20:36:39.424364Z"
+      },
+      {
+        "event_id": "67cbceab-d717-4540-8b4e-8c00ea6e3a31",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 19,
+        "plan_version": 1,
+        "task_id": "task_mean_elevation_by_tract",
+        "reason": "Worker bound.",
+        "metadata": {
+          "from": "binding",
+          "to": "bound"
+        },
+        "created_at": "2026-08-21T20:36:39.427434Z"
+      },
+      {
+        "event_id": "54742c83-00a5-476d-90e1-451a3f069e8b",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 20,
+        "plan_version": 1,
+        "task_id": "task_mean_elevation_by_tract",
+        "reason": "Worker started.",
+        "metadata": {
+          "from": "bound",
+          "to": "running"
+        },
+        "created_at": "2026-08-21T20:36:39.433689Z"
+      },
+      {
+        "event_id": "1de1435c-41a0-4507-94e4-00fb7824545b",
+        "event_type": "worker_execution_completed",
+        "actor": "worker_executor",
+        "state_version": 21,
+        "plan_version": 1,
+        "task_id": "task_mean_elevation_by_tract",
+        "reason": "Worker returned successfully.",
+        "metadata": {
+          "binding_id": "396252fd-6002-4024-a277-9b875aeeebe6",
+          "agent_id": "raster_analysis_agent",
+          "operation": "zonal_statistics",
+          "attempt": 1,
+          "status": "successful",
+          "duration_seconds": 0.01029522500175517
+        },
+        "created_at": "2026-08-21T20:36:39.447332Z"
+      },
+      {
+        "event_id": "6ec2638d-114c-4a1b-8a8b-590dc7f483ca",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 21,
+        "plan_version": 1,
+        "task_id": "task_mean_elevation_by_tract",
+        "reason": "Worker returned a provisional result.",
+        "metadata": {
+          "from": "running",
+          "to": "provisional_success"
+        },
+        "created_at": "2026-08-21T20:36:39.447403Z"
+      },
+      {
+        "event_id": "320e3b4c-d6e1-4d74-9366-ddb0f7cc2714",
+        "event_type": "artifact_registered",
+        "actor": "artifact_registry",
+        "state_version": 22,
+        "plan_version": 1,
+        "task_id": "task_mean_elevation_by_tract",
+        "reason": null,
+        "metadata": {
+          "artifact_id": "79b730b8-9e02-4474-a343-54178332835c",
+          "role": "mean_elevation_by_tract",
+          "content_hash": "fe6b4e52375875194532b1637760ac372e8687497f120ab334a39dbc07cfacda"
+        },
+        "created_at": "2026-08-21T20:36:39.450959Z"
+      },
+      {
+        "event_id": "4ee9589d-dad4-4222-976f-b82b737d3b84",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 23,
+        "plan_version": 1,
+        "task_id": "task_mean_elevation_by_tract",
+        "reason": "Reviewing runtime evidence.",
+        "metadata": {
+          "from": "provisional_success",
+          "to": "validating"
+        },
+        "created_at": "2026-08-21T20:36:39.455785Z"
+      },
+      {
+        "event_id": "3ac0c6a0-3e32-465d-abd6-ce40ba4e8ca4",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 24,
+        "plan_version": 1,
+        "task_id": "task_mean_elevation_by_tract",
+        "reason": "The worker succeeded and produced a complete CSV table artifact with the required mean_elevation result field and zone_id identity field. Current-task requirements are satisfied, runtime evidence is complete, and no deterministic violations or evidence-grounded defects are present.",
+        "metadata": {
+          "from": "validating",
+          "to": "successful"
+        },
+        "created_at": "2026-08-21T20:36:49.494532Z"
+      },
+      {
+        "event_id": "f26574e9-6e63-441c-a2bc-589c83ea5f47",
+        "event_type": "workflow_completed",
+        "actor": "completion_policy",
+        "state_version": 25,
+        "plan_version": 1,
+        "task_id": null,
+        "reason": "All active tasks, blocking requirements, and terminal outputs are satisfied.",
+        "metadata": {
+          "final_artifact_ids": [
+            "79b730b8-9e02-4474-a343-54178332835c"
+          ]
+        },
+        "created_at": "2026-08-21T20:36:49.500508Z"
+      }
+    ],
+    "qc_history": [
+      {
+        "decision_id": "qc-task_retrieve_census_tracts-20260821",
+        "task_id": "task_retrieve_census_tracts",
+        "verdict": "PASS",
+        "proposed_verdict": "PASS",
+        "reason": "The retrieval worker succeeded and produced a complete, inspected census tract polygon artifact in GPKG format. The artifact has valid polygon geometry, a metric projected CRS matching the State College boundary, and bounds encompassing the boundary extent. No deterministic violations or evidence-grounded defects affect this retrieval task; downstream overlay suitability checks remain the responsibility of the downstream task.",
+        "acknowledged_finding_ids": [],
+        "action_class": "NONE",
+        "effective_action": "NONE",
+        "effective_action_source": "qc_component",
+        "allowed_recovery_types": [],
+        "recovery_parameters": {},
+        "preserve_completed_work": true,
+        "forced_by_invariant": false,
+        "created_at": "2026-08-21T20:37:00Z"
+      },
+      {
+        "decision_id": "qc-task_select_intersecting_tracts-20260821",
+        "task_id": "task_select_intersecting_tracts",
+        "verdict": "PASS",
+        "proposed_verdict": "PASS",
+        "reason": "The overlay task succeeded. The output artifact is a complete GPKG vector dataset with one valid polygon feature, a metric EPSG:26918 CRS, and the required census tract identity fields. All current-task requirements are satisfied, with no deterministic violations or evidence-grounded defects.",
+        "acknowledged_finding_ids": [],
+        "action_class": "NONE",
+        "effective_action": "NONE",
+        "effective_action_source": "qc_component",
+        "allowed_recovery_types": [],
+        "recovery_parameters": {},
+        "preserve_completed_work": true,
+        "forced_by_invariant": false,
+        "created_at": "2026-08-21T20:36:36.067470Z"
+      },
+      {
+        "decision_id": "qc-20260821-task_mean_elevation_by_tract",
+        "task_id": "task_mean_elevation_by_tract",
+        "verdict": "PASS",
+        "proposed_verdict": "PASS",
+        "reason": "The worker succeeded and produced a complete CSV table artifact with the required mean_elevation result field and zone_id identity field. Current-task requirements are satisfied, runtime evidence is complete, and no deterministic violations or evidence-grounded defects are present.",
+        "acknowledged_finding_ids": [],
+        "action_class": "NONE",
+        "effective_action": "NONE",
+        "effective_action_source": "qc_component",
+        "allowed_recovery_types": [],
+        "recovery_parameters": {},
+        "preserve_completed_work": true,
+        "forced_by_invariant": false,
+        "created_at": "2026-08-21T20:36:39Z"
+      }
+    ],
+    "replan_history": [],
+    "component_calls": [
+      {
+        "call_id": "4954326d-02f1-4b40-a43f-c904c3e6c114",
+        "component": "planner",
+        "prompt_hash": "25bc965d75e7dbfce25f1035847c9d81e211af2735b635aa9598841b28be880d",
+        "tool_schema_hash": "441719facf91fd72ec7e126a4de0921e9629efd4cd39619a5dbe1be9fea2e3fe",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 5354,
+        "output_tokens": 3724,
+        "duration_seconds": 40.19913143699523,
+        "disposition": "successful",
+        "created_at": "2026-08-21T20:36:29.789682Z"
+      },
+      {
+        "call_id": "94815cfa-7994-4feb-b9bd-7c9c05de3885",
+        "component": "qc",
+        "prompt_hash": "60de9a1b8f3087706aaba54af1aa4f0487c48e64792d72892d264badafbc1d2d",
+        "tool_schema_hash": "264376b66f6ac19b4d57965f2f5a135067cea57302b6779a763ae77f3e5ccb86",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 2928,
+        "output_tokens": 443,
+        "duration_seconds": 6.192040587004158,
+        "disposition": "successful",
+        "created_at": "2026-08-21T20:36:36.014057Z"
+      },
+      {
+        "call_id": "9275b242-4f5f-423b-b699-f1529ce0bb41",
+        "component": "qc",
+        "prompt_hash": "60de9a1b8f3087706aaba54af1aa4f0487c48e64792d72892d264badafbc1d2d",
+        "tool_schema_hash": "264376b66f6ac19b4d57965f2f5a135067cea57302b6779a763ae77f3e5ccb86",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 3307,
+        "output_tokens": 268,
+        "duration_seconds": 3.341702425997937,
+        "disposition": "successful",
+        "created_at": "2026-08-21T20:36:39.417342Z"
+      },
+      {
+        "call_id": "07796227-8df1-4911-b9b9-19950ef565da",
+        "component": "qc",
+        "prompt_hash": "60de9a1b8f3087706aaba54af1aa4f0487c48e64792d72892d264badafbc1d2d",
+        "tool_schema_hash": "264376b66f6ac19b4d57965f2f5a135067cea57302b6779a763ae77f3e5ccb86",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 1991,
+        "output_tokens": 776,
+        "duration_seconds": 10.031596365995938,
+        "disposition": "successful",
+        "created_at": "2026-08-21T20:36:49.494401Z"
+      }
+    ],
+    "plan_versions": [
+      {
+        "version": 1,
+        "parent_version": null,
+        "reason": "Initial plan committed by independent Planner.",
+        "task_ids": [
+          "task_mean_elevation_by_tract",
+          "task_retrieve_census_tracts",
+          "task_select_intersecting_tracts"
+        ],
+        "edges": [
+          [
+            "task_retrieve_census_tracts",
+            "task_select_intersecting_tracts"
+          ],
+          [
+            "task_select_intersecting_tracts",
+            "task_mean_elevation_by_tract"
+          ]
+        ],
+        "created_at": "2026-08-21T20:36:29.782161Z"
+      }
+    ],
+    "budgets": {
+      "max_total_model_calls": 24,
+      "max_total_tokens": 120000,
+      "max_worker_calls": 30,
+      "max_local_recoveries": 6,
+      "max_replans": 3,
+      "max_runtime_seconds": 900.0,
+      "planner_retry_limit": 2,
+      "qc_retry_limit": 1,
+      "replanner_retry_limit": 1,
+      "total_model_calls": 4,
+      "total_tokens": 18791,
+      "worker_calls": 3,
+      "local_recoveries": 0,
+      "replans": 0
+    },
+    "terminal_state": "completed",
+    "terminal_reason": "All active tasks, blocking requirements, and terminal outputs are satisfied.",
+    "human_clarification": null,
+    "final_artifact_ids": [
+      "79b730b8-9e02-4474-a343-54178332835c"
+    ],
+    "required_terminal_roles": [
+      "mean_elevation_by_tract"
+    ],
+    "final_disclosure": "Workflow completed with accepted terminal artifacts.",
+    "created_at": "2026-08-21T20:35:49.532548Z",
+    "updated_at": "2026-08-21T20:36:49.502448Z"
+  },
+  "execution_steps": [
+    {
+      "step_index": 1,
+      "step_id": "task_retrieve_census_tracts",
+      "agent_id": "data_retrieval_agent",
+      "title": "Retrieve census tract polygons",
+      "instructions": "Retrieve the highest-ranked available census tract polygon dataset covering State College borough. Return the retrieved artifact metadata for downstream suitability checks.",
+      "output_artifacts": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_bba5b515_fx_tracts_centre_utm.gpkg"
+      ],
+      "status": "successful",
+      "error": null
+    },
+    {
+      "step_index": 2,
+      "step_id": "task_select_intersecting_tracts",
+      "agent_id": "vector_analysis_a",
+      "title": "Select census tracts intersecting State College borough",
+      "instructions": "Perform an intersection overlay between the retrieved census tract polygon dataset and the State College borough boundary. Retain the census tract identity and attributes needed for the final zonal statistics output.",
+      "output_artifacts": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_a/intersect_9d081975.gpkg"
+      ],
+      "status": "successful",
+      "error": null
+    },
+    {
+      "step_index": 3,
+      "step_id": "task_mean_elevation_by_tract",
+      "agent_id": "raster_analysis_agent",
+      "title": "Calculate mean elevation by intersecting census tract",
+      "instructions": "Compute mean raster elevation for each polygon in the intersecting census tract zones using the supplied DEM rasters. Return a CSV table that preserves the census tract identity fields and contains the calculated mean elevation.",
+      "output_artifacts": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/raster_analysis_agent/zonal_stats_3e22001b.csv"
+      ],
+      "status": "successful",
+      "error": null
+    }
+  ],
+  "qc_evaluations": 3,
+  "qc_blocks": 0,
+  "qc_interventions": 0,
+  "effective_blocks": 0,
+  "effective_interventions": 0,
+  "qc_policy_overrides": 0,
+  "replanning_iterations": 0,
+  "error": null,
+  "ledger_events": [
+    {
+      "call_id": "7a5c7455-1ef9-4678-8c7b-e77a717168f0",
+      "trajectory_id": "traj_ISS_Q17_C1_run2",
+      "agent_id": "data_retrieval_agent",
+      "operation": "dataset_retrieval",
+      "query": "Retrieve the highest-ranked available census tract polygon dataset covering State College borough. Return the retrieved artifact metadata for downstream suitability checks.",
+      "timestamp_start": 1787344589.800872,
+      "timestamp_end": 1787344589.802778,
+      "duration_seconds": 0.0019098760094493628,
+      "input_artifact_paths": [],
+      "input_artifact_hashes": {},
+      "parameters": {},
+      "status": "completed",
+      "error_code": null,
+      "error_message": null,
+      "output_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_bba5b515_fx_tracts_centre_utm.gpkg"
+      ],
+      "output_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_bba5b515_fx_tracts_centre_utm.gpkg": "9818cdd69d3b26cbd238d60780f5a566bee625b857232a79ed5ca02595c100a8"
+      },
+      "summary": "Successfully retrieved dataset: fx_tracts_centre_utm.gpkg",
+      "raw_response": {
+        "binding_id": "7a5c7455-1ef9-4678-8c7b-e77a717168f0",
+        "task_id": "task_retrieve_census_tracts",
+        "attempt": 1
+      }
+    },
+    {
+      "call_id": "9de88b74-b0d0-4094-8142-74d3143ae703",
+      "trajectory_id": "traj_ISS_Q17_C1_run2",
+      "agent_id": "vector_analysis_a",
+      "operation": "overlay",
+      "query": "Perform an intersection overlay between the retrieved census tract polygon dataset and the State College borough boundary. Retain the census tract identity and attributes needed for the final zonal statistics output.",
+      "timestamp_start": 1787344596.028716,
+      "timestamp_end": 1787344596.058627,
+      "duration_seconds": 0.02991884200309869,
+      "input_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_bba5b515_fx_tracts_centre_utm.gpkg",
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_state_college_boundary.gpkg"
+      ],
+      "input_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/data_retrieval_agent/retrieved_bba5b515_fx_tracts_centre_utm.gpkg": "9818cdd69d3b26cbd238d60780f5a566bee625b857232a79ed5ca02595c100a8",
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_state_college_boundary.gpkg": "8babd6041cfb3fb8cd2a574e212372b937de7810908f0691bde166acca8d126a"
+      },
+      "parameters": {
+        "operation": "overlay"
+      },
+      "status": "completed",
+      "error_code": null,
+      "error_message": null,
+      "output_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_a/intersect_9d081975.gpkg"
+      ],
+      "output_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_a/intersect_9d081975.gpkg": "1fb84edcdc6895a4994ad0acdbb72cd71b227b167ba57a336e6f1d13c9b1abe7"
+      },
+      "summary": "Intersected vectors resulting in 1 features.",
+      "raw_response": {
+        "binding_id": "9de88b74-b0d0-4094-8142-74d3143ae703",
+        "task_id": "task_select_intersecting_tracts",
+        "attempt": 1
+      }
+    },
+    {
+      "call_id": "396252fd-6002-4024-a277-9b875aeeebe6",
+      "trajectory_id": "traj_ISS_Q17_C1_run2",
+      "agent_id": "raster_analysis_agent",
+      "operation": "zonal_statistics",
+      "query": "Compute mean raster elevation for each polygon in the intersecting census tract zones using the supplied DEM rasters. Return a CSV table that preserves the census tract identity fields and contains the calculated mean elevation.",
+      "timestamp_start": 1787344599.436973,
+      "timestamp_end": 1787344599.447261,
+      "duration_seconds": 0.01029522500175517,
+      "input_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_dem_partial_60pct_utm.tif",
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_dem_centre_30m_utm.tif",
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_a/intersect_9d081975.gpkg"
+      ],
+      "input_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_dem_partial_60pct_utm.tif": "c853b59bebcfe95bfa54a5b406befe9e135708b247f6d7ac162633e166fb9031",
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_dem_centre_30m_utm.tif": "1426addcdb0dea68e59a3b63a33a5efbf17fd56a0b1fd066a4bbf52595accdcb",
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_a/intersect_9d081975.gpkg": "1fb84edcdc6895a4994ad0acdbb72cd71b227b167ba57a336e6f1d13c9b1abe7"
+      },
+      "parameters": {
+        "operation": "zonal_statistics"
+      },
+      "status": "completed",
+      "error_code": null,
+      "error_message": null,
+      "output_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/raster_analysis_agent/zonal_stats_3e22001b.csv"
+      ],
+      "output_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/raster_analysis_agent/zonal_stats_3e22001b.csv": "fe6b4e52375875194532b1637760ac372e8687497f120ab334a39dbc07cfacda"
+      },
+      "summary": "Calculated zonal statistics for 1 zones.",
+      "raw_response": {
+        "binding_id": "396252fd-6002-4024-a277-9b875aeeebe6",
+        "task_id": "task_mean_elevation_by_tract",
+        "attempt": 1
+      }
+    }
+  ],
+  "created_at": "2026-08-21T20:36:49.506570+00:00",
+  "evaluation": {
+    "task_id": "ISS_Q17",
+    "bafo_success": false,
+    "all_challenges_resolved": false,
+    "evaluability_status": "EVALUABLE",
+    "challenge_activated": true,
+    "trajectory_classification": "valid_bafo_fail",
+    "production_terminal_state": "completed",
+    "terminal_state": "successful",
+    "constraint_results": {
+      "complete_spatial_coverage": {
+        "constraint_key": "complete_spatial_coverage",
+        "status": "FAIL",
+        "reason": "Workflow consumed partial 60% DEM candidate instead of full coverage extent.",
+        "details": {}
+      },
+      "zonal_statistics_output": {
+        "constraint_key": "zonal_statistics_output",
+        "status": "PASS",
+        "reason": "Raster and vector spatial references harmonized for zonal statistics.",
+        "details": {
+          "output_features": 1
+        }
+      }
+    },
+    "passed_constraints": [
+      "zonal_statistics_output"
+    ],
+    "failed_constraints": [
+      "complete_spatial_coverage"
+    ],
+    "unevaluable_constraints": [],
+    "inspected_artifacts_count": 3,
+    "events_count": 3,
+    "diagnostic_summary": "BAFO: False | State: successful (Valid: True) | Constraints: 1 PASS, 1 FAIL, 0 UNEVALUABLE | Events Recorded: 3 | Artifacts Inspected: 3"
+  },
+  "bafo_success": false,
+  "all_challenges_resolved": false,
+  "trajectory_classification": "valid_bafo_fail"
+}

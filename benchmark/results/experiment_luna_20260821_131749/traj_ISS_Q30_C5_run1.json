@@ -1,0 +1,1701 @@
+{
+  "trajectory_id": "traj_ISS_Q30_C5_run1",
+  "task_id": "ISS_Q30",
+  "condition": "C5",
+  "model": "gpt-5.6-luna",
+  "run_index": 1,
+  "suite": "isolated",
+  "user_question": "Create a choropleth map of median household income by census tract across Centre County.",
+  "input_artifact_paths": [
+    "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg",
+    "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_acs_centre_2024.csv"
+  ],
+  "status": "successful",
+  "total_wall_time": 35.177,
+  "rate_limit_wait_time": 0.0,
+  "provider_retry_wait_time": 0.0,
+  "orchestration_active_time": 35.149,
+  "worker_execution_time": 0.028,
+  "total_tokens": 14817,
+  "input_tokens": 11027,
+  "output_tokens": 3790,
+  "outputs": {
+    "summary": "Workflow completed with accepted terminal artifacts.",
+    "artifacts": [
+      "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/mapping_agent/map_74011d5f.html"
+    ],
+    "produced_artifacts": [
+      "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/attr_joined_661ccb5e.gpkg",
+      "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/mapping_agent/map_74011d5f.html"
+    ],
+    "workflow_plan": {
+      "workflow_id": "6a1aa376-e6d5-4894-bb04-c3591dc9fbf3",
+      "plan_version": 1,
+      "goal": "Create a choropleth map of median household income by census tract across Centre County.",
+      "workflow_steps": [
+        {
+          "step_id": "attribute_join_1",
+          "title": "Join ACS income attributes to census tracts",
+          "purpose": "Attach median household income attributes to the census tract polygons.",
+          "agent_id": "vector_analysis_b",
+          "operation": "attribute_join",
+          "instructions": "Join the input GeoPackage tract layer with the input CSV table. Runtime QC must ground the compatible join fields from the observed schemas and must not infer or prebind join-key names. Preserve the tract polygon geometry and the median household income attribute in the output GeoPackage.",
+          "parameters": {
+            "table_key": "GEOID",
+            "vector_key": "GEOID"
+          },
+          "depends_on": [],
+          "input_from_steps": [],
+          "status": "successful",
+          "output_artifact_ids": [
+            "10db85e1-06b3-4b8b-b8c8-345ba5d9a167"
+          ]
+        },
+        {
+          "step_id": "thematic_mapping_1",
+          "title": "Create median household income choropleth",
+          "purpose": "Generate the requested choropleth map of median household income by census tract across Centre County.",
+          "agent_id": "mapping_agent",
+          "operation": "thematic_mapping",
+          "instructions": "Create an HTML choropleth from the joined tract GeoPackage. Runtime QC must ground the mapped income field from the joined output schema; do not prebind a field name in parameters. Use the tract polygon geometries as the map features.",
+          "parameters": {
+            "field": "median_income"
+          },
+          "depends_on": [
+            "attribute_join_1"
+          ],
+          "input_from_steps": [
+            "attribute_join_1"
+          ],
+          "status": "successful",
+          "output_artifact_ids": [
+            "e233bc09-561d-4151-baba-ea637777432f"
+          ]
+        }
+      ],
+      "requirements": [
+        {
+          "requirement_id": "req_join_formats",
+          "requirement_type": "format_compatible",
+          "scope": "attribute_join_1 input artifacts",
+          "task_id": "attribute_join_1",
+          "artifact_roles": [
+            "input_1",
+            "input_2"
+          ],
+          "parameters": {
+            "accepted_formats": {
+              "input_1": [
+                "GPKG"
+              ],
+              "input_2": [
+                "CSV"
+              ]
+            }
+          },
+          "blocking": true,
+          "provenance": "WORKER_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [
+            "acf04904-6a44-42c4-bd12-f1f3daa54bf8",
+            "894ac746-ce60-47a0-a0ab-faf6148d8cbd"
+          ],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_join_fields",
+          "requirement_type": "required_fields",
+          "scope": "attribute_join_1 inputs and joined output",
+          "task_id": "attribute_join_1",
+          "artifact_roles": [
+            "input_1",
+            "input_2"
+          ],
+          "parameters": {
+            "observed_candidate_fields": {
+              "input_1": [
+                "GEOID"
+              ],
+              "input_2": [
+                "GEOID",
+                "median_income"
+              ]
+            },
+            "required_semantics": [
+              "tract join identifier",
+              "median household income"
+            ],
+            "runtime_field_grounding_required": true
+          },
+          "blocking": true,
+          "provenance": "DOWNSTREAM_CONSUMER",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [
+            "acf04904-6a44-42c4-bd12-f1f3daa54bf8",
+            "894ac746-ce60-47a0-a0ab-faf6148d8cbd"
+          ],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_tract_coverage",
+          "requirement_type": "spatial_coverage",
+          "scope": "input_1 tract layer",
+          "task_id": "attribute_join_1",
+          "artifact_roles": [
+            "input_1"
+          ],
+          "parameters": {
+            "area": "Centre County",
+            "spatial_unit": "census tract",
+            "coverage_required": "across the requested county"
+          },
+          "blocking": true,
+          "provenance": "USER_EXPLICIT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [
+            "acf04904-6a44-42c4-bd12-f1f3daa54bf8"
+          ],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_map_format",
+          "requirement_type": "format_compatible",
+          "scope": "thematic_mapping_1 input artifact",
+          "task_id": "thematic_mapping_1",
+          "artifact_roles": [
+            "joined_tract_income"
+          ],
+          "parameters": {
+            "accepted_formats": [
+              "GPKG"
+            ]
+          },
+          "blocking": true,
+          "provenance": "WORKER_CONTRACT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [
+            "f2fabd1f-a414-4ca3-8a16-a328801efcf9"
+          ],
+          "superseded_by": null
+        },
+        {
+          "requirement_id": "req_map_field",
+          "requirement_type": "required_fields",
+          "scope": "thematic_mapping_1 input artifact",
+          "task_id": "thematic_mapping_1",
+          "artifact_roles": [
+            "joined_tract_income"
+          ],
+          "parameters": {
+            "required_semantic_field": "median household income",
+            "observed_source_candidate": "median_income",
+            "runtime_field_grounding_required": true
+          },
+          "blocking": true,
+          "provenance": "USER_EXPLICIT",
+          "created_by": "planner",
+          "created_in_plan_version": 1,
+          "status": "satisfied",
+          "satisfied_by_evidence_ids": [
+            "f2fabd1f-a414-4ca3-8a16-a328801efcf9"
+          ],
+          "superseded_by": null
+        }
+      ],
+      "commitments": []
+    }
+  },
+  "workflow_state": {
+    "schema_version": "1.0.0",
+    "workflow_id": "6a1aa376-e6d5-4894-bb04-c3591dc9fbf3",
+    "state_version": 20,
+    "user_goal": "Create a choropleth map of median household income by census tract across Centre County.",
+    "feature_profile": "C2",
+    "feature_config": {
+      "profile_name": "C2",
+      "planner_mode": "gis_aware",
+      "qc_mode": "gis_aware",
+      "replanner_mode": "gis_aware",
+      "technical_invariants": true,
+      "local_recovery": true,
+      "structural_patching": true,
+      "gis_finding_routing": true
+    },
+    "current_plan_version": 1,
+    "tasks": {
+      "attribute_join_1": {
+        "task_id": "attribute_join_1",
+        "title": "Join ACS income attributes to census tracts",
+        "purpose": "Attach median household income attributes to the census tract polygons.",
+        "operation": "attribute_join",
+        "instructions": "Join the input GeoPackage tract layer with the input CSV table. Runtime QC must ground the compatible join fields from the observed schemas and must not infer or prebind join-key names. Preserve the tract polygon geometry and the median household income attribute in the output GeoPackage.",
+        "parameters": {
+          "table_key": "GEOID",
+          "vector_key": "GEOID"
+        },
+        "required_capabilities": [
+          "attribute_join",
+          "vector_aggregation_and_joins"
+        ],
+        "depends_on": [],
+        "input_requirements": [
+          {
+            "role": "input_1",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          },
+          {
+            "role": "input_2",
+            "data_model": "table",
+            "formats": [
+              "CSV"
+            ],
+            "required": true
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "joined_tract_income",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_join_formats",
+          "req_join_fields",
+          "req_tract_coverage"
+        ],
+        "status": "successful",
+        "attempts": 1,
+        "active_binding_id": "d02bf7b2-d55c-4d58-a90b-76d870023ceb",
+        "output_artifact_ids": [
+          "10db85e1-06b3-4b8b-b8c8-345ba5d9a167"
+        ],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      },
+      "thematic_mapping_1": {
+        "task_id": "thematic_mapping_1",
+        "title": "Create median household income choropleth",
+        "purpose": "Generate the requested choropleth map of median household income by census tract across Centre County.",
+        "operation": "thematic_mapping",
+        "instructions": "Create an HTML choropleth from the joined tract GeoPackage. Runtime QC must ground the mapped income field from the joined output schema; do not prebind a field name in parameters. Use the tract polygon geometries as the map features.",
+        "parameters": {
+          "field": "median_income"
+        },
+        "required_capabilities": [
+          "thematic_mapping"
+        ],
+        "depends_on": [
+          "attribute_join_1"
+        ],
+        "input_requirements": [
+          {
+            "role": "joined_tract_income",
+            "data_model": "vector",
+            "formats": [
+              "GPKG"
+            ],
+            "required": true
+          }
+        ],
+        "expected_outputs": [
+          {
+            "role": "median_income_choropleth_map",
+            "data_model": "map",
+            "formats": [
+              "HTML"
+            ],
+            "required": true
+          }
+        ],
+        "requirement_ids": [
+          "req_map_format",
+          "req_map_field"
+        ],
+        "status": "successful",
+        "attempts": 1,
+        "active_binding_id": "152d63ed-1835-4b44-8fc6-064df3788e34",
+        "output_artifact_ids": [
+          "e233bc09-561d-4151-baba-ea637777432f"
+        ],
+        "last_error": null,
+        "created_in_plan_version": 1,
+        "superseded_in_plan_version": null,
+        "metadata": {}
+      }
+    },
+    "edges": [
+      [
+        "attribute_join_1",
+        "thematic_mapping_1"
+      ]
+    ],
+    "bindings": {
+      "d02bf7b2-d55c-4d58-a90b-76d870023ceb": {
+        "binding_id": "d02bf7b2-d55c-4d58-a90b-76d870023ceb",
+        "task_id": "attribute_join_1",
+        "agent_id": "vector_analysis_b",
+        "operation": "attribute_join",
+        "instruction": "Join the input GeoPackage tract layer with the input CSV table. Runtime QC must ground the compatible join fields from the observed schemas and must not infer or prebind join-key names. Preserve the tract polygon geometry and the median household income attribute in the output GeoPackage.",
+        "input_bindings": [
+          {
+            "role": "input_1",
+            "artifact_id": "d6b03802-fb70-4385-866c-c8cdce81b379",
+            "source_task_id": null,
+            "binding_order": 0
+          },
+          {
+            "role": "input_2",
+            "artifact_id": "4b4fb765-1fa0-4255-baa7-9e7b201cd532",
+            "source_task_id": null,
+            "binding_order": 1
+          }
+        ],
+        "agent_profile_snapshot": {
+          "agent_id": "vector_analysis_b",
+          "name": "Vector Analysis B",
+          "description": "Performs deterministic vector joins, dissolves, grouped aggregations, attribute joins, and buffering. Vector operations consume GeoPackage inputs. The service does not convert formats, repair invalid geometries, or reproject inputs automatically.",
+          "operations": [
+            "aggregate",
+            "attribute_join",
+            "buffer",
+            "dissolve",
+            "point_count_by_polygon",
+            "point_sum_by_polygon",
+            "spatial_join",
+            "vector_aggregation_and_joins"
+          ],
+          "skills": [
+            {
+              "skill_id": "vector_aggregation_and_joins",
+              "name": "Vector Aggregation and Joins",
+              "description": "Performs polygon dissolves, feature aggregations, spatial joins, attribute table joins, and spatial buffering on GeoPackage layers.",
+              "constraints": {
+                "spatial": "Requires matching coordinate reference systems for spatial joins. Requires projected CRS for metric buffer.",
+                "temporal": null,
+                "other": [
+                  "Accepts GeoPackage (.gpkg) vector format only. Rejects GeoJSON or Shapefiles.",
+                  "Accepts CSV tables for attribute join operations."
+                ]
+              }
+            }
+          ],
+          "inputs": {
+            "input_datasets": {
+              "required": true,
+              "description": "GeoPackage vector dataset(s) and optional CSV attribute table."
+            }
+          },
+          "outputs": [
+            {
+              "type": "vector",
+              "formats": [
+                "GPKG"
+              ],
+              "required": true,
+              "description": "Processed GeoPackage vector dataset."
+            }
+          ],
+          "parameters": {
+            "operation": {
+              "required": false,
+              "description": "Explicit operation name (dissolve, spatial_join, attribute_join, buffer, aggregate, point_count_by_polygon, point_sum_by_polygon)."
+            },
+            "count_field": {
+              "required": false,
+              "description": "Output field name for point_count_by_polygon."
+            },
+            "sum_field": {
+              "required": false,
+              "description": "Point-layer numeric field to sum for point_sum_by_polygon."
+            },
+            "output_field": {
+              "required": false,
+              "description": "Output field name for point_sum_by_polygon."
+            },
+            "vector_key": {
+              "required": false,
+              "description": "Field name in vector dataset for attribute join."
+            },
+            "table_key": {
+              "required": false,
+              "description": "Field name in tabular dataset for attribute join."
+            }
+          }
+        },
+        "endpoint": "https://www.geospatial-agentic-services.online/agents/vector_analysis_b/tasks",
+        "attempt": 1,
+        "invocation_id": null,
+        "status": "successful",
+        "started_at": "2026-08-21T20:58:43.396425Z",
+        "completed_at": "2026-08-21T20:58:43.414721Z",
+        "duration_seconds": 0.018304721001186408,
+        "output_artifact_ids": [
+          "10db85e1-06b3-4b8b-b8c8-345ba5d9a167"
+        ],
+        "messages": [
+          "Joined attributes by GEOID=GEOID, producing 16 features."
+        ],
+        "structured_error": null,
+        "created_at": "2026-08-21T20:58:43.391776Z"
+      },
+      "152d63ed-1835-4b44-8fc6-064df3788e34": {
+        "binding_id": "152d63ed-1835-4b44-8fc6-064df3788e34",
+        "task_id": "thematic_mapping_1",
+        "agent_id": "mapping_agent",
+        "operation": "thematic_mapping",
+        "instruction": "Create an HTML choropleth from the joined tract GeoPackage. Runtime QC must ground the mapped income field from the joined output schema; do not prebind a field name in parameters. Use the tract polygon geometries as the map features.",
+        "input_bindings": [
+          {
+            "role": "joined_tract_income",
+            "artifact_id": "10db85e1-06b3-4b8b-b8c8-345ba5d9a167",
+            "source_task_id": "attribute_join_1",
+            "binding_order": 0
+          }
+        ],
+        "agent_profile_snapshot": {
+          "agent_id": "mapping_agent",
+          "name": "Mapping Agent",
+          "description": "Produces deterministic HTML maps from supplied vector, raster, or joined tabular-spatial artifacts. Visualizes the specified field and embeds verification metadata.",
+          "operations": [
+            "thematic_mapping"
+          ],
+          "skills": [
+            {
+              "skill_id": "thematic_mapping",
+              "name": "Thematic Mapping",
+              "description": "Generates interactive HTML choropleth and vector boundary maps from GeoPackage or GeoJSON layers.",
+              "constraints": {
+                "spatial": "Visualizes the specified spatial features and mapped attributes.",
+                "temporal": null,
+                "other": [
+                  "Embeds source artifact and CRS verification metadata in output HTML."
+                ]
+              }
+            }
+          ],
+          "inputs": {
+            "input_datasets": {
+              "required": true,
+              "description": "Input vector or raster layer in GeoPackage or GeoJSON format."
+            }
+          },
+          "outputs": [
+            {
+              "type": "map",
+              "formats": [
+                "HTML"
+              ],
+              "required": true,
+              "description": "Interactive HTML visualization map."
+            }
+          ],
+          "parameters": {
+            "field": {
+              "required": false,
+              "description": "Attribute column name to visualize/classify."
+            }
+          }
+        },
+        "endpoint": "https://www.geospatial-agentic-services.online/agents/mapping_agent/tasks",
+        "attempt": 1,
+        "invocation_id": null,
+        "status": "successful",
+        "started_at": "2026-08-21T20:58:49.736903Z",
+        "completed_at": "2026-08-21T20:58:49.747092Z",
+        "duration_seconds": 0.01019270101096481,
+        "output_artifact_ids": [
+          "e233bc09-561d-4151-baba-ea637777432f"
+        ],
+        "messages": [
+          "Rendered map with 16 features (mapped field: median_income)."
+        ],
+        "structured_error": null,
+        "created_at": "2026-08-21T20:58:49.729015Z"
+      }
+    },
+    "artifacts": {
+      "d6b03802-fb70-4385-866c-c8cdce81b379": {
+        "artifact_id": "d6b03802-fb70-4385-866c-c8cdce81b379",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg",
+        "content_hash": "9818cdd69d3b26cbd238d60780f5a566bee625b857232a79ed5ca02595c100a8",
+        "format": "gpkg",
+        "media_type": null,
+        "data_model": "vector",
+        "producer_task_id": null,
+        "producer_binding_id": null,
+        "role": "input_1",
+        "evidence_ids": [
+          "acf04904-6a44-42c4-bd12-f1f3daa54bf8"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T20:58:18.279831Z",
+        "metadata": {
+          "source": "user_input"
+        }
+      },
+      "4b4fb765-1fa0-4255-baa7-9e7b201cd532": {
+        "artifact_id": "4b4fb765-1fa0-4255-baa7-9e7b201cd532",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_acs_centre_2024.csv",
+        "content_hash": "07aeaae70fda652250b9ef8042c26d2529bf448c8636a11b7c102a3eebde07b6",
+        "format": "csv",
+        "media_type": null,
+        "data_model": "table",
+        "producer_task_id": null,
+        "producer_binding_id": null,
+        "role": "input_2",
+        "evidence_ids": [
+          "894ac746-ce60-47a0-a0ab-faf6148d8cbd"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T20:58:18.280040Z",
+        "metadata": {
+          "source": "user_input"
+        }
+      },
+      "10db85e1-06b3-4b8b-b8c8-345ba5d9a167": {
+        "artifact_id": "10db85e1-06b3-4b8b-b8c8-345ba5d9a167",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/attr_joined_661ccb5e.gpkg",
+        "content_hash": "4b651b156c036f8cd6d8ad28f1a828ffdc64f5a7443f2d5310080bf73ea9d6b9",
+        "format": "gpkg",
+        "media_type": null,
+        "data_model": "vector",
+        "producer_task_id": "attribute_join_1",
+        "producer_binding_id": "d02bf7b2-d55c-4d58-a90b-76d870023ceb",
+        "role": "joined_tract_income",
+        "evidence_ids": [
+          "f2fabd1f-a414-4ca3-8a16-a328801efcf9"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T20:58:43.418070Z",
+        "metadata": {}
+      },
+      "e233bc09-561d-4151-baba-ea637777432f": {
+        "artifact_id": "e233bc09-561d-4151-baba-ea637777432f",
+        "location": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/mapping_agent/map_74011d5f.html",
+        "content_hash": "319bb7dd794968dd95e49f8b735d5b91f1da5312d68e809296629bb72c2a8886",
+        "format": "html",
+        "media_type": null,
+        "data_model": "map",
+        "producer_task_id": "thematic_mapping_1",
+        "producer_binding_id": "152d63ed-1835-4b44-8fc6-064df3788e34",
+        "role": "median_income_choropleth_map",
+        "evidence_ids": [
+          "460ff64d-d355-4a73-ba07-0e72695047c4"
+        ],
+        "validation_status": "pass",
+        "created_at": "2026-08-21T20:58:49.749871Z",
+        "metadata": {}
+      }
+    },
+    "derivations": {
+      "8f68765a-058e-4176-84fd-dfff910c6826": {
+        "derivation_id": "8f68765a-058e-4176-84fd-dfff910c6826",
+        "output_artifact_id": "10db85e1-06b3-4b8b-b8c8-345ba5d9a167",
+        "source_artifact_ids": [
+          "d6b03802-fb70-4385-866c-c8cdce81b379",
+          "4b4fb765-1fa0-4255-baa7-9e7b201cd532"
+        ],
+        "producer_task_id": "attribute_join_1",
+        "operation": "attribute_join",
+        "parameters": {},
+        "semantic_effect": "Produced role 'joined_tract_income' using operation 'attribute_join'.",
+        "evidence_snapshot_ids": [],
+        "created_at": "2026-08-21T20:58:43.418110Z"
+      },
+      "d5b88aea-8bc9-491f-a952-a0f73d51018b": {
+        "derivation_id": "d5b88aea-8bc9-491f-a952-a0f73d51018b",
+        "output_artifact_id": "e233bc09-561d-4151-baba-ea637777432f",
+        "source_artifact_ids": [
+          "10db85e1-06b3-4b8b-b8c8-345ba5d9a167"
+        ],
+        "producer_task_id": "thematic_mapping_1",
+        "operation": "thematic_mapping",
+        "parameters": {
+          "field": "median_income"
+        },
+        "semantic_effect": "Produced role 'median_income_choropleth_map' using operation 'thematic_mapping'.",
+        "evidence_snapshot_ids": [],
+        "created_at": "2026-08-21T20:58:49.749901Z"
+      }
+    },
+    "requirements": {
+      "req_join_formats": {
+        "requirement_id": "req_join_formats",
+        "requirement_type": "format_compatible",
+        "scope": "attribute_join_1 input artifacts",
+        "task_id": "attribute_join_1",
+        "artifact_roles": [
+          "input_1",
+          "input_2"
+        ],
+        "parameters": {
+          "accepted_formats": {
+            "input_1": [
+              "GPKG"
+            ],
+            "input_2": [
+              "CSV"
+            ]
+          }
+        },
+        "blocking": true,
+        "provenance": "WORKER_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [
+          "acf04904-6a44-42c4-bd12-f1f3daa54bf8",
+          "894ac746-ce60-47a0-a0ab-faf6148d8cbd"
+        ],
+        "superseded_by": null
+      },
+      "req_join_fields": {
+        "requirement_id": "req_join_fields",
+        "requirement_type": "required_fields",
+        "scope": "attribute_join_1 inputs and joined output",
+        "task_id": "attribute_join_1",
+        "artifact_roles": [
+          "input_1",
+          "input_2"
+        ],
+        "parameters": {
+          "observed_candidate_fields": {
+            "input_1": [
+              "GEOID"
+            ],
+            "input_2": [
+              "GEOID",
+              "median_income"
+            ]
+          },
+          "required_semantics": [
+            "tract join identifier",
+            "median household income"
+          ],
+          "runtime_field_grounding_required": true
+        },
+        "blocking": true,
+        "provenance": "DOWNSTREAM_CONSUMER",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [
+          "acf04904-6a44-42c4-bd12-f1f3daa54bf8",
+          "894ac746-ce60-47a0-a0ab-faf6148d8cbd"
+        ],
+        "superseded_by": null
+      },
+      "req_tract_coverage": {
+        "requirement_id": "req_tract_coverage",
+        "requirement_type": "spatial_coverage",
+        "scope": "input_1 tract layer",
+        "task_id": "attribute_join_1",
+        "artifact_roles": [
+          "input_1"
+        ],
+        "parameters": {
+          "area": "Centre County",
+          "spatial_unit": "census tract",
+          "coverage_required": "across the requested county"
+        },
+        "blocking": true,
+        "provenance": "USER_EXPLICIT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [
+          "acf04904-6a44-42c4-bd12-f1f3daa54bf8"
+        ],
+        "superseded_by": null
+      },
+      "req_map_format": {
+        "requirement_id": "req_map_format",
+        "requirement_type": "format_compatible",
+        "scope": "thematic_mapping_1 input artifact",
+        "task_id": "thematic_mapping_1",
+        "artifact_roles": [
+          "joined_tract_income"
+        ],
+        "parameters": {
+          "accepted_formats": [
+            "GPKG"
+          ]
+        },
+        "blocking": true,
+        "provenance": "WORKER_CONTRACT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [
+          "f2fabd1f-a414-4ca3-8a16-a328801efcf9"
+        ],
+        "superseded_by": null
+      },
+      "req_map_field": {
+        "requirement_id": "req_map_field",
+        "requirement_type": "required_fields",
+        "scope": "thematic_mapping_1 input artifact",
+        "task_id": "thematic_mapping_1",
+        "artifact_roles": [
+          "joined_tract_income"
+        ],
+        "parameters": {
+          "required_semantic_field": "median household income",
+          "observed_source_candidate": "median_income",
+          "runtime_field_grounding_required": true
+        },
+        "blocking": true,
+        "provenance": "USER_EXPLICIT",
+        "created_by": "planner",
+        "created_in_plan_version": 1,
+        "status": "satisfied",
+        "satisfied_by_evidence_ids": [
+          "f2fabd1f-a414-4ca3-8a16-a328801efcf9"
+        ],
+        "superseded_by": null
+      }
+    },
+    "commitments": {},
+    "schema_mappings": {
+      "4b4fb765-1fa0-4255-baa7-9e7b201cd532:table-side tract identifier": {
+        "artifact_id": "4b4fb765-1fa0-4255-baa7-9e7b201cd532",
+        "semantic_name": "table-side tract identifier",
+        "actual_field": "GEOID",
+        "downstream_parameters": [
+          {
+            "task_id": "attribute_join_1",
+            "parameter": "table_key"
+          }
+        ]
+      },
+      "d6b03802-fb70-4385-866c-c8cdce81b379:vector-side tract identifier": {
+        "artifact_id": "d6b03802-fb70-4385-866c-c8cdce81b379",
+        "semantic_name": "vector-side tract identifier",
+        "actual_field": "GEOID",
+        "downstream_parameters": [
+          {
+            "task_id": "attribute_join_1",
+            "parameter": "vector_key"
+          }
+        ]
+      },
+      "10db85e1-06b3-4b8b-b8c8-345ba5d9a167:median household income measure": {
+        "artifact_id": "10db85e1-06b3-4b8b-b8c8-345ba5d9a167",
+        "semantic_name": "median household income measure",
+        "actual_field": "median_income",
+        "downstream_parameters": [
+          {
+            "task_id": "thematic_mapping_1",
+            "parameter": "field"
+          }
+        ]
+      }
+    },
+    "evidence": {
+      "acf04904-6a44-42c4-bd12-f1f3daa54bf8": {
+        "evidence_id": "acf04904-6a44-42c4-bd12-f1f3daa54bf8",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "d6b03802-fb70-4385-866c-c8cdce81b379"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg",
+          "format": "gpkg",
+          "size_bytes": 98304,
+          "complete": true,
+          "limitations": [],
+          "data_model": "vector",
+          "feature_count": 16,
+          "schema": {
+            "GEOID": "object",
+            "NAME": "object",
+            "COUNTYFP": "object",
+            "STATEFP": "object"
+          },
+          "schema_fields": [
+            "GEOID",
+            "NAME",
+            "COUNTYFP",
+            "STATEFP"
+          ],
+          "geometry_type": [
+            "Polygon"
+          ],
+          "geometry_valid": true,
+          "invalid_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "null_geometry_count": 0,
+          "bounds": [
+            238087.3824011362,
+            4508961.385028789,
+            272914.01066431846,
+            4543387.006183241
+          ],
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true,
+          "crs": "EPSG:26918",
+          "crs_authority": "EPSG:26918",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T20:58:18.285929Z",
+        "complete": true,
+        "limitations": []
+      },
+      "894ac746-ce60-47a0-a0ab-faf6148d8cbd": {
+        "evidence_id": "894ac746-ce60-47a0-a0ab-faf6148d8cbd",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "4b4fb765-1fa0-4255-baa7-9e7b201cd532"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_acs_centre_2024.csv",
+          "format": "csv",
+          "size_bytes": 747,
+          "complete": true,
+          "limitations": [],
+          "data_model": "table",
+          "inspected_row_count": 16,
+          "row_sample_complete": true,
+          "schema": {
+            "GEOID": "int64",
+            "tract_name": "object",
+            "median_income": "int64",
+            "median_rent": "int64",
+            "total_pop": "int64"
+          },
+          "schema_fields": [
+            "GEOID",
+            "tract_name",
+            "median_income",
+            "median_rent",
+            "total_pop"
+          ],
+          "coordinate_candidates": [],
+          "spatializable_from_coordinates": false,
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T20:58:18.287910Z",
+        "complete": true,
+        "limitations": []
+      },
+      "f2fabd1f-a414-4ca3-8a16-a328801efcf9": {
+        "evidence_id": "f2fabd1f-a414-4ca3-8a16-a328801efcf9",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "10db85e1-06b3-4b8b-b8c8-345ba5d9a167"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/attr_joined_661ccb5e.gpkg",
+          "format": "gpkg",
+          "size_bytes": 98304,
+          "complete": true,
+          "limitations": [],
+          "data_model": "vector",
+          "feature_count": 16,
+          "schema": {
+            "GEOID": "object",
+            "NAME": "object",
+            "COUNTYFP": "object",
+            "STATEFP": "object",
+            "tract_name": "object",
+            "median_income": "int64",
+            "median_rent": "int64",
+            "total_pop": "int64"
+          },
+          "schema_fields": [
+            "GEOID",
+            "NAME",
+            "COUNTYFP",
+            "STATEFP",
+            "tract_name",
+            "median_income",
+            "median_rent",
+            "total_pop"
+          ],
+          "geometry_type": [
+            "Polygon"
+          ],
+          "geometry_valid": true,
+          "invalid_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "null_geometry_count": 0,
+          "bounds": [
+            238087.3824011362,
+            4508961.385028789,
+            272914.01066431846,
+            4543387.006183241
+          ],
+          "temporal_coverage": null,
+          "temporal_candidates": [],
+          "temporal_coverage_complete": true,
+          "crs": "EPSG:26918",
+          "crs_authority": "EPSG:26918",
+          "is_projected": true,
+          "is_geographic": false,
+          "linear_unit": "metre",
+          "linear_unit_to_meter": 1.0,
+          "is_metric_crs": true
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T20:58:43.423076Z",
+        "complete": true,
+        "limitations": []
+      },
+      "460ff64d-d355-4a73-ba07-0e72695047c4": {
+        "evidence_id": "460ff64d-d355-4a73-ba07-0e72695047c4",
+        "evidence_type": "artifact_inspection",
+        "subject_ids": [
+          "e233bc09-561d-4151-baba-ea637777432f"
+        ],
+        "values": {
+          "path": "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/mapping_agent/map_74011d5f.html",
+          "format": "html",
+          "size_bytes": 8196,
+          "complete": true,
+          "limitations": [],
+          "data_model": "map",
+          "embedded_metadata_present": true,
+          "embedded_metadata_keys": [
+            "bbox",
+            "crs",
+            "feature_count",
+            "mapped_field",
+            "source_artifact"
+          ],
+          "source_artifact": "attr_joined_661ccb5e.gpkg",
+          "mapped_field": "median_income",
+          "crs": "EPSG:26918",
+          "feature_count": 16,
+          "bounds": [
+            -78.10000000000001,
+            40.7,
+            -77.7,
+            41.0
+          ],
+          "analytical_unit": null,
+          "disclosure": null
+        },
+        "source": "deterministic_artifact_inspector",
+        "inspector_version": "1.2.0",
+        "observed_at": "2026-08-21T20:58:49.750684Z",
+        "complete": true,
+        "limitations": []
+      }
+    },
+    "violations": {},
+    "execution_history": [
+      {
+        "event_id": "c7a518f0-492f-49b6-8c46-d84c6e940c72",
+        "event_type": "initial_plan_committed",
+        "actor": "planner_component",
+        "state_version": 0,
+        "plan_version": 1,
+        "task_id": null,
+        "reason": "Join the observed ACS median-income table to the Centre County census tract polygons using runtime-grounded schema fields, then generate an HTML choropleth map.",
+        "metadata": {
+          "task_ids": [
+            "attribute_join_1",
+            "thematic_mapping_1"
+          ]
+        },
+        "created_at": "2026-08-21T20:58:43.386558Z"
+      },
+      {
+        "event_id": "59709a16-711e-4023-9bac-a5663fc174d3",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 1,
+        "plan_version": 1,
+        "task_id": "attribute_join_1",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "proposed",
+          "to": "ready"
+        },
+        "created_at": "2026-08-21T20:58:43.389046Z"
+      },
+      {
+        "event_id": "decaf745-42e6-45a6-8d55-1c03ab442e41",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 2,
+        "plan_version": 1,
+        "task_id": "attribute_join_1",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-21T20:58:43.390381Z"
+      },
+      {
+        "event_id": "bd8e2008-4a84-4e68-875f-22011f478ad3",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 3,
+        "plan_version": 1,
+        "task_id": "attribute_join_1",
+        "reason": "Worker bound.",
+        "metadata": {
+          "from": "binding",
+          "to": "bound"
+        },
+        "created_at": "2026-08-21T20:58:43.391822Z"
+      },
+      {
+        "event_id": "a559e758-0183-496b-8d90-bfa11954333d",
+        "event_type": "pre_execution_requirements_evaluated",
+        "actor": "invariant_engine",
+        "state_version": 4,
+        "plan_version": 1,
+        "task_id": "attribute_join_1",
+        "reason": "All currently evaluable preconditions are satisfied.",
+        "metadata": {
+          "evaluated_requirement_ids": [
+            "req_join_formats",
+            "req_join_fields",
+            "req_tract_coverage"
+          ],
+          "blocking_violation_ids": []
+        },
+        "created_at": "2026-08-21T20:58:43.393439Z"
+      },
+      {
+        "event_id": "f677b6f1-2de3-44a7-8b49-051ec84914b6",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 5,
+        "plan_version": 1,
+        "task_id": "attribute_join_1",
+        "reason": "Worker started.",
+        "metadata": {
+          "from": "bound",
+          "to": "running"
+        },
+        "created_at": "2026-08-21T20:58:43.394938Z"
+      },
+      {
+        "event_id": "fd08bad2-a539-45d3-8519-5ae54592d1a6",
+        "event_type": "worker_execution_completed",
+        "actor": "worker_executor",
+        "state_version": 6,
+        "plan_version": 1,
+        "task_id": "attribute_join_1",
+        "reason": "Worker returned successfully.",
+        "metadata": {
+          "binding_id": "d02bf7b2-d55c-4d58-a90b-76d870023ceb",
+          "agent_id": "vector_analysis_b",
+          "operation": "attribute_join",
+          "attempt": 1,
+          "status": "successful",
+          "duration_seconds": 0.018304721001186408
+        },
+        "created_at": "2026-08-21T20:58:43.414790Z"
+      },
+      {
+        "event_id": "4f95b44e-a624-48b1-b36a-9d73f592d50f",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 6,
+        "plan_version": 1,
+        "task_id": "attribute_join_1",
+        "reason": "Worker returned a provisional result.",
+        "metadata": {
+          "from": "running",
+          "to": "provisional_success"
+        },
+        "created_at": "2026-08-21T20:58:43.414849Z"
+      },
+      {
+        "event_id": "933e8498-b11b-4346-aed6-b4153a0c67f4",
+        "event_type": "artifact_registered",
+        "actor": "artifact_registry",
+        "state_version": 7,
+        "plan_version": 1,
+        "task_id": "attribute_join_1",
+        "reason": null,
+        "metadata": {
+          "artifact_id": "10db85e1-06b3-4b8b-b8c8-345ba5d9a167",
+          "role": "joined_tract_income",
+          "content_hash": "4b651b156c036f8cd6d8ad28f1a828ffdc64f5a7443f2d5310080bf73ea9d6b9"
+        },
+        "created_at": "2026-08-21T20:58:43.418127Z"
+      },
+      {
+        "event_id": "a7d475f3-3a37-436e-ae27-1dcb86d2b6bf",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 8,
+        "plan_version": 1,
+        "task_id": "attribute_join_1",
+        "reason": "Reviewing runtime evidence.",
+        "metadata": {
+          "from": "provisional_success",
+          "to": "validating"
+        },
+        "created_at": "2026-08-21T20:58:43.425049Z"
+      },
+      {
+        "event_id": "6ab0d5b5-05f9-465f-92ab-f0f8fde59abb",
+        "event_type": "schema_mapping_grounded",
+        "actor": "loop_controller",
+        "state_version": 9,
+        "plan_version": 1,
+        "task_id": null,
+        "reason": "Mapped 'table-side tract identifier' to runtime field 'GEOID'.",
+        "metadata": {
+          "artifact_id": "4b4fb765-1fa0-4255-baa7-9e7b201cd532",
+          "mapping_key": "4b4fb765-1fa0-4255-baa7-9e7b201cd532:table-side tract identifier"
+        },
+        "created_at": "2026-08-21T20:58:49.720265Z"
+      },
+      {
+        "event_id": "68ad757a-8c6a-4cdd-8689-f5f90a8e6bec",
+        "event_type": "schema_mapping_grounded",
+        "actor": "loop_controller",
+        "state_version": 9,
+        "plan_version": 1,
+        "task_id": null,
+        "reason": "Mapped 'vector-side tract identifier' to runtime field 'GEOID'.",
+        "metadata": {
+          "artifact_id": "d6b03802-fb70-4385-866c-c8cdce81b379",
+          "mapping_key": "d6b03802-fb70-4385-866c-c8cdce81b379:vector-side tract identifier"
+        },
+        "created_at": "2026-08-21T20:58:49.720329Z"
+      },
+      {
+        "event_id": "1793b50e-28d7-4abc-ba63-896ce4d1f44b",
+        "event_type": "schema_mapping_grounded",
+        "actor": "loop_controller",
+        "state_version": 9,
+        "plan_version": 1,
+        "task_id": null,
+        "reason": "Mapped 'median household income measure' to runtime field 'median_income'.",
+        "metadata": {
+          "artifact_id": "10db85e1-06b3-4b8b-b8c8-345ba5d9a167",
+          "mapping_key": "10db85e1-06b3-4b8b-b8c8-345ba5d9a167:median household income measure"
+        },
+        "created_at": "2026-08-21T20:58:49.720380Z"
+      },
+      {
+        "event_id": "0ebc113d-7877-4b71-960c-70c6076a949c",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 9,
+        "plan_version": 1,
+        "task_id": "attribute_join_1",
+        "reason": "Worker succeeded. The joined GeoPackage is complete, has valid polygon geometry, includes the median_income field, and no deterministic violations or evidence-grounded defects are present. Runtime schemas ground the join keys and downstream thematic field.",
+        "metadata": {
+          "from": "validating",
+          "to": "successful"
+        },
+        "created_at": "2026-08-21T20:58:49.720448Z"
+      },
+      {
+        "event_id": "e826665f-9676-409e-8952-260609a74a0d",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 10,
+        "plan_version": 1,
+        "task_id": "thematic_mapping_1",
+        "reason": "Dependencies are accepted.",
+        "metadata": {
+          "from": "proposed",
+          "to": "ready"
+        },
+        "created_at": "2026-08-21T20:58:49.723930Z"
+      },
+      {
+        "event_id": "d9692a17-9dfa-4fbf-a7d3-78cb5267111d",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 11,
+        "plan_version": 1,
+        "task_id": "thematic_mapping_1",
+        "reason": "Binding task.",
+        "metadata": {
+          "from": "ready",
+          "to": "binding"
+        },
+        "created_at": "2026-08-21T20:58:49.726411Z"
+      },
+      {
+        "event_id": "af280c11-0722-4aa9-bfc3-70c7f2f11b67",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 12,
+        "plan_version": 1,
+        "task_id": "thematic_mapping_1",
+        "reason": "Worker bound.",
+        "metadata": {
+          "from": "binding",
+          "to": "bound"
+        },
+        "created_at": "2026-08-21T20:58:49.729082Z"
+      },
+      {
+        "event_id": "97237377-a668-4f0b-842b-7ada9c0f633e",
+        "event_type": "pre_execution_requirements_evaluated",
+        "actor": "invariant_engine",
+        "state_version": 13,
+        "plan_version": 1,
+        "task_id": "thematic_mapping_1",
+        "reason": "All currently evaluable preconditions are satisfied.",
+        "metadata": {
+          "evaluated_requirement_ids": [
+            "req_map_format",
+            "req_map_field"
+          ],
+          "blocking_violation_ids": []
+        },
+        "created_at": "2026-08-21T20:58:49.731786Z"
+      },
+      {
+        "event_id": "b58357a1-f96a-4858-a78d-55dd4921ec1a",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 14,
+        "plan_version": 1,
+        "task_id": "thematic_mapping_1",
+        "reason": "Worker started.",
+        "metadata": {
+          "from": "bound",
+          "to": "running"
+        },
+        "created_at": "2026-08-21T20:58:49.734345Z"
+      },
+      {
+        "event_id": "0d94020a-fbbd-4bd5-b12d-930f2626f867",
+        "event_type": "worker_execution_completed",
+        "actor": "worker_executor",
+        "state_version": 15,
+        "plan_version": 1,
+        "task_id": "thematic_mapping_1",
+        "reason": "Worker returned successfully.",
+        "metadata": {
+          "binding_id": "152d63ed-1835-4b44-8fc6-064df3788e34",
+          "agent_id": "mapping_agent",
+          "operation": "thematic_mapping",
+          "attempt": 1,
+          "status": "successful",
+          "duration_seconds": 0.01019270101096481
+        },
+        "created_at": "2026-08-21T20:58:49.747155Z"
+      },
+      {
+        "event_id": "8b319783-9687-4a99-9e75-f3e9aa9de8a3",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 15,
+        "plan_version": 1,
+        "task_id": "thematic_mapping_1",
+        "reason": "Worker returned a provisional result.",
+        "metadata": {
+          "from": "running",
+          "to": "provisional_success"
+        },
+        "created_at": "2026-08-21T20:58:49.747214Z"
+      },
+      {
+        "event_id": "9da32b49-3096-4a48-bf48-1b7eb13a5ed4",
+        "event_type": "artifact_registered",
+        "actor": "artifact_registry",
+        "state_version": 16,
+        "plan_version": 1,
+        "task_id": "thematic_mapping_1",
+        "reason": null,
+        "metadata": {
+          "artifact_id": "e233bc09-561d-4151-baba-ea637777432f",
+          "role": "median_income_choropleth_map",
+          "content_hash": "319bb7dd794968dd95e49f8b735d5b91f1da5312d68e809296629bb72c2a8886"
+        },
+        "created_at": "2026-08-21T20:58:49.749922Z"
+      },
+      {
+        "event_id": "504f07ef-ff04-4ff4-967a-70c7989daaf4",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 17,
+        "plan_version": 1,
+        "task_id": "thematic_mapping_1",
+        "reason": "Reviewing runtime evidence.",
+        "metadata": {
+          "from": "provisional_success",
+          "to": "validating"
+        },
+        "created_at": "2026-08-21T20:58:49.753212Z"
+      },
+      {
+        "event_id": "c79dbc4c-0df3-4029-8c69-ee2c22c40024",
+        "event_type": "task_transition",
+        "actor": "loop_controller",
+        "state_version": 18,
+        "plan_version": 1,
+        "task_id": "thematic_mapping_1",
+        "reason": "The thematic mapping worker succeeded. Complete runtime evidence confirms an HTML map artifact with median_income mapped over 16 tract features, and the terminal output satisfies the original choropleth goal. There are no active deterministic violations or evidence-grounded defects.",
+        "metadata": {
+          "from": "validating",
+          "to": "successful"
+        },
+        "created_at": "2026-08-21T20:58:53.420515Z"
+      },
+      {
+        "event_id": "5bf8fec2-5970-46ea-af3e-7d2a1474e215",
+        "event_type": "workflow_completed",
+        "actor": "completion_policy",
+        "state_version": 19,
+        "plan_version": 1,
+        "task_id": null,
+        "reason": "All active tasks, blocking requirements, and terminal outputs are satisfied.",
+        "metadata": {
+          "final_artifact_ids": [
+            "e233bc09-561d-4151-baba-ea637777432f"
+          ]
+        },
+        "created_at": "2026-08-21T20:58:53.426212Z"
+      }
+    ],
+    "qc_history": [
+      {
+        "decision_id": "qc-attribute_join_1-20260821T205843Z",
+        "task_id": "attribute_join_1",
+        "verdict": "PASS",
+        "proposed_verdict": "PASS",
+        "reason": "Worker succeeded. The joined GeoPackage is complete, has valid polygon geometry, includes the median_income field, and no deterministic violations or evidence-grounded defects are present. Runtime schemas ground the join keys and downstream thematic field.",
+        "acknowledged_finding_ids": [],
+        "action_class": "NONE",
+        "effective_action": "NONE",
+        "effective_action_source": "qc_component",
+        "allowed_recovery_types": [],
+        "recovery_parameters": {
+          "schema_mappings": [
+            {
+              "artifact_id": "4b4fb765-1fa0-4255-baa7-9e7b201cd532",
+              "semantic_name": "table-side tract identifier",
+              "actual_field": "GEOID",
+              "downstream_parameters": [
+                {
+                  "task_id": "attribute_join_1",
+                  "parameter": "table_key"
+                }
+              ]
+            },
+            {
+              "artifact_id": "d6b03802-fb70-4385-866c-c8cdce81b379",
+              "semantic_name": "vector-side tract identifier",
+              "actual_field": "GEOID",
+              "downstream_parameters": [
+                {
+                  "task_id": "attribute_join_1",
+                  "parameter": "vector_key"
+                }
+              ]
+            },
+            {
+              "artifact_id": "10db85e1-06b3-4b8b-b8c8-345ba5d9a167",
+              "semantic_name": "median household income measure",
+              "actual_field": "median_income",
+              "downstream_parameters": [
+                {
+                  "task_id": "thematic_mapping_1",
+                  "parameter": "field"
+                }
+              ]
+            }
+          ]
+        },
+        "preserve_completed_work": true,
+        "forced_by_invariant": false,
+        "created_at": "2026-08-21T20:58:43.423076Z"
+      },
+      {
+        "decision_id": "qc-thematic_mapping_1-20260821T205849Z",
+        "task_id": "thematic_mapping_1",
+        "verdict": "PASS",
+        "proposed_verdict": "PASS",
+        "reason": "The thematic mapping worker succeeded. Complete runtime evidence confirms an HTML map artifact with median_income mapped over 16 tract features, and the terminal output satisfies the original choropleth goal. There are no active deterministic violations or evidence-grounded defects.",
+        "acknowledged_finding_ids": [],
+        "action_class": "NONE",
+        "effective_action": "NONE",
+        "effective_action_source": "qc_component",
+        "allowed_recovery_types": [],
+        "recovery_parameters": {},
+        "preserve_completed_work": true,
+        "forced_by_invariant": false,
+        "created_at": "2026-08-21T20:58:49.750684Z"
+      }
+    ],
+    "replan_history": [],
+    "component_calls": [
+      {
+        "call_id": "cb5d7e1b-2f14-403b-bdc8-c8afabd9464c",
+        "component": "planner",
+        "prompt_hash": "879bbf4688237108aa73bcb12bca3ec0b568a6ec20b463cefe3a9dddb652d8de",
+        "tool_schema_hash": "441719facf91fd72ec7e126a4de0921e9629efd4cd39619a5dbe1be9fea2e3fe",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 5567,
+        "output_tokens": 2907,
+        "duration_seconds": 25.07207166000444,
+        "disposition": "successful",
+        "created_at": "2026-08-21T20:58:43.386523Z"
+      },
+      {
+        "call_id": "f1cfbed4-1feb-4fc5-845d-1f80376f0fe0",
+        "component": "qc",
+        "prompt_hash": "f32e58c2015bc65d1615821b0bf588e3118841b8fd13c0f66435ff64db6bc238",
+        "tool_schema_hash": "264376b66f6ac19b4d57965f2f5a135067cea57302b6779a763ae77f3e5ccb86",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 3207,
+        "output_tokens": 640,
+        "duration_seconds": 6.288439847994596,
+        "disposition": "successful",
+        "created_at": "2026-08-21T20:58:49.720153Z"
+      },
+      {
+        "call_id": "3ba8e625-92dd-47ca-a615-ed97afeebe59",
+        "component": "qc",
+        "prompt_hash": "f32e58c2015bc65d1615821b0bf588e3118841b8fd13c0f66435ff64db6bc238",
+        "tool_schema_hash": "264376b66f6ac19b4d57965f2f5a135067cea57302b6779a763ae77f3e5ccb86",
+        "model": "gpt-5.6-luna",
+        "provider": "configured_llm_provider",
+        "attempts": 1,
+        "input_tokens": 2253,
+        "output_tokens": 243,
+        "duration_seconds": 3.6614586770010646,
+        "disposition": "successful",
+        "created_at": "2026-08-21T20:58:53.420392Z"
+      }
+    ],
+    "plan_versions": [
+      {
+        "version": 1,
+        "parent_version": null,
+        "reason": "Initial plan committed by independent Planner.",
+        "task_ids": [
+          "attribute_join_1",
+          "thematic_mapping_1"
+        ],
+        "edges": [
+          [
+            "attribute_join_1",
+            "thematic_mapping_1"
+          ]
+        ],
+        "created_at": "2026-08-21T20:58:43.379259Z"
+      }
+    ],
+    "budgets": {
+      "max_total_model_calls": 24,
+      "max_total_tokens": 120000,
+      "max_worker_calls": 30,
+      "max_local_recoveries": 6,
+      "max_replans": 3,
+      "max_runtime_seconds": 900.0,
+      "planner_retry_limit": 2,
+      "qc_retry_limit": 1,
+      "replanner_retry_limit": 1,
+      "total_model_calls": 3,
+      "total_tokens": 14817,
+      "worker_calls": 2,
+      "local_recoveries": 0,
+      "replans": 0
+    },
+    "terminal_state": "completed",
+    "terminal_reason": "All active tasks, blocking requirements, and terminal outputs are satisfied.",
+    "human_clarification": null,
+    "final_artifact_ids": [
+      "e233bc09-561d-4151-baba-ea637777432f"
+    ],
+    "required_terminal_roles": [
+      "median_income_choropleth_map"
+    ],
+    "final_disclosure": "Workflow completed with accepted terminal artifacts.",
+    "created_at": "2026-08-21T20:58:18.278795Z",
+    "updated_at": "2026-08-21T20:58:53.427897Z"
+  },
+  "execution_steps": [
+    {
+      "step_index": 1,
+      "step_id": "attribute_join_1",
+      "agent_id": "vector_analysis_b",
+      "title": "Join ACS income attributes to census tracts",
+      "instructions": "Join the input GeoPackage tract layer with the input CSV table. Runtime QC must ground the compatible join fields from the observed schemas and must not infer or prebind join-key names. Preserve the tract polygon geometry and the median household income attribute in the output GeoPackage.",
+      "output_artifacts": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/attr_joined_661ccb5e.gpkg"
+      ],
+      "status": "successful",
+      "error": null
+    },
+    {
+      "step_index": 2,
+      "step_id": "thematic_mapping_1",
+      "agent_id": "mapping_agent",
+      "title": "Create median household income choropleth",
+      "instructions": "Create an HTML choropleth from the joined tract GeoPackage. Runtime QC must ground the mapped income field from the joined output schema; do not prebind a field name in parameters. Use the tract polygon geometries as the map features.",
+      "output_artifacts": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/mapping_agent/map_74011d5f.html"
+      ],
+      "status": "successful",
+      "error": null
+    }
+  ],
+  "qc_evaluations": 2,
+  "qc_blocks": 0,
+  "qc_interventions": 0,
+  "effective_blocks": 0,
+  "effective_interventions": 0,
+  "qc_policy_overrides": 0,
+  "replanning_iterations": 0,
+  "error": null,
+  "ledger_events": [
+    {
+      "call_id": "d02bf7b2-d55c-4d58-a90b-76d870023ceb",
+      "trajectory_id": "traj_ISS_Q30_C2_run1",
+      "agent_id": "vector_analysis_b",
+      "operation": "attribute_join",
+      "query": "Join the input GeoPackage tract layer with the input CSV table. Runtime QC must ground the compatible join fields from the observed schemas and must not infer or prebind join-key names. Preserve the tract polygon geometry and the median household income attribute in the output GeoPackage.",
+      "timestamp_start": 1787345923.396425,
+      "timestamp_end": 1787345923.414721,
+      "duration_seconds": 0.018304721001186408,
+      "input_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg",
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_acs_centre_2024.csv"
+      ],
+      "input_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_tracts_centre_utm.gpkg": "9818cdd69d3b26cbd238d60780f5a566bee625b857232a79ed5ca02595c100a8",
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/benchmark/fixtures/fx_acs_centre_2024.csv": "07aeaae70fda652250b9ef8042c26d2529bf448c8636a11b7c102a3eebde07b6"
+      },
+      "parameters": {
+        "table_key": "GEOID",
+        "vector_key": "GEOID"
+      },
+      "status": "completed",
+      "error_code": null,
+      "error_message": null,
+      "output_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/attr_joined_661ccb5e.gpkg"
+      ],
+      "output_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/attr_joined_661ccb5e.gpkg": "4b651b156c036f8cd6d8ad28f1a828ffdc64f5a7443f2d5310080bf73ea9d6b9"
+      },
+      "summary": "Joined attributes by GEOID=GEOID, producing 16 features.",
+      "raw_response": {
+        "binding_id": "d02bf7b2-d55c-4d58-a90b-76d870023ceb",
+        "task_id": "attribute_join_1",
+        "attempt": 1
+      }
+    },
+    {
+      "call_id": "152d63ed-1835-4b44-8fc6-064df3788e34",
+      "trajectory_id": "traj_ISS_Q30_C2_run1",
+      "agent_id": "mapping_agent",
+      "operation": "thematic_mapping",
+      "query": "Create an HTML choropleth from the joined tract GeoPackage. Runtime QC must ground the mapped income field from the joined output schema; do not prebind a field name in parameters. Use the tract polygon geometries as the map features.",
+      "timestamp_start": 1787345929.736903,
+      "timestamp_end": 1787345929.747092,
+      "duration_seconds": 0.01019270101096481,
+      "input_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/attr_joined_661ccb5e.gpkg"
+      ],
+      "input_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/vector_analysis_b/attr_joined_661ccb5e.gpkg": "4b651b156c036f8cd6d8ad28f1a828ffdc64f5a7443f2d5310080bf73ea9d6b9"
+      },
+      "parameters": {
+        "field": "median_income"
+      },
+      "status": "completed",
+      "error_code": null,
+      "error_message": null,
+      "output_artifact_paths": [
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/mapping_agent/map_74011d5f.html"
+      ],
+      "output_artifact_hashes": {
+        "/Users/alikhosravikazazi/Desktop/Orchestrator Project/Expriments/GAS Project/Data/mapping_agent/map_74011d5f.html": "319bb7dd794968dd95e49f8b735d5b91f1da5312d68e809296629bb72c2a8886"
+      },
+      "summary": "Rendered map with 16 features (mapped field: median_income).",
+      "raw_response": {
+        "binding_id": "152d63ed-1835-4b44-8fc6-064df3788e34",
+        "task_id": "thematic_mapping_1",
+        "attempt": 1
+      }
+    }
+  ],
+  "created_at": "2026-08-21T20:58:53.432213+00:00",
+  "evaluation": {
+    "task_id": "ISS_Q30",
+    "bafo_success": true,
+    "all_challenges_resolved": true,
+    "evaluability_status": "EVALUABLE",
+    "challenge_activated": true,
+    "trajectory_classification": "valid_bafo_pass",
+    "production_terminal_state": "completed",
+    "terminal_state": "successful",
+    "constraint_results": {
+      "clean_workflow_execution": {
+        "constraint_key": "clean_workflow_execution",
+        "status": "PASS",
+        "reason": "Clean workflow execution confirmed with zero false-positive interventions.",
+        "details": {}
+      },
+      "no_unnecessary_repairs": {
+        "constraint_key": "no_unnecessary_repairs",
+        "status": "PASS",
+        "reason": "Clean workflow execution confirmed with zero false-positive interventions.",
+        "details": {}
+      },
+      "format": {
+        "constraint_key": "format",
+        "status": "PASS",
+        "reason": "Constraint 'format' satisfied by valid output artifact.",
+        "details": {}
+      }
+    },
+    "passed_constraints": [
+      "clean_workflow_execution",
+      "no_unnecessary_repairs",
+      "format"
+    ],
+    "failed_constraints": [],
+    "unevaluable_constraints": [],
+    "inspected_artifacts_count": 2,
+    "events_count": 2,
+    "diagnostic_summary": "BAFO: True | State: successful (Valid: True) | Constraints: 3 PASS, 0 FAIL, 0 UNEVALUABLE | Events Recorded: 2 | Artifacts Inspected: 2"
+  },
+  "bafo_success": true,
+  "all_challenges_resolved": true,
+  "trajectory_classification": "valid_bafo_pass"
+}
