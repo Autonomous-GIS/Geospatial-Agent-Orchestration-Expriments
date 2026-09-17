@@ -1,7 +1,7 @@
 """Export manuscript-supporting artifacts from frozen benchmark trajectories.
 
 This exporter is intentionally read-only with respect to trajectory logs.  It
-creates: (1) Table S7, the runtime and token-use summary; and (2) a C5 failure
+creates: (1) Supplementary Table S2, the runtime and token-use summary; and (2) a C5 failure
 record whose provenance points to the exact C5 trajectory files used.
 """
 
@@ -52,13 +52,13 @@ def load_trajectories(results_dir: Path) -> list[tuple[Path, dict[str, Any]]]:
     return records
 
 
-def write_table_s7(records: list[tuple[Path, dict[str, Any]]], output: Path) -> None:
+def write_table_s2(records: list[tuple[Path, dict[str, Any]]], output: Path) -> None:
     by_condition: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for _, record in records:
         by_condition[record["condition"]].append(record)
 
     lines = [
-        "# Table S7 Runtime and Token Use by Experimental Condition",
+        "# Supplementary Table S2 Runtime and Token Use by Experimental Condition",
         "",
         "Summary of all 540 isolated-suite trajectories. Wall time is recorded per completed trajectory; token counts are the model-provider counts recorded in each trajectory log.",
         "",
@@ -227,18 +227,18 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Export supplementary benchmark artifacts from frozen trajectory logs.")
     parser.add_argument("--results-dir", type=Path, default=DEFAULT_RESULTS_DIR)
     parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
-    parser.add_argument("--table-s7-output", type=Path)
+    parser.add_argument("--table-s2-output", type=Path)
     parser.add_argument("--c5-failures-output", type=Path)
     args = parser.parse_args()
 
     results_dir = args.results_dir.resolve()
-    table_s7_output = args.table_s7_output or results_dir / "table_s7_runtime_and_token_use.md"
+    table_s2_output = args.table_s2_output or results_dir / "table_s2_runtime_and_token_use.md"
     c5_failures_output = args.c5_failures_output or results_dir / "c5_isolated_failed_trajectories.json"
     records = load_trajectories(results_dir)
 
-    write_table_s7(records, table_s7_output)
+    write_table_s2(records, table_s2_output)
     write_c5_failure_record(records, args.manifest.resolve(), c5_failures_output)
-    print(f"Wrote {table_s7_output}")
+    print(f"Wrote {table_s2_output}")
     print(f"Wrote {c5_failures_output}")
 
 
