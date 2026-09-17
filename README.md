@@ -543,28 +543,12 @@ Performs deterministic evaluation of generated artifacts.
 </tr>
 </table>
 
----
-
-## <img src="https://api.iconify.design/lucide:book-open.svg" width="21" height="21" align="center"> Citation
-
-If you use **Geospatial Agentic Services**, the **Isolated Skills Suite**, or the benchmark implementation in academic work, please cite the accompanying paper.
-
-```bibtex
-@article{gas2026,
-  title   = {Geospatial Agentic Services: Autonomous Orchestration for GIS Workflows},
-  author  = {...},
-  year    = {2026}
-}
-```
-
-> Replace the placeholder citation above with the final publication metadata.
-
 
 ---
 
 <div align="center">
 
-### Geospatial Agentic Services
+### Geospatial Agent Orchestration
 
 `Planning` · `Grounding` · `Validation` · `Replanning` · `Execution`
 
