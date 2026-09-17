@@ -464,7 +464,6 @@ Orchestrator
 
 Constructs and manages the execution graph for complex geospatial workflows.
 
-<strong>Responsibilities</strong>
 
 </td>
 
@@ -477,7 +476,6 @@ Semantic QC
 
 Validates intermediate outputs before downstream execution.
 
-<strong>Responsibilities</strong>
 
 
 </td>
@@ -493,7 +491,6 @@ Structural Replanner
 
 Repairs execution graphs when runtime assumptions fail.
 
-<strong>Responsibilities</strong>
 
 
 </td>
@@ -507,7 +504,6 @@ Benchmark Oracle
 
 Performs deterministic evaluation of generated artifacts.
 
-<strong>Responsibilities</strong>
 
 
 </td>
