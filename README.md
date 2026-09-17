@@ -466,14 +466,6 @@ Constructs and manages the execution graph for complex geospatial workflows.
 
 <strong>Responsibilities</strong>
 
-<ul>
-<li>Task decomposition</li>
-<li>DAG generation</li>
-<li>Dependency management</li>
-<li>Typed preconditions</li>
-<li>Worker dispatch</li>
-</ul>
-
 </td>
 
 <td width="50%" valign="top">
@@ -487,13 +479,6 @@ Validates intermediate outputs before downstream execution.
 
 <strong>Responsibilities</strong>
 
-<ul>
-<li>Schema inspection</li>
-<li>Geometry validation</li>
-<li>CRS verification</li>
-<li>Evidence inspection</li>
-<li>Constraint checking</li>
-</ul>
 
 </td>
 </tr>
@@ -510,13 +495,6 @@ Repairs execution graphs when runtime assumptions fail.
 
 <strong>Responsibilities</strong>
 
-<ul>
-<li>Failure interpretation</li>
-<li>Graph patching</li>
-<li>Dependency repair</li>
-<li>Recovery planning</li>
-<li>Self-healing execution</li>
-</ul>
 
 </td>
 
@@ -531,13 +509,6 @@ Performs deterministic evaluation of generated artifacts.
 
 <strong>Responsibilities</strong>
 
-<ul>
-<li>Artifact inspection</li>
-<li>Constraint evaluation</li>
-<li>Physical output validation</li>
-<li>Trajectory scoring</li>
-<li>Benchmark reporting</li>
-</ul>
 
 </td>
 </tr>
